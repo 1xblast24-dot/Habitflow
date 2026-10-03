@@ -209,8 +209,8 @@ input:-webkit-autofill{-webkit-text-fill-color:#fff;box-shadow:inset 0 0 0 100px
 const CONFIG={
   appUrl:'app.html',
   homeUrl:'index.html',
-  supabaseUrl:'',        // e.g. https://abcdxyz.supabase.co
-  supabaseAnonKey:''     // the project's anon / publishable key
+  supabaseUrl:'https://imtmooehxqhaikwdxiiy.supabase.co',        // e.g. https://abcdxyz.supabase.co
+  supabaseAnonKey:'sb_publishable__z44t4ZscZeIcJ3H-qmFjg_ZdN4dqoN'     // the project's anon / publishable key
 };
 
 const $=s=>document.querySelector(s);
@@ -226,7 +226,7 @@ const STORAGE_MSG="Your browser is blocking storage, so HabitFlow can't keep you
 /* ---------- Links and background ---------- */
 $('#homeLink').href=$('#backLink').href=CONFIG.homeUrl;
 (function(){const i=new Image();i.onload=()=>$('#earth').classList.add('ready');i.src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202133_508c64b8-a31e-4290-bdfc-1187df70e0a6.png"})();
-if(cloud)$('#note').textContent='Your habits stay on this device. Your account is stored securely online.';
+if(cloud)$('#note').textContent='Your account and habits are stored securely online, so they follow you to any device.';
 
 /* ---------- Already signed in? Go straight to the app (guests may still sign in) ---------- */
 const existing=read(SESSION,null);
@@ -342,10 +342,10 @@ async function sb(path,body,{method='POST',token}={}){
     throw new Error(j.msg||j.error_description||j.message||'Something went wrong. Try again.')}
   return j;
 }
-const fromUser=(u,tok)=>({mode:'cloud',id:u.id,name:(u.user_metadata&&u.user_metadata.name)||(u.email||'').split('@')[0],email:u.email,...(tok?{token:tok}:{})});
+const fromUser=(u,tok,j)=>({mode:'cloud',id:u.id,name:(u.user_metadata&&u.user_metadata.name)||(u.email||'').split('@')[0],email:u.email,...(tok?{token:tok}:{}),...(j&&j.refresh_token?{rt:j.refresh_token,exp:Date.now()+(j.expires_in||3600)*1000}:{})});
 const remote={
-  async signin({email,pass}){const j=await sb('/token?grant_type=password',{email,password:pass});return fromUser(j.user,j.access_token)},
-  async signup({name,email,pass}){const j=await sb('/signup',{email,password:pass,data:{name}});return j.access_token?fromUser(j.user||j,j.access_token):null},
+  async signin({email,pass}){const j=await sb('/token?grant_type=password',{email,password:pass});return fromUser(j.user,j.access_token,j)},
+  async signup({name,email,pass}){const j=await sb('/signup',{email,password:pass,data:{name}});return j.access_token?fromUser(j.user||j,j.access_token,j):null},
   async reset({email}){await sb('/recover?redirect_to='+encodeURIComponent(location.origin+location.pathname),{email})},
   async newpass({pass}){await sb('/user',{password:pass},{method:'PUT',token:recToken})}
 };
