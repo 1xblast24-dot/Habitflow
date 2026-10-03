@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060d18">
+<meta name="description" content="Sign in to HabitFlow or create your account.">
+<title>Sign in — HabitFlow</title>
+<link rel="icon" type="image/png" href="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202005_3346cc4d-ec3b-44ab-825c-b18e49f5021a.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--acc:#5b5bf0;--acc2:#14c8a8;--g:#8c8cff;--ink:#f5f5fa;--mute:rgba(226,228,244,.74);--bad:#ff8da1;--ok:#5ee6c8;--ease:cubic-bezier(.32,.72,0,1);--spring:cubic-bezier(.34,1.56,.64,1);--sf:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Segoe UI",system-ui,sans-serif}
+*,*::before,*::after{box-sizing:border-box}
+html{min-height:100%;background:#060d18}
+body{margin:0;min-width:320px;min-height:100svh;background:#060d18;color:var(--ink);font:16px/1.5 var(--sf);-webkit-font-smoothing:antialiased;overflow-x:clip}
+a{color:inherit;text-decoration:none}button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--g);outline-offset:3px}
+[hidden]{display:none!important}
+
+/* Background: CSS glow underneath, the earth photo fades in on top once loaded */
+.scene{position:relative;isolation:isolate;min-height:100svh;display:flex;flex-direction:column}
+.earth{position:fixed;inset:0;z-index:-3;background:radial-gradient(60% 50% at 18% 12%,rgba(91,91,240,.28),transparent 70%),radial-gradient(50% 45% at 85% 90%,rgba(20,200,168,.2),transparent 70%),#060d18}
+.earth::before{content:'';position:absolute;inset:0;background:url('https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202133_508c64b8-a31e-4290-bdfc-1187df70e0a6.png') center 47%/cover no-repeat;opacity:0;transform:scale(1.02);transition:opacity 1.4s ease}
+.earth.ready::before{opacity:1}
+.shade{position:fixed;inset:0;z-index:-2;background:linear-gradient(180deg,rgba(4,10,18,.55),rgba(4,10,18,.25) 40%,rgba(4,10,18,.7)),radial-gradient(70% 60% at 50% 50%,rgba(4,11,21,.35),rgba(4,11,21,.75))}
+
+/* Navigation, same material as the home page */
+.nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:40;width:min(1120px,calc(100% - 28px));height:56px;margin:12px auto 0;padding:0 8px 0 18px;display:flex;align-items:center;justify-content:space-between;border-radius:28px;background:rgba(18,26,38,.5);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 12px 40px rgba(0,0,0,.25)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-.04em}
+.brand i{width:26px;height:26px;border-radius:8px;background:linear-gradient(145deg,#14c8a8,#5b5bf0);display:grid;place-items:center}
+.brand i::after{content:'';width:12px;height:12px;border:2px solid #fff;border-radius:50%}
+.brand b{color:var(--acc2);font-weight:700}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 20px;border-radius:30px;font-weight:600;font-size:14px;letter-spacing:-.01em;border:0;cursor:pointer;transition:transform .35s var(--spring),background .25s,box-shadow .25s}
+.pill:active{transform:scale(.96)}
+.pill.ghost{color:#fff;background:rgba(255,255,255,.12);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+.pill.ghost:hover{background:rgba(255,255,255,.2)}
+
+/* Card */
+main{flex:1;display:grid;place-items:center;padding:28px 16px calc(40px + env(safe-area-inset-bottom,0px))}
+.card{width:min(440px,100%);padding:30px 28px 26px;border-radius:34px;background:rgba(12,19,31,.58);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),0 40px 100px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.25);animation:rise .9s cubic-bezier(.16,1,.3,1) backwards;transition:transform .5s var(--ease),opacity .5s}
+@keyframes rise{from{opacity:0;transform:translateY(40px) scale(.97)}}
+.card.leaving{transform:scale(.97) translateY(-6px);opacity:.0}
+h1{margin:0;font-size:32px;line-height:1.1;letter-spacing:-.045em;font-weight:700;text-wrap:balance}
+.sub{margin:8px 0 0;color:var(--mute);font-size:15px;line-height:1.5;min-height:1.5em}
+.head{margin-top:0}
+
+/* Collapsible rows: they open and close smoothly so the card reshapes instead of jumping */
+.col{display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;transition:grid-template-rows .45s var(--ease),opacity .3s,visibility 0s .45s}
+.col.open{grid-template-rows:1fr;opacity:1;visibility:visible;transition:grid-template-rows .45s var(--ease),opacity .35s .08s,visibility 0s}
+.col>.in{overflow:hidden;min-height:0;padding:6px 6px 0;margin:-6px -6px 0}
+
+/* Segmented switch */
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:20px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:16px;background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 4px 14px rgba(0,0,0,.25);transition:transform .45s var(--spring)}
+.seg[data-on="signup"] .thumb{transform:translateX(100%)}
+.seg button{position:relative;z-index:1;height:40px;border:0;background:none;border-radius:16px;font-weight:600;font-size:14px;letter-spacing:-.01em;color:var(--mute);cursor:pointer;transition:color .25s}
+.seg button[aria-selected="true"]{color:#fff}
+.seg-wrap .in{padding-bottom:22px}
+
+/* Fields */
+.fld{padding-bottom:16px}
+label{display:block;margin:0 0 7px 2px;font-size:13px;font-weight:600;letter-spacing:-.005em;color:rgba(236,240,250,.86)}
+.ctl{position:relative}
+input{display:block;width:100%;height:52px;padding:0 16px;border:0;border-radius:16px;background:rgba(255,255,255,.075);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);font-size:16px;letter-spacing:-.01em;caret-color:var(--g);transition:box-shadow .2s,background .2s}
+input::placeholder{color:rgba(226,228,244,.38)}
+input:hover{background:rgba(255,255,255,.09)}
+input:focus{outline:0;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1.5px var(--g),0 0 0 4px rgba(140,140,255,.22)}
+input:-webkit-autofill{-webkit-text-fill-color:#fff;box-shadow:inset 0 0 0 100px #1a2336,inset 0 0 0 1px rgba(255,255,255,.15)}
+.fld.bad input{box-shadow:inset 0 0 0 1.5px var(--bad)}
+.fld.bad input:focus{box-shadow:inset 0 0 0 1.5px var(--bad),0 0 0 4px rgba(255,141,161,.2)}
+.pw input{padding-right:54px}
+.eye{position:absolute;top:6px;right:6px;width:40px;height:40px;border:0;border-radius:12px;background:none;display:grid;place-items:center;color:var(--mute);cursor:pointer;transition:background .2s,color .2s}
+.eye:hover{background:rgba(255,255,255,.1);color:#fff}
+.eye svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.eye .off{display:none}.eye[aria-pressed="true"] .on{display:none}.eye[aria-pressed="true"] .off{display:block}
+.err{margin:7px 2px 0;font-size:13px;line-height:1.35;color:var(--bad);min-height:0}
+.err:empty{display:none}
+
+/* Password strength */
+.meter{display:flex;align-items:center;gap:10px;margin-top:10px}
+.bars{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.bars i{height:5px;border-radius:5px;background:rgba(255,255,255,.12);transition:background .3s}
+.meter[data-s="1"] .bars i:nth-child(-n+1){background:#ff6b81}
+.meter[data-s="2"] .bars i:nth-child(-n+2){background:#f5a623}
+.meter[data-s="3"] .bars i:nth-child(-n+3){background:#9ad65f}
+.meter[data-s="4"] .bars i{background:var(--acc2)}
+.meter span{min-width:92px;text-align:right;font-size:13px;color:var(--mute)}
+
+/* Row helpers */
+.row{display:flex;justify-content:flex-end;padding:0 2px 16px;margin-top:-4px}
+.link{border:0;background:none;padding:6px 2px;font-size:14px;font-weight:600;color:#c9c9ff;cursor:pointer;border-radius:8px;transition:color .2s}
+.link:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.center{display:flex;justify-content:center;padding-top:6px}
+
+/* Alerts */
+.alert{display:flex;gap:10px;align-items:flex-start;margin:0 0 16px;padding:12px 14px;border-radius:16px;font-size:14px;line-height:1.4;background:rgba(255,141,161,.12);color:#ffc2cd;box-shadow:inset 0 0 0 1px rgba(255,141,161,.3);animation:pop .4s var(--spring)}
+.alert.ok{background:rgba(20,200,168,.12);color:#a6f3e2;box-shadow:inset 0 0 0 1px rgba(94,230,200,.3)}
+.alert::before{content:'';flex:none;width:8px;height:8px;margin-top:6px;border-radius:50%;background:currentColor}
+@keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.98)}}
+
+/* Submit */
+.go{position:relative;width:100%;min-height:54px;margin-top:4px;border:0;border-radius:30px;background:var(--acc);color:#fff;font-weight:600;font-size:16px;letter-spacing:-.01em;cursor:pointer;box-shadow:0 8px 28px rgba(91,91,240,.45),inset 0 1px rgba(255,255,255,.28);transition:transform .35s var(--spring),box-shadow .25s,background .3s,opacity .2s;display:grid;place-items:center;overflow:hidden}
+.go:hover{transform:scale(1.015);box-shadow:0 12px 34px rgba(91,91,240,.62),inset 0 1px rgba(255,255,255,.4)}
+.go:active{transform:scale(.97)}
+.go>*{grid-area:1/1;transition:opacity .25s,transform .4s var(--spring)}
+.go .spin,.go .done{opacity:0;transform:scale(.5)}
+.spin{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.done{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.go.busy{pointer-events:none}.go.busy .lbl{opacity:0;transform:scale(.8)}.go.busy .spin{opacity:1;transform:none}
+.go.ok{background:var(--acc2);box-shadow:0 8px 28px rgba(20,200,168,.45);pointer-events:none}.go.ok .lbl{opacity:0}.go.ok .done{opacity:1;transform:none}
+.go:disabled{opacity:.6;pointer-events:none}
+
+.or{display:flex;align-items:center;gap:12px;margin:20px 0 14px;font-size:13px;color:rgba(226,228,244,.5)}
+.or::before,.or::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.12)}
+.guest{width:100%;min-height:50px;border:0;border-radius:30px;font-weight:600;font-size:15px;cursor:pointer;color:#fff;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);transition:background .25s,transform .35s var(--spring)}
+.guest:hover{background:rgba(255,255,255,.18)}.guest:active{transform:scale(.97)}
+.note{margin:18px 0 0;text-align:center;font-size:13px;line-height:1.5;color:rgba(226,228,244,.55)}
+
+@media (max-width:480px){
+  .card{padding:26px 20px 22px;border-radius:30px}
+  h1{font-size:28px}
+  .nav .pill{padding:0 16px}
+}
+@media (prefers-reduced-motion:reduce){
+  .card,.col,.col.open,.seg .thumb,.go,.go>*,.alert,.earth::before{animation:none!important;transition:none!important}
+  .spin{animation-duration:1.6s}
+}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="earth" id="earth" aria-hidden="true"></div>
+  <div class="shade" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="brand" id="homeLink" href="index.html" aria-label="HabitFlow home"><i aria-hidden="true"></i><span>habit<b>flow</b></span></a>
+    <a class="pill ghost" id="backLink" href="index.html">Back to home</a>
+  </header>
+
+  <main>
+    <section class="card" id="card" aria-labelledby="ttl">
+      <div class="col seg-wrap open" data-k="seg"><div class="in">
+        <div class="seg" id="seg" role="tablist" aria-label="Account options" data-on="signin">
+          <i class="thumb" aria-hidden="true"></i>
+          <button type="button" role="tab" id="tab-signin" aria-selected="true" aria-controls="form" data-go="signin">Sign in</button>
+          <button type="button" role="tab" id="tab-signup" aria-selected="false" aria-controls="form" tabindex="-1" data-go="signup">Create account</button>
+        </div>
+      </div></div>
+
+      <div class="head">
+        <h1 id="ttl">Welcome back</h1>
+        <p class="sub" id="sub">Sign in to see today's habits.</p>
+      </div>
+
+      <form id="form" novalidate style="margin-top:22px" aria-labelledby="ttl">
+        <div class="alert" id="alert" role="alert" hidden></div>
+
+        <div class="col" data-k="name"><div class="in"><div class="fld">
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" autocomplete="name" autocapitalize="words" maxlength="60" placeholder="What should we call you?">
+          <div class="err" id="err-name"></div>
+        </div></div></div>
+
+        <div class="col open" data-k="email"><div class="in"><div class="fld">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="you@example.com">
+          <div class="err" id="err-email"></div>
+        </div></div></div>
+
+        <div class="col open" data-k="pass"><div class="in"><div class="fld">
+          <label for="pass" id="passLbl">Password</label>
+          <div class="ctl pw">
+            <input id="pass" name="password" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Your password">
+            <button type="button" class="eye" id="eye" aria-pressed="false" aria-label="Show password">
+              <svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.5 6.6A16.6 16.6 0 0 0 2 12s3.6 7 10 7a9.8 9.8 0 0 0 4.2-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+            </button>
+          </div>
+          <div class="err" id="err-pass"></div>
+          <div class="meter" id="meter" data-s="0" hidden aria-live="polite"><div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div><span id="meterTxt">Use 8 or more characters</span></div>
+        </div></div></div>
+
+        <div class="col open" data-k="forgot"><div class="in"><div class="row"><button type="button" class="link" data-go="reset">Forgot password?</button></div></div></div>
+
+        <button class="go" id="submit" type="submit"><span class="lbl" id="lbl">Sign in</span><span class="spin" aria-hidden="true"></span><svg class="done" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+
+        <div class="col open" data-k="guest"><div class="in">
+          <div class="or">or</div>
+          <button type="button" class="guest" id="guest">Continue without an account</button>
+        </div></div>
+
+        <div class="col" data-k="back"><div class="in"><div class="center"><button type="button" class="link" data-go="signin">Back to sign in</button></div></div></div>
+      </form>
+
+      <p class="note" id="note">Your account and habits stay on this device.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Settings ----------
+   Leave the two Supabase fields empty to keep accounts on this device.
+   Fill both in to use real cloud accounts (email + password, reset emails). */
+const CONFIG={
+  appUrl:'app.html',
+  homeUrl:'index.html',
+  supabaseUrl:'',        // e.g. https://abcdxyz.supabase.co
+  supabaseAnonKey:''     // the project's anon / publishable key
+};
+
+const $=s=>document.querySelector(s);
+const SESSION='habitflow.session',ACCOUNTS='habitflow.accounts',LOCK='habitflow.lock';
+const cloud=!!(CONFIG.supabaseUrl&&CONFIG.supabaseAnonKey);
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---------- Storage helpers ---------- */
+const read=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
+const STORAGE_MSG="Your browser is blocking storage, so HabitFlow can't keep you signed in. Turn off private browsing or allow site data, then try again.";
+
+/* ---------- Links and background ---------- */
+$('#homeLink').href=$('#backLink').href=CONFIG.homeUrl;
+(function(){const i=new Image();i.onload=()=>$('#earth').classList.add('ready');i.src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202133_508c64b8-a31e-4290-bdfc-1187df70e0a6.png"})();
+if(cloud)$('#note').textContent='Your habits stay on this device. Your account is stored securely online.';
+
+/* ---------- Already signed in? Go straight to the app (guests may still sign in) ---------- */
+const existing=read(SESSION,null);
+if(existing&&existing.mode&&existing.mode!=='guest'){location.replace(CONFIG.appUrl);return}
+
+/* ---------- Views ---------- */
+const form=$('#form'),btn=$('#submit'),alertEl=$('#alert');
+const V={
+  signin:{t:'Welcome back',s:"Sign in to see today's habits.",b:'Sign in',show:['seg','email','pass','forgot','guest']},
+  signup:{t:'Create your account',s:'Setting up takes under a minute.',b:'Create account',show:['seg','name','email','pass','guest']},
+  reset:{t:'Reset your password',s:cloud?"Enter your email and we'll send you a link to choose a new password.":'Choose a new password for this device.',b:cloud?'Send reset link':'Reset password',show:cloud?['email','back']:['email','pass','back']},
+  newpass:{t:'Choose a new password',s:'Pick something you have not used here before.',b:'Update password',show:['pass','back']}
+};
+let view='signin',busy=false,recToken=null;
+
+function go(v,keepAlert){
+  view=v;const c=V[v];
+  $('#ttl').textContent=c.t;$('#sub').textContent=c.s;$('#lbl').textContent=c.b;
+  document.querySelectorAll('.col[data-k]').forEach(el=>el.classList.toggle('open',c.show.includes(el.dataset.k)));
+  const tab=v==='signup'?'signup':'signin';
+  $('#seg').dataset.on=tab;
+  [['signin',$('#tab-signin')],['signup',$('#tab-signup')]].forEach(([n,el])=>{el.setAttribute('aria-selected',n===tab);el.tabIndex=n===tab?0:-1});
+  const p=$('#pass'),isNew=v==='signup'||v==='reset'||v==='newpass';
+  p.autocomplete=isNew?'new-password':'current-password';
+  p.placeholder=isNew?'At least 8 characters':'Your password';
+  $('#passLbl').textContent=v==='reset'||v==='newpass'?'New password':'Password';
+  $('#meter').hidden=!isNew;updateMeter();
+  $('#email').autocomplete=v==='signup'?'email':'username';
+  clearErrors();if(!keepAlert)showAlert('');
+  setEye(false);
+  history.replaceState(null,'',v==='signup'?'#signup':location.pathname+location.search);
+  document.title=(v==='signup'?'Create account':v==='signin'?'Sign in':'Reset password')+' — HabitFlow';
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t&&!busy){go(t.dataset.go);const first=(view==='signup'?$('#name'):$('#email'));if(t.closest('.seg')===null&&view!=='newpass')first.focus({preventScroll:true})}});
+$('#seg').addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();const n=view==='signup'?'signin':'signup';go(n);$('#tab-'+n).focus()}});
+
+/* ---------- Messages and errors ---------- */
+function showAlert(msg,ok){alertEl.hidden=!msg;alertEl.textContent=msg||'';alertEl.className='alert'+(ok?' ok':'')}
+function setErr(id,msg){const el=$('#'+id),f=el.closest('.fld');f.classList.toggle('bad',!!msg);$('#err-'+id).textContent=msg||'';if(msg){el.setAttribute('aria-invalid','true');el.setAttribute('aria-describedby','err-'+id)}else{el.removeAttribute('aria-invalid');el.removeAttribute('aria-describedby')}}
+function clearErrors(){['name','email','pass'].forEach(i=>setErr(i,''))}
+['name','email','pass'].forEach(i=>$('#'+i).addEventListener('input',()=>{setErr(i,'');if(alertEl.className==='alert'&&!alertEl.hidden)showAlert('')}));
+
+/* ---------- Password: show/hide and strength ---------- */
+function setEye(on){const p=$('#pass'),e=$('#eye');p.type=on?'text':'password';e.setAttribute('aria-pressed',on);e.setAttribute('aria-label',on?'Hide password':'Show password')}
+$('#eye').addEventListener('click',()=>{setEye($('#pass').type==='password');$('#pass').focus()});
+function strength(p){if(!p)return 0;if(p.length<8)return 1;return Math.min(4,2+((/[a-z]/.test(p)&&/[A-Z]/.test(p))||/\d/.test(p)?1:0)+(/[^A-Za-z0-9]/.test(p)||p.length>=12?1:0))}
+function updateMeter(){const s=strength($('#pass').value);$('#meter').dataset.s=s;$('#meterTxt').textContent=['Use 8 or more characters','Too short','Okay','Good','Strong'][s]}
+$('#pass').addEventListener('input',updateMeter);
+
+/* ---------- Validation ---------- */
+const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function validate(){
+  clearErrors();let first=null;
+  const bad=(id,m)=>{setErr(id,m);first=first||id};
+  const name=$('#name').value.trim(),email=$('#email').value.trim(),pass=$('#pass').value;
+  if(view==='signup'&&!name)bad('name','Enter your name.');
+  if(view!=='newpass'){if(!email)bad('email','Enter your email.');else if(!EMAIL.test(email))bad('email','Enter a valid email, like you@example.com.')}
+  if(view==='signin'&&!pass)bad('pass','Enter your password.');
+  if((view==='signup'||view==='newpass'||(view==='reset'&&!cloud))&&pass.length<8)bad('pass',pass?'Use at least 8 characters.':'Choose a password with 8 or more characters.');
+  if(first){$('#'+first).focus();return null}
+  return{name,email:email.toLowerCase(),pass};
+}
+
+/* ---------- Local accounts (PBKDF2 where the browser supports it) ---------- */
+const b64=buf=>btoa(String.fromCharCode(...new Uint8Array(buf)));
+const rnd=n=>crypto.getRandomValues(new Uint8Array(n));
+async function hashPw(pw,salt,alg){
+  const enc=new TextEncoder().encode(pw);
+  if(alg==='pbkdf2'&&crypto.subtle){
+    const key=await crypto.subtle.importKey('raw',enc,'PBKDF2',false,['deriveBits']);
+    return b64(await crypto.subtle.deriveBits({name:'PBKDF2',salt:Uint8Array.from(atob(salt),c=>c.charCodeAt(0)),iterations:150000,hash:'SHA-256'},key,256));
+  }
+  let h=2166136261;const s=salt+pw;for(let r=0;r<2000;r++)for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}
+  return String(h);
+}
+const algNow=()=>crypto.subtle?'pbkdf2':'basic';
+async function makeCred(pw){const alg=algNow(),salt=b64(rnd(16));return{alg,salt,hash:await hashPw(pw,salt,alg)}}
+const newId=()=>crypto.randomUUID?crypto.randomUUID():Array.from(rnd(12),x=>x.toString(16).padStart(2,'0')).join('');
+
+const local={
+  async signup({name,email,pass}){
+    const acc=read(ACCOUNTS,{});
+    if(acc[email])throw new Error('An account with this email already exists. Try signing in instead.');
+    acc[email]={id:newId(),name,email,created:Date.now(),...await makeCred(pass)};
+    if(!write(ACCOUNTS,acc))throw new Error(STORAGE_MSG);
+    return{mode:'local',id:acc[email].id,name,email};
+  },
+  async signin({email,pass}){
+    const a=read(ACCOUNTS,{})[email];
+    const ok=a&&await hashPw(pass,a.salt,a.alg)===a.hash;
+    if(!ok)throw Object.assign(new Error('That email and password do not match.'),{auth:true});
+    return{mode:'local',id:a.id,name:a.name,email:a.email};
+  },
+  async reset({email,pass}){
+    const acc=read(ACCOUNTS,{});
+    if(!acc[email])throw new Error('No account with this email was found on this device.');
+    Object.assign(acc[email],await makeCred(pass));
+    if(!write(ACCOUNTS,acc))throw new Error(STORAGE_MSG);
+  }
+};
+
+/* ---------- Cloud accounts (Supabase Auth over plain REST) ---------- */
+async function sb(path,body,{method='POST',token}={}){
+  let r;
+  try{r=await fetch(CONFIG.supabaseUrl.replace(/\/$/,'')+'/auth/v1'+path,{method,headers:{'Content-Type':'application/json',apikey:CONFIG.supabaseAnonKey,...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)})}
+  catch(e){throw new Error("Can't reach the sign-in service. Check your connection and try again.")}
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){const m=(j.msg||j.error_description||j.message||'').toLowerCase();
+    if(m.includes('invalid login'))throw Object.assign(new Error('That email and password do not match.'),{auth:true});
+    if(m.includes('already registered')||m.includes('already been registered'))throw new Error('An account with this email already exists. Try signing in instead.');
+    if(m.includes('not confirmed'))throw new Error('Confirm your email first. Check your inbox for the link we sent.');
+    if(r.status===429||m.includes('rate limit'))throw new Error('Too many requests. Wait a minute and try again.');
+    throw new Error(j.msg||j.error_description||j.message||'Something went wrong. Try again.')}
+  return j;
+}
+const fromUser=(u,tok)=>({mode:'cloud',id:u.id,name:(u.user_metadata&&u.user_metadata.name)||(u.email||'').split('@')[0],email:u.email,...(tok?{token:tok}:{})});
+const remote={
+  async signin({email,pass}){const j=await sb('/token?grant_type=password',{email,password:pass});return fromUser(j.user,j.access_token)},
+  async signup({name,email,pass}){const j=await sb('/signup',{email,password:pass,data:{name}});return j.access_token?fromUser(j.user||j,j.access_token):null},
+  async reset({email}){await sb('/recover?redirect_to='+encodeURIComponent(location.origin+location.pathname),{email})},
+  async newpass({pass}){await sb('/user',{password:pass},{method:'PUT',token:recToken})}
+};
+const api=cloud?remote:local;
+
+/* ---------- Too many wrong passwords ---------- */
+let lockTimer=null;
+function lockLeft(){const l=read(LOCK,{until:0});return Math.max(0,Math.ceil((l.until-Date.now())/1000))}
+function failed(){const l=read(LOCK,{n:0,until:0});l.n=(Date.now()>l.until&&l.until?0:l.n)+1;if(l.n>=5){l.until=Date.now()+30000;l.n=0}write(LOCK,l)}
+function tickLock(){clearInterval(lockTimer);const run=()=>{const s=lockLeft();if(s>0&&view==='signin'){showAlert(`Too many attempts. Try again in ${s}s.`);btn.disabled=true}else{if(s<=0)clearInterval(lockTimer);if(btn.disabled){btn.disabled=false;if(s<=0||view!=='signin')showAlert('')}}};run();if(lockLeft()>0)lockTimer=setInterval(run,500)}
+
+/* ---------- Submit ---------- */
+function setBusy(b){busy=b;btn.classList.toggle('busy',b);form.setAttribute('aria-busy',b)}
+function finish(session){
+  const guest=session.mode==='guest';
+  if(!write(SESSION,session)){setBusy(false);showAlert(STORAGE_MSG);return}
+  btn.classList.remove('busy');btn.classList.add('ok');$('#lbl').textContent=guest?'Opening HabitFlow':'Signed in';
+  setTimeout(()=>$('#card').classList.add('leaving'),reduce?0:450);
+  setTimeout(()=>location.replace(CONFIG.appUrl),reduce?150:850);
+}
+form.addEventListener('submit',async e=>{
+  e.preventDefault();if(busy)return;
+  if((view==='signin')&&lockLeft()>0){tickLock();return}
+  const d=validate();if(!d)return;
+  showAlert('');setBusy(true);
+  try{
+    if(view==='signin'){finish(await api.signin(d));return}
+    if(view==='signup'){
+      const s=await api.signup(d);
+      if(s){finish(s);return}
+      setBusy(false);go('signin');$('#email').value=d.email;showAlert('Account created. Check your inbox to confirm your email, then sign in.',true);return;
+    }
+    if(view==='reset'){
+      await api.reset(d);setBusy(false);
+      if(cloud){showAlert('If an account exists for that email, a reset link is on its way.',true);return}
+      go('signin');$('#email').value=d.email;$('#pass').value='';showAlert('Password updated. Sign in with your new password.',true);return;
+    }
+    if(view==='newpass'){
+      await api.newpass(d);recToken=null;setBusy(false);go('signin');$('#pass').value='';showAlert('Password updated. Sign in with your new password.',true);return;
+    }
+  }catch(err){
+    setBusy(false);
+    if(view==='signin'&&err.auth){failed();if(lockLeft()>0){tickLock();return}}
+    showAlert(err.message||'Something went wrong. Try again.');
+    if(view==='signup'&&/already exists/.test(err.message))setErr('email','This email is already registered.');
+    if(err.auth)$('#pass').select();
+  }
+});
+
+/* ---------- Guest ---------- */
+$('#guest').addEventListener('click',()=>{if(busy)return;finish({mode:'guest',name:'Guest',email:''})});
+
+function entry(initial){
+  const h=new URLSearchParams(location.hash.replace(/^#/,''));
+  if(h.get('type')==='recovery'&&h.get('access_token')&&cloud){recToken=h.get('access_token');history.replaceState(null,'',location.pathname);go('newpass');return}
+  if(h.get('error_description')){go('signin');showAlert(h.get('error_code')==='otp_expired'?'That reset link has expired. Request a new one.':h.get('error_description').replace(/\+/g,' '));history.replaceState(null,'',location.pathname);return}
+  if(location.hash==='#signup'){if(view!=='signup')go('signup')}
+  else if(initial||(!location.hash&&view==='signup'))go('signin');
+  if(initial&&lockLeft()>0)tickLock();
+}
+addEventListener('hashchange',()=>{if(!busy)entry(false)});
+entry(true);
+})();
+</script>
+</body>
+            </html>
