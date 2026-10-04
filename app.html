@@ -263,6 +263,32 @@ body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 img,svg{-webkit-user-drag:none;user-drag:none}
 button,[data-act],.xg-bk,.xg-chip{touch-action:manipulation}
+
+/* ---- iOS-style motion: push pages + sheets (override block) ---- */
+:root{--ios:cubic-bezier(.32,.72,0,1)}
+@keyframes xg-push{from{transform:translate3d(100%,0,0)}to{transform:translate3d(0,0,0)}}
+@keyframes xg-pushout{from{transform:translate3d(0,0,0)}to{transform:translate3d(100%,0,0)}}
+@keyframes xg-sheet{from{transform:translate3d(0,100%,0)}to{transform:translate3d(0,0,0)}}
+@keyframes xg-sheetout{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,100%,0)}}
+@keyframes xg-under-in{from{transform:translate3d(0,0,0)}to{transform:translate3d(-26%,0,0)}}
+@keyframes xg-under-out{from{transform:translate3d(-26%,0,0)}to{transform:translate3d(0,0,0)}}
+.xg-det{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;box-shadow:-14px 0 36px rgba(0,0,0,.16);backface-visibility:hidden}
+.xg-det.in{animation:xg-push .5s var(--ios);will-change:transform}
+.xg-det.out{animation:xg-pushout .42s var(--ios) forwards;will-change:transform;pointer-events:none}
+.xg-dim{position:fixed;inset:0;z-index:11;background:#000;opacity:0;pointer-events:none;transition:opacity .42s var(--ios)}
+.xg-dim.on{opacity:.2;transition-duration:.5s}
+#app.under-in>section{animation:xg-under-in .5s var(--ios) both;will-change:transform}
+#app.under-out>section{animation:xg-under-out .42s var(--ios) both;will-change:transform}
+.xg-sheet{overscroll-behavior:contain}
+.xg-sheet.in{animation:xg-fade .4s ease-out}
+.xg-sheet.in>div{animation:xg-sheet .5s var(--ios);will-change:transform}
+.xg-sheet.out{animation:xg-fadeout .4s ease-in forwards;pointer-events:none}
+.xg-sheet.out>div{animation:xg-sheetout .4s var(--ios) forwards;will-change:transform}
+.sheet{animation:xg-fade .35s ease-out}
+.sheet>div{animation:xg-sheet .5s var(--ios)}
+/* weekly bars only animate when the page first pushes in, not on every toggle */
+.xg-wk i{animation:none}
+.xg-det.in .xg-wk i{animation:xg-rise .6s both}
 </style><script>
 /* HabitFlow account guard + cloud sync (Supabase). Habits stay in localStorage and are mirrored to the user's account. */
 (function(){
@@ -1128,11 +1154,12 @@ return`<div><div class="xg-r"><button class="xg-pill" data-act="xg_back">${ic('c
 <button class="xg-add" style="margin-top:8px" data-act="xg_addh" data-xa="${a.id}">${ic('plus',15,2.4)}Add habit</button>
 <div class="xg-h2">This week</div>${weekTable(a.id,false)}
 ${off.length?`<div class="xg-h2">Other days</div><div class="xg-g">${order(off).map(h=>`<div class="xg-w" data-act="xg_edith" data-xa="${a.id}" data-xh="${h.id}" style="cursor:pointer"><span>${esc(h.name)}<div class="xg-m xg-sm">${h.start==null?'Flexible':f12(h.start)} · ${fd(h.dur)}</div></span><span class="xg-m xg-sm">${h.days.map(d=>WD[d]).join(' ')}</span></div>`).join('')}</div>`:''}</div>`}
-function ensure(){if(!$('#xg-det'))document.body.insertAdjacentHTML('beforeend','<div id="xg-det" class="xg-det"></div><div id="xg-sh" class="xg-sheet"></div>')}
-function refresh(){ensure();const a=open&&D.areas.find(x=>x.id===open);$('#xg-det').innerHTML=a?detail(a):'';if(!a)open=null;try{render()}catch(e){}}
-function out(el,cb){el.classList.add('out');setTimeout(()=>{el.classList.remove('out','in');cb()},290)}
-function sheet(h){ensure();tok++;const el=$('#xg-sh');el.classList.remove('out');el.innerHTML=`<div><div class="xg-grab"></div>${h}</div>`;el.classList.add('in');setTimeout(()=>el.classList.remove('in'),480)}
-function closeS(){const id=++tok,el=$('#xg-sh');if(!el.innerHTML)return;out(el,()=>{if(tok===id){el.innerHTML='';S=null}})}
+function ensure(){if(!$('#xg-det'))document.body.insertAdjacentHTML('beforeend','<div id="xg-dim" class="xg-dim"></div><div id="xg-det" class="xg-det"></div><div id="xg-sh" class="xg-sheet"></div>')}
+function refresh(){ensure();const a=open&&D.areas.find(x=>x.id===open);$('#xg-det').innerHTML=a?detail(a):'';if(!a){open=null;$('#xg-dim').classList.remove('on');$('#app').classList.remove('under-in','under-out')}if(!open){try{render()}catch(e){}}}
+const RM=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
+function out(el,cb){if(el.classList.contains('out'))return;el.classList.remove('in');el.classList.add('out');let d=0;const f=()=>{if(d)return;d=1;el.removeEventListener('animationend',h);el.classList.remove('out');cb()},h=e=>{if(/out$/.test(e.animationName))f()};el.addEventListener('animationend',h);setTimeout(f,RM()?0:480)}
+function sheet(h){ensure();tok++;const el=$('#xg-sh');el.classList.remove('out');el.innerHTML=`<div><div class="xg-grab"></div>${h}</div>`;el.classList.add('in');setTimeout(()=>el.classList.remove('in'),560)}
+function closeS(){const el=$('#xg-sh');if(!el.innerHTML||el.classList.contains('out'))return;const id=++tok;out(el,()=>{if(tok===id){el.innerHTML='';S=null}})}
 const rw=(i,c,l,x,at='')=>`<div class="xg-w" ${at}><span class="xg-lb">${tile(i,c,28)}${l}</span>${x}</div>`;
 function habitSheet(aid,hid,pre){const a=aid&&D.areas.find(x=>x.id===aid),h=hid?a.habits.find(x=>x.id===hid):null,t=h||{name:'',start:540,dur:30,rep:'daily',days:[new Date().getDay()],rem:10,notes:'',track:true,...(pre||{})},flex=h&&h.start==null;
  if(!D.areas.length){toast('Create an area first');return areaSheet()}S={aid:aid||(flt!=='all'?flt:D.areas[0].id),hid};
@@ -1157,8 +1184,9 @@ document.addEventListener('input',e=>{const i=e.target.id;if(!S||!S.hasOwnProper
  else if(i==='xh-f'){$('#xh-tr').hidden=$('#xh-te').hidden=e.target.checked}});
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act^="xg_"]');if(!el)return;ensure();const d=el.dataset,a=D.areas.find(x=>x.id===d.xa),h=a&&d.xh?a.habits.find(x=>x.id===d.xh):null,on=(sel,el)=>document.querySelectorAll(sel).forEach(b=>b.classList.toggle('on',b===el));
  switch(d.act){
- case'xg_open':{open=d.xa;refresh();const el=$('#xg-det');el.classList.add('in');setTimeout(()=>el.classList.remove('in'),480);break}
- case'xg_back':out($('#xg-det'),()=>{open=null;refresh()});break;case'xg_close':closeS();break;
+ case'xg_open':{const A=D.areas.find(x=>x.id===d.xa),el=$('#xg-det'),app=$('#app');if(!A||el.classList.contains('out'))break;open=A.id;el.classList.remove('out');el.innerHTML=detail(A);el.scrollTop=0;app.classList.remove('under-out');app.classList.add('under-in');$('#xg-dim').classList.add('on');el.classList.add('in');setTimeout(()=>el.classList.remove('in'),620);break}
+ case'xg_back':{const el=$('#xg-det'),app=$('#app');if(!el.innerHTML||el.classList.contains('out'))break;app.classList.remove('under-in');app.classList.add('under-out');$('#xg-dim').classList.remove('on');try{render()}catch(e){}out(el,()=>{app.classList.remove('under-out');open=null;el.innerHTML=''});break}
+  case'xg_close':closeS();break;
  case'xg_flt':flt=d.xv;try{render()}catch(e){}break;
  case'xg_tog':case'xg_ttog':if(h){const k=dk(new Date());if(h.done[k]){delete h.done[k]}else{h.done[k]=1;popId=popT=h.id}save();refresh()}break;
  case'xg_addh':habitSheet(d.xa);break;case'xg_edith':habitSheet(d.xa,d.xh);break;case'xg_newarea':areaSheet();break;case'xg_edita':areaSheet(d.xa);break;
