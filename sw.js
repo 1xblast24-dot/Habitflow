@@ -1,67 +1,62 @@
-/* HabitFlow service worker: caches the app shell, keeps API calls on the network. */
-const VERSION = 'habitflow-v1';
+/* HabitFlow service worker.
+   - Shell pages + icons are cached so the app opens offline.
+   - Only same-origin GET requests are handled. Supabase, fonts and images
+     from other hosts always go straight to the network, so sign-in and cloud
+     sync are never served from a stale cache.
+   Bump VERSION whenever you deploy changes you want users to receive. */
+const VERSION = 'hf-v1';
 const SHELL = [
-  './',
-  'index.html',
-  'login.html',
-  'app.html',
-  'offline.html',
+  './', 'index.html', 'login.html', 'app.html', 'pwa.js',
   'manifest.webmanifest',
-  'icons/icon.svg',
-  'icons/icon-maskable.svg'
+  'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(VERSION).then((cache) =>
-      Promise.all(SHELL.map((url) => cache.add(url).catch(() => {})))
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(VERSION).then(c =>
+      Promise.allSettled(SHELL.map(u => c.add(new Request(u, { cache: 'reload' }))))
     ).then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
+self.addEventListener('activate', e => {
+  e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
+self.addEventListener('fetch', e => {
+  const req = e.request;
   if (req.method !== 'GET') return;
-
   const url = new URL(req.url);
-  // Only handle same-origin requests; Supabase and other APIs go straight to the network.
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== location.origin) return;
+  if (url.pathname.startsWith('/.well-known/')) return;
 
-  // Pages: network first, fall back to cache, then the offline page.
+  // Pages: network first, so deploys show up right away; cache when offline.
   if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(VERSION).then((c) => c.put(req, copy));
-          return res;
-        })
-        .catch(() => caches.match(req).then((hit) => hit || caches.match('offline.html')))
+    e.respondWith(
+      fetch(req).then(res => {
+        const copy = res.clone();
+        if (res.ok) caches.open(VERSION).then(c => c.put(req, copy));
+        return res;
+      }).catch(() =>
+        caches.match(req, { ignoreSearch: true })
+          .then(hit => hit || caches.match('app.html') || caches.match('login.html'))
+      )
     );
     return;
   }
 
-  // Static assets: serve from cache, refresh in the background.
-  event.respondWith(
-    caches.match(req).then((hit) => {
-      const refresh = fetch(req)
-        .then((res) => {
-          if (res && res.ok) {
-            const copy = res.clone();
-            caches.open(VERSION).then((c) => c.put(req, copy));
-          }
-          return res;
-        })
-        .catch(() => hit);
-      return hit || refresh;
+  // Everything else on this site: serve the cache, refresh it in the background.
+  e.respondWith(
+    caches.match(req).then(hit => {
+      const net = fetch(req).then(res => {
+        if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); }
+        return res;
+      }).catch(() => hit);
+      return hit || net;
     })
   );
 });
