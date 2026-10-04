@@ -1,0 +1,147 @@
+ case'inc':case'dec':{const cur=((D.logs[h]||{})[k]||{}).v||0;const n=cur+(a==='inc'?step(H):-step(H));n<=0?setLog(h,k,null):setLog(h,k,{v:n,skip:false});break}
+ case'log':case'log2':logSheet(h,k);break;
+ case'lsave':{const n=H.type==='yesno'?1:parseFloat(document.getElementById('lv').value);if(isNaN(n)||n<0){toast('Enter a valid amount');break}closeSheet();setLog(h,k,{v:n,skip:false,note:document.getElementById('ln').value});if(!document.getElementById('detail'))break;break}
+ case'lskip':closeSheet();setLog(h,k,{v:0,skip:true,note:document.getElementById('ln').value});break;
+ case'lclear':closeSheet();setLog(h,k,null);break;
+ case'new':habitSheet();break;
+ case'edit':habitSheet(h);break;
+ case'detail':detailSheet(h);break;
+ case'arch':V.showArch=v==='1';render();break;
+ case'arch2':V.tab='habits';V.showArch=true;render();break;
+ case'pick':V.draft[f]=v;el.parentElement.querySelectorAll('.pill,.step').forEach(b=>{b.classList.remove('on');if(f==='color')b.style.borderColor='transparent'});f==='color'?el.style.borderColor='var(--text)':el.classList.add('on');updPrev();break;
+ case'day':{const i=+v,d=V.draft.days;d.includes(i)?d.splice(d.indexOf(i),1):d.push(i);el.classList.toggle('on');break}
+ case'close2':closeSheet();break;
+ case'rnew':routineSheet();break;
+ case'redit':routineSheet(el.dataset.r);break;
+ case'rtpl':TPL.forEach(x=>D.routines.push({id:uid(),name:x[0],icon:x[1],color:COLORS[D.routines.length%6],days:[...x[3]],time:x[2],remind:false,steps:x[4].map(n=>({id:uid(),t:n})),status:'active',start:t}));commit();break;
+ case'wday':{const r=D.routines.find(x=>x.id===el.dataset.r),i=+v;r.days.includes(i)?r.days.splice(r.days.indexOf(i),1):r.days.push(i);commit();break}
+ case'rstep':{const r=D.routines.find(x=>x.id===el.dataset.r),sid=el.dataset.s,L=(D.rlogs[r.id]=D.rlogs[r.id]||{}),a2=L[k]||[];
+  if(k>t)break;L[k]=a2.includes(sid)?a2.filter(i=>i!==sid):[...a2,sid];if(!a2.includes(sid))V.fresh=r.id+sid+k;commit();break}
+ case'rrem':{V.draft.remind=!V.draft.remind;el.classList.toggle('on',V.draft.remind);el.setAttribute('aria-checked',V.draft.remind);const ti=document.getElementById('rt');if(V.draft.remind&&!ti.value)ti.value='08:00';break}
+ case'sadd':{readSteps();V.draft.steps.push({id:uid(),t:''});const l=document.getElementById('stl');l.innerHTML=stepsHTML(V.draft.steps);[...l.querySelectorAll('.sti')].pop().focus();break}
+ case'srm':{readSteps();V.draft.steps.splice(+el.dataset.i,1);document.getElementById('stl').innerHTML=stepsHTML(V.draft.steps);break}
+ case'rdel':if(confirm('Delete this routine and its history?')){D.routines=D.routines.filter(x=>x.id!==el.dataset.r);delete D.rlogs[el.dataset.r];closeSheet();commit()}break;
+ case'rsave':{readSteps();const d=V.draft,n=document.getElementById('rn').value.trim(),rid=el.dataset.r,steps=d.steps.filter(x=>x.t.trim()).map(x=>({...x,t:x.t.trim()})),time=document.getElementById('rt').value;
+  if(!n){toast('Give your routine a name');break}if(!d.days.length){toast('Pick at least one day');break}if(!steps.length){toast('Add at least one step');break}
+  Object.assign(d,{name:n,steps,time,remind:!!(d.remind&&time)});
+  if(rid)Object.assign(D.routines.find(x=>x.id===rid),d);else D.routines.push({...d,id:uid(),start:t});
+  closeSheet();commit();break}
+ case'ptab':V.ptab=v;render();break;
+ case'psel':V.psel=k;render();break;
+ case'gnew':goalSheet();break;
+ case'gedit':goalSheet(el.dataset.g);break;
+ case'ginc':case'gdec':{const g=D.goals.find(x=>x.id===el.dataset.g);g.done=Math.max(0,(g.done||0)+(a==='ginc'?1:-1));commit();break}
+ case'gdel':if(confirm('Delete this goal?')){D.goals=D.goals.filter(x=>x.id!==el.dataset.g);closeSheet();commit()}break;
+ case'gsave':{const d=V.draft,n=document.getElementById('gn').value.trim(),tg=parseFloat(document.getElementById('gt').value),gid=el.dataset.g;
+  if(!n){toast('Give your goal a name');break}if(!(tg>0)){toast('Target must be greater than 0');break}
+  Object.assign(d,{title:n,habit:document.getElementById('gh').value,target:tg,due:document.getElementById('gd').value});
+  D.goals=D.goals||[];if(gid)Object.assign(D.goals.find(x=>x.id===gid),d);else D.goals.push({...d,id:uid(),start:t,done:0});
+  closeSheet();commit();break}
+ case'type':{V.draft.type=v;document.getElementById('ht').value=v;el.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===el));document.getElementById('tg').classList.toggle('show',v!=='yesno');if(v==='yesno')document.getElementById('hg').value=1;break}
+ case'rtog':{const on=!el.classList.contains('on');el.classList.toggle('on',on);el.setAttribute('aria-checked',on);document.getElementById('rem').classList.toggle('show',on);document.getElementById('hr').value=on?(document.getElementById('hr').value||'09:00'):'';break}
+ case'hsave':{const d=V.draft,n=document.getElementById('hn').value.trim();
+  if(!n){toast('Give your habit a name');break}if(!d.days.length){toast('Pick at least one day');break}
+  const type=document.getElementById('ht').value,target=type==='yesno'?1:parseFloat(document.getElementById('hg').value);
+  if(!(target>0)){toast('Target must be greater than 0');break}
+  Object.assign(d,{name:n,description:document.getElementById('hd').value,type,target,unit:document.getElementById('hu').value.trim(),start:document.getElementById('hs').value||t,reminder:document.getElementById('hr').value,category:document.getElementById('hc').value,updated:Date.now()});
+  if(h){Object.assign(D.habits.find(x=>x.id===h),d)}else{D.habits.push({...d,id:uid(),created:Date.now()})}
+  closeSheet();commit();break}
+ case'archive':case'restore':case'pause':{H.status=a==='archive'?'archived':a==='restore'?'active':H.status==='paused'?'active':'paused';H.updated=Date.now();closeSheet();commit();break}
+ case'del':if(confirm(`Delete "${H.name}" and all its history? This can't be undone.`)){D.habits=D.habits.filter(x=>x.id!==h);delete D.logs[h];closeSheet();commit()}break;
+ case'range':V.range=+v;render();break;
+ case'sel':V.sel=k;render();break;
+ case'mo':{const[y,m]=V.month.split('-').map(Number),d=new Date(y,m-1+(+v),1);V.month=`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;render();break}
+ case'signout':HF.signout();break;
+ case'theme':D.settings.theme=v;commit();break;
+ case'notify':toggleNotify();break;
+ case'export':{const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),x=document.createElement('a');x.href=u;x.download='habitflow-export.json';x.click();break}
+ case'wipe':if(confirm('Delete ALL habits and logs?')){D={habits:[],logs:{},settings:D.settings,onboarded:true,goals:[],routines:[],rlogs:{}};commit()}break;
+ case'starter':{const i=+v;V.starters.has(i)?V.starters.delete(i):V.starters.add(i);el.classList.toggle('on');break}
+ case'finish':{[...V.starters].forEach(i=>{const s=V.stData[i];D.habits.push({id:uid(),name:s[0],icon:s[1],color:COLORS[i%6],type:s[2],target:s[3],unit:s[4],days:[0,1,2,3,4,5,6],start:t,reminder:'',status:'active',category:'',description:'',created:Date.now(),updated:Date.now()})});D.onboarded=true;closeSheet();commit();break}
+ }
+ // refresh open detail sheet after edits to logs
+});
+document.addEventListener('change',e=>{const a=e.target.dataset.act;
+ if(a==='goal'){D.settings.goal=Math.min(100,Math.max(10,+e.target.value||80));Store.save(D)}
+ if(a==='q0'||a==='q1'){D.settings.quiet[a==='q0'?0:1]=e.target.value;Store.save(D)}});
+
+/* reminders: browser notifications, only while this tab is open */
+async function toggleNotify(){
+ if(!('Notification' in window)){toast('This browser does not support notifications');return}
+ if(D.settings.notify){D.settings.notify=false;return commit()}
+ const p=await Notification.requestPermission();
+ if(p!=='granted'){toast('Notification permission was not granted');return}
+ D.settings.notify=true;commit();
+}
+const fired=new Set();
+setInterval(()=>{
+ if(!D.settings.notify||Notification.permission!=='granted')return;
+ const n=new Date(),hm=`${pad2(n.getHours())}:${pad2(n.getMinutes())}`,t=todayK(),[q0,q1]=D.settings.quiet;
+ const quiet=q0>q1?(hm>=q0||hm<q1):(hm>=q0&&hm<q1);if(quiet)return;
+ for(const h of D.habits){if(h.reminder!==hm||fired.has(h.id+t+hm))continue;
+  if(Engine.state(h,t,t,D.logs)==='PENDING'){fired.add(h.id+t+hm);new Notification('HabitFlow',{body:`${h.name} — whenever you're ready.`})}}
+for(const r of D.routines||[]){if(!r.remind||r.time!==hm||r.status==='archived'||!r.days.includes(n.getDay())||fired.has(r.id+t+hm))continue;
+  if(rDone(r,t)<r.steps.length){fired.add(r.id+t+hm);new Notification('HabitFlow',{body:`${r.name} — time to start.`})}}
+},20000);
+
+/* ===== Life areas: Study, Gym, Meals, Recipes, Cooking. One scheduler feeds Home, Calendar and Insights ===== */
+const IT=()=>D.items||(D.items=[]),AL=()=>D.al||(D.al={});
+const AR={study:{n:'Study',i:'book',c:'#5b5bf0'},gym:{n:'Gym',i:'dumbbell',c:'#ff7a45'},meals:{n:'Meals',i:'apple',c:'#14c8a8'},recipes:{n:'Recipes',i:'leaf',c:'#f5a623'},cook:{n:'Cooking',i:'flame',c:'#ff4d8d'}};
+const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],DNF=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],CKS=['Ingredients','Preparation','Steps','Timing','Done'];
+const lines=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
+const arOf=i=>i.area==='recipes'?'cook':i.area;
+const areaItems=a=>IT().filter(i=>a==='cook'?i.area==='recipes':i.area===a);
+const tmin=s=>{const[a,b]=s.split(':').map(Number);return a*60+b};
+const nowM=()=>{const n=new Date();return n.getHours()*60+n.getMinutes()};
+const hm=m=>`${pad2(Math.floor(m/60)%24)}:${pad2(m%60)}`;
+const sd=k=>Engine.parse(k).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+const lg=(i,k)=>(AL()[i.id]||{})[k]||{};
+const sOn=(i,k)=>!!(i.sch&&i.sch.days.length&&k>=i.start&&i.sch.days.includes(Engine.parse(k).getDay()));
+/* lifecycle: planned (no schedule) -> scheduled -> due -> completed / skipped / missed */
+function lc(i,k){
+ if(!i.sch||!i.sch.days.length)return'planned';
+ const l=lg(i,k);if(l.s==='done')return'completed';if(l.s==='skip')return'skipped';
+ const t=todayK();if(k>t)return'scheduled';if(k<t)return'missed';
+ return!i.sch.time||nowM()>=tmin(i.sch.time)?'due':'scheduled'}
+const occ=k=>IT().filter(i=>sOn(i,k)).map(i=>({i,k,st:lc(i,k),t:i.sch.time||''})).sort((a,b)=>(a.t||'99')<(b.t||'99')?-1:(a.t||'99')>(b.t||'99')?1:0);
+const LCC={planned:'var(--mute)',scheduled:'var(--acc)',due:'var(--warn)',completed:'var(--acc2)',skipped:'var(--mute)',missed:'var(--bad)'};
+const chipL=s=>`<span class="chip" style="color:${LCC[s]}">${s[0].toUpperCase()+s.slice(1)}</span>`;
+const schTxt=i=>{const s=i.sch;if(!s||!s.days.length)return'Planned';return(s.days.length===7?'Daily':s.days.map(d=>DN[d]).join(' '))+(s.time?' · '+s.time:'')+(s.dur?' · '+s.dur+' min':'')};
+const exs=i=>lines(i.ex).map(l=>{const p=l.split(',').map(x=>x.trim());return{n:p[0],s:Math.max(1,+p[1]||3),r:+p[2]||10,w:+p[3]||0,rest:+p[4]||60}});
+const stp=i=>lines(i.steps).map(l=>{const p=l.split('|');return{t:p[0].trim(),m:+p[1]||0}});
+const nut=i=>{const r=i.recipe&&IT().find(x=>x.id===i.recipe),g=k=>(i[k]===''||i[k]==null)?((r&&+r[k])||0):+i[k];return{kcal:g('kcal'),pro:g('pro'),carb:g('carb'),fat:g('fat')}};
+const nutH=n=>`<div class="row" style="flex-wrap:wrap;gap:8px;margin:8px 0">${[['kcal',n.kcal,''],['Protein',n.pro,' g'],['Carbs',n.carb,' g'],['Fat',n.fat,' g']].map(([l,v,u])=>`<span class="chip">${l} ${v}${u}</span>`).join('')}</div>`;
+const fmtCd=ms=>{if(ms<=0)return'now';const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}h ${m}m`:m>=10?`${m} min`:`${m}:${pad2(s%60)}`};
+const note=m=>{const t=document.createElement('div');t.className='toast';t.style.background='var(--acc)';t.textContent=m;document.body.append(t);setTimeout(()=>t.remove(),4000)};
+function alog(i,k,p){const L=AL()[i.id]=AL()[i.id]||{};if(p===null)delete L[k];else L[k]={...(L[k]||{}),...p,at:Date.now()};Store.save(D);render()}
+const crow=(on,act,at,n,txt,c,sub)=>`<div class="rw st ${on?'dn':''}"><button class="chk ${on?'COMPLETED':''}" style="--c:${c}" data-act="${act}" ${at} data-v="${n}" aria-label="Toggle">${svg(CK,'',3.4,15)}</button><span class="sp" data-act="${act}" ${at} data-v="${n}">${esc(txt)}${sub?` <span class="mute">· ${sub}</span>`:''}</span></div>`;
+const orow=(o,sub)=>{const m=AR[arOf(o.i)];return`<div class="rw pr" data-act="li_run" data-i="${o.i.id}" data-k="${o.k}" style="cursor:pointer"><span class="tm">${o.t||'Anytime'}</span><div class="ic" style="background:${m.c}1f;color:${m.c}">${ico(m.i,20)}</div><div class="sp"><div style="font-weight:600">${esc(o.i.title)}</div><div class="mute" style="font-size:12px">${sub}</div></div>${chipL(o.st)}</div>`};
+
+/* analysis: counts occurrences in a date range */
+function agg(from,to,f){
+ const r={sch:0,c:0,s:0,m:0,cm:0,pm:0,by:{},wd:Array.from({length:7},()=>({c:0,n:0})),sl:{M:{c:0,n:0},A:{c:0,n:0},E:{c:0,n:0}},days:new Set()};
+ for(let k=from;k<=to;k=Engine.addDays(k,1)){const d=Engine.parse(k).getDay();
+  for(const o of occ(k)){if(f&&!f(o.i))continue;const du=o.i.sch.dur||0,b=r.by[o.i.id]=r.by[o.i.id]||{c:0,m:0};r.sch++;r.pm+=du;
+   if(o.st==='completed'){r.c++;r.cm+=du;r.days.add(k)}else if(o.st==='skipped')r.s++;else if(o.st==='missed'){r.m++;b.m++}
+   if(o.st==='completed'||o.st==='skipped'||o.st==='missed'){r.wd[d].n++;if(o.st==='completed')r.wd[d].c++;
+    if(o.t){const sl=o.t<'12:00'?'M':o.t<'17:00'?'A':'E';r.sl[sl].n++;if(o.st==='completed')r.sl[sl].c++}}}}
+ return r}
+const gSets=(from,to)=>{let n=0;IT().filter(i=>i.area==='gym').forEach(i=>{for(const[k,v]of Object.entries(AL()[i.id]||{}))if(k>=from&&k<=to&&v.s==='done')n+=Object.values(v.sets||{}).reduce((a,b)=>a+b,0)});return n};
+
+/* ---- Areas hub + area screens (inside Plan > Areas) ---- */
+function vAreas(){
+ const t=todayK(),O=occ(t),C=2*Math.PI*24;
+ return`<div class="row"><div class="sp"><div class="mute" style="font-weight:600">Life areas</div><h1>Areas</h1></div></div>${seg('areas')}${window.xgGrid?window.xgGrid():''}
+ <div style="margin-top:16px">${Object.entries(AR).map(([a,m])=>{const its=areaItems(a),os=O.filter(o=>arOf(o.i)===a),dn=os.filter(o=>o.st==='completed').length,p=os.length?dn/os.length:0;
+ return`<div class="grp goal" data-act="li_area" data-a="${a}"><div class="gr"><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" fill="none" stroke="var(--rest)" stroke-width="6"/><circle cx="28" cy="28" r="24" fill="none" stroke="${m.c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}"/></svg><span style="color:${m.c}">${ico(m.i,20)}</span></div><div class="sp"><div class="t">${m.n}</div><div class="mute">${its.length} ${a==='cook'||a==='recipes'?'recipe':'plan'}${its.length===1?'':'s'}${os.length?` · ${dn} of ${os.length} today`:''}</div></div><div class="mute" style="font-size:22px">›</div></div>`}).join('')}</div><div class="grp" style="margin-top:12px"><button class="addrow" data-act="ar_new">Create your own area</button></div>
+ <div class="gf">Anything you schedule here appears on Home, Calendar and Insights, with reminders. Tip: set a habit's Category to an area name to show it inside that area.</div>`}
+
+const HK={study:/study|read|learn|homework|revis/i,gym:/gym|exercise|workout|run|train|stretch|walk/i,meals:/water|meal|eat|vitamin|protein|fruit/i,recipes:/cook|bake/i,cook:/cook|bake/i};
+function areaHabits(a){const t=todayK(),n=AR[a].n.toLowerCase();return Engine.dayProgress(D.habits,t,t,D.logs).items.filter(({h})=>{const c=(h.category||'').trim().toLowerCase();return c?c===n:(HK[a]?HK[a].test(h.name):h.name.toLowerCase().includes(n))}).sort((x,y)=>((x.s==='COMPLETED')-(y.s==='COMPLETED'))||(x.h.reminder||'99').localeCompare(y.h.reminder||'99'))}
+function vArea(a){
+ const m=AR[a],t=todayK(),ws=Engine.addDays(t,-Engine.parse(t).getDay()),we=Engine.addDays(ws,6),its=areaItems(a),g=agg(ws,we,i=>arOf(i)===a),pct=g.sch?Math.round(g.c/g.sch*100):0,isR=a==='recipes'||a==='cook';
+ const sc=i=>i.sch&&i.sch.days.length,S=its.filter(sc),U=its.filter(i=>!sc(i)),rk={High:0,Medium:1,Low:2},pc={High:'var(--bad)',Medium:'var(--warn)',Low:'var(--mute)'},cl=!['gym','meals','recipes','cook'].includes(a);
+ const noun=a==='gym'?'workout':a==='meals'?'meal':a==='study'?'study plan':isR?'recipe':'activity',na=a==='cook'?'recipes':a;
+ const days=[0,1,2,3,4,5,6].map(x=>Engine.addDays(ws,x)),tm=i=>i.sch.time||'Anytime',bt=(x,y)=>(x.sch.time||'99').localeCompare(y.sch.time||'99');
+ const used=i=>IT().filter(x=>x.area==='meals'&&x.recipe===i.id).length;
+ let ex='';
