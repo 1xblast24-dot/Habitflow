@@ -4,7 +4,7 @@
      from other hosts always go straight to the network, so sign-in and cloud
      sync are never served from a stale cache.
    Bump VERSION whenever you deploy changes you want users to receive. */
-const VERSION = 'hf-v1';
+const VERSION = 'hf-v2';
 const SHELL = [
   './', 'index.html', 'login.html', 'app.html', 'pwa.js',
   'manifest.webmanifest',
@@ -37,7 +37,7 @@ self.addEventListener('fetch', e => {
   // Pages: network first, so deploys show up right away; cache when offline.
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then(res => {
+      fetch(req.url, { cache: 'no-cache' }).then(res => {
         const copy = res.clone();
         if (res.ok) caches.open(VERSION).then(c => c.put(req, copy));
         return res;
