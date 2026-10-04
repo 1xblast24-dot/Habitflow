@@ -1,18 +1,18 @@
 {
+  "id": "/app.html",
   "name": "HabitFlow",
   "short_name": "HabitFlow",
-  "description": "Build habits. Build yourself.",
-  "start_url": "./app.html",
-  "scope": "./",
+  "description": "Build habits around your real schedule. Plan, remind, track.",
+  "start_url": "/app.html?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#4f46e5",
-  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "background_color": "#060d18",
+  "theme_color": "#060d18",
+  "categories": ["productivity", "lifestyle", "health"],
   "icons": [
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
-  ],
-  "shortcuts": [
-    { "name": "Open tracker", "url": "./app.html" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
