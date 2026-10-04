@@ -299,6 +299,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{font-size:16px;line-height:1.45;text-rendering:optimizeLegibility}
 .mute{font-size:14px}
 input,select,textarea{font-size:16px}
+.pf{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 0 4px}
+.av{position:relative;width:104px;height:104px;border-radius:50%;border:0;padding:0;cursor:pointer;background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff;font:700 38px var(--sf,system-ui);display:grid;place-items:center;box-shadow:0 0 0 4px var(--bg),0 0 0 6px var(--line),var(--sh);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.av:active{transform:scale(.96)}.av img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.av .cam{position:absolute;right:-2px;bottom:-2px;width:32px;height:32px;border-radius:50%;background:var(--surf);color:var(--acc);display:grid;place-items:center;border:1px solid var(--line);box-shadow:var(--sh)}
+.pn{font-size:24px;font-weight:700;margin-top:14px;letter-spacing:-.02em}.pa{display:flex;gap:8px;margin-top:12px}
 </style><script>
 /* HabitFlow account guard + cloud sync (Supabase). Habits stay in localStorage and are mirrored to the user's account. */
 (function(){
@@ -457,6 +462,7 @@ let D=Store.load()||{habits:[],logs:{},settings:{theme:'auto',quiet:['22:00','07
 D.goals=D.goals||[];D.routines=D.routines||[];D.rlogs=D.rlogs||{};
 const todayK=()=>Engine.key(new Date());
 const commit=()=>{Store.save(D);render()};
+function avatarFrom(f){if(!f)return;const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const s=256,m=Math.min(im.width,im.height),cv=document.createElement('canvas');cv.width=cv.height=s;cv.getContext('2d').drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,s,s);D.settings.avatar=cv.toDataURL('image/jpeg',.85);URL.revokeObjectURL(u);commit()};im.onerror=()=>toast('Could not read that image.');im.src=u}
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.append(t);setTimeout(()=>t.remove(),3500)}
 
 /* ===== actions (serialized state updates; each is synchronous so rapid taps can't interleave) ===== */
@@ -632,6 +638,7 @@ const pad2=n=>String(n).padStart(2,'0');
 function vProfile(){
  const S=D.settings,arch=D.habits.filter(h=>h.status==='archived').length,np='Notification' in window?Notification.permission:'unsupported';
  return`<h1>Profile</h1>
+ <div class="pf"><button class="av" data-act="avatar" aria-label="Change profile photo">${S.avatar?`<img src="${S.avatar}" alt="Your profile photo">`:`<span>${esc(((SESS.name||'Guest').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('')||'G').toUpperCase())}</span>`}<i class="cam"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></i></button><input id="avIn" data-act="avfile" type="file" accept="image/*" hidden><div class="pn">${esc(SESS.name||'Guest')}</div><div class="mute">${SESS.mode==='guest'?'Guest':esc(SESS.email||'')}</div><div class="pa"><button class="btn g" data-act="avatar">${S.avatar?'Change photo':'Add photo'}</button>${S.avatar?'<button class="btn g" data-act="avrm">Remove</button>':''}</div></div>
  <h2>Account</h2><div class="card"><div class="item"><div class="sp"><div>${esc(SESS.name||'Guest')}</div><div class="mute">${SESS.mode==='guest'?'Guest mode. Your habits are saved in this browser only.':esc(SESS.email||'')+' · Synced to your account.'}</div></div><button class="btn g" data-act="signout">${SESS.mode==='guest'?'Sign in':'Sign out'}</button></div></div>
  <h2>Goal</h2><div class="card"><div class="item"><div class="sp">Weekly consistency goal</div><input type="number" min="10" max="100" value="${S.goal}" data-act="goal" style="width:90px"></div></div>
  <h2>Theme</h2><div class="row">${['auto','light','dark'].map(x=>`<button class="pill ${S.theme===x?'on':''}" data-act="theme" data-v="${x}">${x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div>
@@ -640,7 +647,8 @@ function vProfile(){
  <div class="rw"><span>Quiet hours</span><span class="sp"></span><input type="time" value="${S.quiet[0]}" data-act="q0"><span class="mute">to</span><input type="time" value="${S.quiet[1]}" data-act="q1"></div></div>
  <div class="gf">Reminders only fire while HabitFlow is open in a tab; there's no background push. Status: ${np}.</div>
  <h2>Data</h2><div class="row"><button class="btn g" data-act="arch2">Archived habits (${arch})</button><button class="btn g" data-act="export">Export JSON</button></div>
- <div style="margin-top:12px"><button class="btn d" data-act="wipe">Delete all data</button></div>`;
+ <div style="margin-top:12px"><button class="btn d" data-act="wipe">Delete all data</button></div>
+ <div class="gl">About</div><div class="grp"><div class="rw"><span class="ico" style="background:linear-gradient(135deg,#14c8a8,#5b5bf0)">H</span><span class="sp">HabitFlow</span><span class="mute">v1.0</span></div><div class="rw"><span class="ico" style="background:#ff9f0a">&#9829;</span><span class="sp">Built by</span><span class="mute">Amin</span></div></div><div class="gf">Designed and built by Amin.</div>`;
 }
 
 function render(){
@@ -770,6 +778,8 @@ document.addEventListener('click',e=>{
  case'sel':V.sel=k;render();break;
  case'mo':{const[y,m]=V.month.split('-').map(Number),d=new Date(y,m-1+(+v),1);V.month=`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;render();break}
  case'signout':HF.signout();break;
+  case'avatar':document.getElementById('avIn').click();break;
+  case'avrm':delete D.settings.avatar;commit();break;
  case'theme':D.settings.theme=v;commit();break;
  case'notify':toggleNotify();break;
  case'export':{const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),x=document.createElement('a');x.href=u;x.download='habitflow-export.json';x.click();break}
@@ -780,6 +790,7 @@ document.addEventListener('click',e=>{
  // refresh open detail sheet after edits to logs
 });
 document.addEventListener('change',e=>{const a=e.target.dataset.act;
+  if(a==='avfile'){avatarFrom(e.target.files[0]);e.target.value='';return}
  if(a==='goal'){D.settings.goal=Math.min(100,Math.max(10,+e.target.value||80));Store.save(D)}
  if(a==='q0'||a==='q1'){D.settings.quiet[a==='q0'?0:1]=e.target.value;Store.save(D)}});
 
