@@ -3,7 +3,7 @@
   "name": "HabitFlow",
   "short_name": "HabitFlow",
   "description": "Build habits around your real schedule. Plan, remind, track.",
-  "start_url": "/app.html?source=pwa",
+  "start_url": "/app?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

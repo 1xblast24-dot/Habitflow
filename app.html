@@ -308,11 +308,11 @@ var ls=localStorage,rawSet=Storage.prototype.setItem;
 function rd(k){try{return JSON.parse(ls.getItem(k))}catch(e){return null}}
 function put(k,v){try{rawSet.call(ls,k,typeof v==='string'?v:JSON.stringify(v))}catch(e){}}
 var S=rd(SK);
-if(!S||!S.mode){location.replace('login.html');return}
+if(!S||!S.mode){location.replace('/login');return}
 var HF=window.HF={session:S,cloud:S.mode==='cloud'};
 HF.signout=function(){
-  if(!HF.cloud){try{ls.removeItem(SK)}catch(e){}location.replace('login.html');return}
-  var done=function(){try{ls.removeItem(SK);ls.removeItem(META);DK.forEach(function(k){ls.removeItem(k)})}catch(e){}location.replace('login.html')};
+  if(!HF.cloud){try{ls.removeItem(SK)}catch(e){}location.replace('/login');return}
+  var done=function(){try{ls.removeItem(SK);ls.removeItem(META);DK.forEach(function(k){ls.removeItem(k)})}catch(e){}location.replace('/login')};
   var m=rd(META)||{};
   if(m.dirty&&ready){Promise.race([push(),new Promise(function(r){setTimeout(r,4000)})]).then(done,done)}else done();
 };
@@ -337,7 +337,7 @@ async function token(){
   }
   return S.token;
 }
-function expired(){try{ls.removeItem(SK)}catch(e){}location.replace('login.html')}
+function expired(){try{ls.removeItem(SK)}catch(e){}location.replace('/login')}
 function payload(){return{user_id:S.id,planner:rd(DK[0])||{},areas:rd(DK[1])||{}}}
 
 async function push(){

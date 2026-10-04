@@ -4,9 +4,9 @@
      from other hosts always go straight to the network, so sign-in and cloud
      sync are never served from a stale cache.
    Bump VERSION whenever you deploy changes you want users to receive. */
-const VERSION = 'hf-v3';
+const VERSION = 'hf-v4';
 const SHELL = [
-  './', 'index.html', 'login.html', 'app.html', 'pwa.js',
+  '/', '/login', '/app', 'pwa.js',
   'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'
 ];
@@ -43,7 +43,7 @@ self.addEventListener('fetch', e => {
         return res;
       }).catch(() =>
         caches.match(req, { ignoreSearch: true })
-          .then(hit => hit || caches.match('app.html') || caches.match('login.html'))
+          .then(hit => hit || caches.match('/app') || caches.match('/login'))
       )
     );
     return;
