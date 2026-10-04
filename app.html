@@ -699,10 +699,10 @@ function detailSheet(id){
 }
 
 function welcome(){
- const starters=[['Read','book','yesno',1,''],['Exercise','dumbbell','yesno',1,''],['Study','target','duration',60,'min'],['Water','drop','count',3,'L'],['Meditate','leaf','duration',10,'min'],['Journal','pen','yesno',1,'']];
+ const starters=[];
  V.starters=new Set();
- sheet(`<h1>Welcome to HabitFlow</h1><p class="mute">Consistency over perfection. Missing a day is fine — returning is what counts. Pick a few to start (or skip and create your own).</p>
- <div class="row" style="flex-wrap:wrap">${starters.map((s,i)=>`<button class="pill" data-act="starter" data-v="${i}">${ico(s[1],18)} ${s[0]}</button>`).join('')}</div>
+ sheet(`<h1>Welcome to HabitFlow</h1><p class="mute">Consistency over perfection. Missing a day is fine — returning is what counts. Start by creating your own.</p>
+ 
  <div class="row" style="margin-top:20px"><button class="btn" data-act="finish">Get started</button></div>`);
  V.stData=starters;
 }
@@ -1110,7 +1110,7 @@ const PICK=['book','dumbbell','trend','star','moon','heart','leaf','bulb','brief
 const ic=(n,z=20,sw=1.9)=>`<svg viewBox="0 0 24 24" width="${z}" height="${z}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||P.star}</svg>`;
 const tile=(n,c,z=44)=>`<div class="xg-ic" style="--c:${c};width:${z}px;height:${z}px;border-radius:${Math.round(z*.29)}px">${ic(n,Math.round(z*.54))}</div>`;
 let SL=null,popT=null,D=load(),open=null,S=null,F={},flt='all',popId=null,tok=0;
-function load(){try{const x=JSON.parse(localStorage.getItem(K));if(x&&x.areas)return x}catch(e){}return{areas:[]}}
+function load(){try{const x=JSON.parse(localStorage.getItem(K));if(x&&x.areas){const demo=x.areas.some&&x.areas.some(a=>['Subjects & revision','Move every day','Prepare, execute, review','Stillness & reflection'].includes(a.desc));if(!demo)return x;localStorage.removeItem(K)}}catch(e){}return{areas:[]}}
 function save(){try{localStorage.setItem(K,JSON.stringify(D))}catch(e){toast('Could not save: storage unavailable.')}}
 function stat(a,d){const k=dk(d),l=a.habits.filter(h=>sch(h,d)),dn=l.filter(h=>h.done[k]);return{l,n:l.length,d:dn.length,pl:sum(l),cm:sum(dn),p:l.length?Math.round(dn.length/l.length*100):0}}
 function streak(ok,sc){let n=0;for(let i=0;i<400;i++){const d=back(i);if(!sc(d))continue;if(ok(d))n++;else if(i)break}return n}

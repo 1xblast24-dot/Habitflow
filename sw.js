@@ -4,7 +4,7 @@
      from other hosts always go straight to the network, so sign-in and cloud
      sync are never served from a stale cache.
    Bump VERSION whenever you deploy changes you want users to receive. */
-const VERSION = 'hf-v2';
+const VERSION = 'hf-v3';
 const SHELL = [
   './', 'index.html', 'login.html', 'app.html', 'pwa.js',
   'manifest.webmanifest',
