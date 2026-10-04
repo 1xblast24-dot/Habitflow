@@ -1066,11 +1066,16 @@ buildDock();render();
 })();
 
 /* scroll-reactive nav: goes glassier while scrolling, tucks away on scroll down, returns on scroll up */
-(()=>{const dk=document.getElementById('dock'),fd=document.querySelector('.dockfade');let ly=scrollY,tm,tk=false;
+(()=>{const dk=document.getElementById('dock'),fd=document.querySelector('.dockfade');let ly=scrollY,tm,tk=false,lt=V.tab,ui=0;
+ /* only a real finger/wheel/key scroll may tuck the nav away; tab switches and re-renders reset scroll in code and must never trigger it */
+ ['touchstart','touchmove','wheel','keydown','pointerdown'].forEach(n=>addEventListener(n,e=>{if(e.target.closest&&e.target.closest('#dock'))return;ui=performance.now()},{passive:true,capture:true}));
+ dk.addEventListener('pointerdown',()=>{ui=0});
  addEventListener('scroll',()=>{if(tk)return;tk=true;requestAnimationFrame(()=>{
   const y=Math.max(0,scrollY),d=y-ly;
+  if(V.tab!==lt){lt=V.tab;ly=y;ui=0;clearTimeout(tm);dk.classList.remove('scrolling','hide');fd.classList.remove('hide');tk=false;return}
+  const usr=performance.now()-ui<2500;
   dk.classList.add('scrolling');clearTimeout(tm);tm=setTimeout(()=>{dk.classList.remove('scrolling');dk.classList.remove('hide');fd.classList.remove('hide')},700);
-  if(Math.abs(d)>6){const hide=d>0&&y>80;dk.classList.toggle('hide',hide);fd.classList.toggle('hide',hide);ly=y}
+  if(Math.abs(d)>6){const hide=usr&&d>0&&y>80;dk.classList.toggle('hide',hide);fd.classList.toggle('hide',hide);ly=y}
   tk=false})},{passive:true});
  dk.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')});
 })();
