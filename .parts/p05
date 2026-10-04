@@ -1,0 +1,131 @@
+  :`<div class="empty" style="padding-top:60px"><div style="color:var(--acc);display:grid;place-items:center;margin-bottom:12px">${svg(IC.target,'',1.6,54)}</div><div style="font-weight:700;color:var(--text);font-size:18px">Set your first goal</div><div style="margin:6px 0 20px">Link it to a habit or track it by hand.</div><button class="btn" data-act="gnew">New goal</button></div>`);}
+ return head;
+}
+function goalSheet(id){
+ const g=id?D.goals.find(x=>x.id===id):{title:'',icon:'target',color:COLORS[0],habit:'',target:30,due:''};V.draft={...g};
+ sheet(`<div class="ios-top"><button data-act="close2">Cancel</button><b>${id?'Edit Goal':'New Goal'}</b><button data-act="gsave" data-g="${id||''}">${id?'Save':'Add'}</button></div>
+ <div class="ios-prev"><div class="ic" id="prev" style="background:${g.color}22;color:${g.color}">${ico(g.icon,34)}</div></div>
+ <div class="grp"><div class="rw"><input class="l" id="gn" value="${esc(g.title)}" maxlength="60" placeholder="Goal name" style="font-size:18px;font-weight:600"></div></div>
+ <div class="gl">Progress</div><div class="grp"><div class="rw"><span>Linked habit</span><select id="gh" style="color:var(--acc);font-weight:600"><option value="">None (manual)</option>${D.habits.filter(h=>h.status!=='archived').map(h=>`<option value="${h.id}" ${h.id===g.habit?'selected':''}>${esc(h.name)}</option>`).join('')}</select></div>
+ <div class="rw"><span>Target</span><input id="gt" type="number" min="1" inputmode="numeric" value="${g.target}"></div><div class="rw"><span>Deadline</span><span class="sp"></span><input id="gd" type="date" value="${g.due||''}"></div></div>
+ <div class="gf">Linked goals count completed days of that habit from today on. Manual goals use the + and − buttons.</div>
+ <div class="gl">Appearance</div><div class="grp"><div class="pk">${ICONS.map(i=>`<button class="pill ${i===g.icon?'on':''}" data-act="pick" data-f="icon" data-v="${i}" aria-label="${i}">${ico(i)}</button>`).join('')}</div>
+ <div class="rw" style="padding:10px 14px;gap:10px;flex-wrap:wrap">${COLORS.map(c=>`<button class="step" style="background:${c};border-color:${c===g.color?'var(--text)':'transparent'}" data-act="pick" data-f="color" data-v="${c}" aria-label="Color"></button>`).join('')}</div></div>
+ ${id?`<div class="grp" style="margin-top:20px"><button class="dgd" data-act="gdel" data-g="${id}">Delete goal</button></div>`:''}`);
+}
+
+function vInsights(){
+ const t=todayK(),act=D.habits.filter(h=>h.status!=='archived');
+ const all=V.range===0,from=all?(D.habits.map(h=>h.start).sort()[0]||t):Engine.addDays(t,-(V.range-1));
+ const s=Engine.summary(act,from,t,t,D.logs);
+ const weeks=[];for(let i=7;i>=0;i--){const e=Engine.addDays(t,-i*7),b=Engine.addDays(e,-6);weeks.push(Engine.summary(act,b,e,t,D.logs).rate||0)}
+ return`<h1>Insights</h1><div class="seg" style="margin:10px 0">${[[7,'7 days'],[30,'30 days'],[90,'90 days'],[0,'All time']].map(([r,l])=>`<button class="pill ${V.range===r?'on':''}" data-act="range" data-v="${r}">${l}</button>`).join('')}</div>
+ ${!act.length?'<div class="empty">Insights appear once you add and log habits.</div>':`
+ <div class="row"><div class="stat hero"><span class="mute">Consistency</span><div>${s.rate==null?'—':s.rate+'%'}</div></div><div class="stat"><span class="mute">Completed</span><div>${s.COMPLETED}</div></div></div>
+ <div class="row" style="margin-top:10px"><div class="stat"><span class="mute">Partial</span><div>${s.PARTIAL}</div></div><div class="stat"><span class="mute">Skipped</span><div>${s.SKIPPED}</div></div><div class="stat"><span class="mute">Missed</span><div>${s.MISSED}</div></div></div>
+ <p class="mute">Partial counts as half. Skipped days don't count against you. Rest days are ignored.</p>
+ <h2>Weekly consistency</h2><div class="bars">${weeks.map(w=>`<i style="height:${Math.max(w,3)}%" title="${w}%"></i>`).join('')}</div><div class="row mute" style="font-size:12px"><span>8 weeks ago</span><span class="sp"></span><span>This week</span></div>
+ <h2>By habit</h2><div class="card">${act.map(h=>{const x=Engine.summary([h],from,t,t,D.logs),st=Engine.streaks(h,t,D.logs);return`<div class="item" style="min-height:70px;display:block"><div class="row"><span class="row" style="gap:8px"><i style="color:${h.color};display:inline-flex">${ico(h.icon,18)}</i>${esc(h.name)}</span><span class="sp"></span><b>${x.rate==null?'—':x.rate+'%'}</b></div><div class="bar" style="margin:8px 0 4px"><i style="width:${x.rate||0}%;background:${h.color}"></i></div><div class="mute" style="font-size:12px">streak ${st.cur} · best ${st.best} · ${x.COMPLETED} done</div></div>`}).join('')}</div>`}`;
+}
+
+function vCalendar(){
+ const t=todayK(),[y,m]=V.month.split('-').map(Number),first=new Date(y,m-1,1),n=new Date(y,m,0).getDate(),cells=[];
+ for(let i=0;i<first.getDay();i++)cells.push('<i></i>');
+ for(let d=1;d<=n;d++){const k=`${V.month}-${pad2(d)}`,p=Engine.dayProgress(D.habits,k,t,D.logs),fut=k>t,pc=p.total?Math.round(p.done/p.total*100):0;
+  cells.push(`<button class="cd ${k===V.sel?'sel':''} ${k===t?'t':''} ${!p.total||fut?'u':''}" style="--p:${pc}" data-act="sel" data-k="${k}" aria-label="${fmtDate(k)}${p.total&&!fut?`, ${p.done} of ${p.total} done`:''}"><span>${d}</span></button>`)}
+ const p=Engine.dayProgress(D.habits,V.sel,t,D.logs),chev=d=>svg(`<path d="${d}"/>`,'',2.4,18);
+ return`<div class="mute" style="font-weight:600">Your history</div><h1>Calendar</h1>
+ <div class="calcard"><div class="row" style="margin-bottom:16px"><div class="sp" style="font-size:20px;font-weight:800;letter-spacing:-.4px">${first.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</div><button class="nav" data-act="mo" data-v="-1" aria-label="Previous month">${chev('M15 6l-6 6 6 6')}</button><button class="nav" data-act="mo" data-v="1" aria-label="Next month">${chev('M9 6l6 6-6 6')}</button></div>
+ <div class="grid wk">${'SMTWTFS'.split('').map(x=>`<div>${x}</div>`).join('')}</div><div class="grid days">${cells.join('')}</div></div>
+ <div style="margin:28px 2px 12px"><div style="font-size:18px;font-weight:800">${fmtDate(V.sel)}</div><div class="mute">${V.sel>t?'Not yet':p.total?`${p.done} of ${p.total} done`:'Rest day'}</div></div>
+ ${V.sel>t?'<div class="empty">This day hasn\'t happened yet.</div>':p.items.length?`<div class="card">${p.items.map(i=>habitRow(i.h,V.sel,t,1)).join('')}</div>`:'<div class="empty">Nothing scheduled. Rest is part of the plan.</div>'}`;
+}
+const pad2=n=>String(n).padStart(2,'0');
+
+function vProfile(){
+ const S=D.settings,arch=D.habits.filter(h=>h.status==='archived').length,np='Notification' in window?Notification.permission:'unsupported';
+ return`<h1>Profile</h1>
+ <h2>Account</h2><div class="card"><div class="item"><div class="sp"><div>${esc(SESS.name||'Guest')}</div><div class="mute">${SESS.mode==='guest'?'Guest mode. Your habits are saved in this browser only.':esc(SESS.email||'')+' · Synced to your account.'}</div></div><button class="btn g" data-act="signout">${SESS.mode==='guest'?'Sign in':'Sign out'}</button></div></div>
+ <h2>Goal</h2><div class="card"><div class="item"><div class="sp">Weekly consistency goal</div><input type="number" min="10" max="100" value="${S.goal}" data-act="goal" style="width:90px"></div></div>
+ <h2>Theme</h2><div class="row">${['auto','light','dark'].map(x=>`<button class="pill ${S.theme===x?'on':''}" data-act="theme" data-v="${x}">${x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div>
+ <div class="gl">Notifications</div><div class="grp"><div class="nt"><div class="ap">H</div><div><small>HabitFlow · now</small><div>Read — whenever you're ready.</div></div></div>
+ <div class="rw"><span class="ico" style="background:#ff3b30">${svg(IC.bell,'',2,16)}</span><span>Allow notifications</span><button class="sw ${S.notify?'on':''}" data-act="notify" role="switch" aria-checked="${!!S.notify}" aria-label="Allow notifications"></button></div>
+ <div class="rw"><span>Quiet hours</span><span class="sp"></span><input type="time" value="${S.quiet[0]}" data-act="q0"><span class="mute">to</span><input type="time" value="${S.quiet[1]}" data-act="q1"></div></div>
+ <div class="gf">Reminders only fire while HabitFlow is open in a tab; there's no background push. Status: ${np}.</div>
+ <h2>Data</h2><div class="row"><button class="btn g" data-act="arch2">Archived habits (${arch})</button><button class="btn g" data-act="export">Export JSON</button></div>
+ <div style="margin-top:12px"><button class="btn d" data-act="wipe">Delete all data</button></div>`;
+}
+
+function render(){
+ const enter=V.last!==V.tab,ni=TABS.findIndex(x=>x[0]===V.tab),dir=enter&&V.li!=null?(ni>V.li?'dr':'dl'):'';V.li=ni;V.last=V.tab;if(enter&&V.tab==='today')V.ringPct=0;
+ const y=scrollY,f={today:vToday,plan:vPlan,habits:vHabits,insights:vInsights,calendar:vCalendar,profile:vProfile}[V.tab];
+ document.getElementById('app').innerHTML=`<section class="${enter?'enter '+dir:''}">${f()}</section>`;V.fresh=null;
+ document.querySelectorAll('[data-off]').forEach(e=>requestAnimationFrame(()=>requestAnimationFrame(()=>e.style.strokeDashoffset=e.dataset.off)));
+ const dk=document.getElementById('dock');dk.style.setProperty('--i',ni);if(enter){const ind=dk.querySelector('.ind');ind.classList.remove('move');void ind.offsetWidth;ind.classList.add('move')}
+ dk.querySelectorAll('button').forEach(b=>b.dataset.id===V.tab?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
+ scrollTo(0,enter?0:y);applyTheme();
+}
+function buildDock(){const n=document.createElement('nav');n.className='dock';n.id='dock';n.setAttribute('aria-label','Main');
+ n.innerHTML='<i class="ind"></i>'+TABS.map(([id,i,l])=>`<button data-act="tab" data-id="${id}" aria-label="${l}"><span>${i}</span>${l}</button>`).join('');
+ const f=document.createElement('div');f.className='dockfade';document.body.append(f,n)}
+
+/* sheets */
+function sheet(html){document.getElementById('over').innerHTML=`<div class="sheet" data-act="close"><div>${html}</div></div>`}
+const closeSheet=()=>document.getElementById('over').innerHTML='';
+
+function logSheet(hid,k){
+ const h=D.habits.find(x=>x.id===hid),l=(D.logs[hid]||{})[k]||{v:0,note:''};
+ sheet(`<h1 style="font-size:22px">${h.icon} ${esc(h.name)}</h1><div class="mute">${fmtDate(k)}</div>
+ ${h.type!=='yesno'?`<label>Amount (${esc(unit(h))}) · target ${h.target}</label><input id="lv" type="number" min="0" inputmode="decimal" value="${l.v||''}">`:''}
+ <label>Note (optional)</label><textarea id="ln" rows="2">${esc(l.note||'')}</textarea>
+ <div class="row" style="margin-top:18px;flex-wrap:wrap"><button class="btn" data-act="lsave" data-h="${hid}" data-k="${k}">${h.type==='yesno'?'Complete':'Save'}</button><button class="btn g" data-act="lskip" data-h="${hid}" data-k="${k}">Skip</button><button class="btn d" data-act="lclear" data-h="${hid}" data-k="${k}">Clear</button></div>`);
+}
+
+function habitSheet(id){
+ const h=id?D.habits.find(x=>x.id===id):{name:'',icon:ICONS[0],color:COLORS[0],type:'yesno',target:1,unit:'',days:[0,1,2,3,4,5,6],start:todayK(),reminder:'',status:'active',category:'',description:''};
+ V.draft={...h,days:[...h.days]};const T=[['yesno','Yes / No'],['count','Count'],['duration','Duration']];
+ sheet(`<div class="ios-top"><button data-act="close2">Cancel</button><b>${id?'Edit Habit':'New Habit'}</b><button data-act="hsave" data-h="${id||''}">${id?'Save':'Add'}</button></div>
+ <div class="ios-prev"><div class="ic" id="prev" style="background:${h.color}22;color:${h.color}">${ico(h.icon,34)}</div></div>
+ <div class="grp"><div class="rw"><input class="l" id="hn" value="${esc(h.name)}" maxlength="60" placeholder="Habit name" style="font-size:18px;font-weight:600"></div><div class="rw"><input class="l" id="hd" value="${esc(h.description||'')}" placeholder="Description"></div></div>
+ <div class="gl">Goal</div><div class="grp"><div class="sg">${T.map(t=>`<button class="${h.type===t[0]?'on':''}" data-act="type" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
+ <input type="hidden" id="ht" value="${h.type}">
+ <div class="rw tgr ${h.type!=='yesno'?'show':''}" id="tg"><span>Target</span><input id="hg" type="number" min="1" inputmode="decimal" value="${h.target}"><input id="hu" value="${esc(h.unit||'')}" placeholder="unit" style="max-width:80px;color:var(--mute)"></div></div>
+ <div class="gl">Appearance</div><div class="grp"><div class="pk">${ICONS.map(i=>`<button class="pill ${i===h.icon?'on':''}" data-act="pick" data-f="icon" data-v="${i}" aria-label="${i}">${ico(i)}</button>`).join('')}</div>
+ <div class="rw" style="padding:10px 14px;gap:10px;flex-wrap:wrap">${COLORS.map(c=>`<button class="step" style="background:${c};border-color:${c===h.color?'var(--text)':'transparent'}" data-act="pick" data-f="color" data-v="${c}" aria-label="Color"></button>`).join('')}</div></div>
+ <div class="gl">Repeat</div><div class="grp"><div class="rw" style="padding:10px 14px"><div class="wd" style="width:100%">${'SMTWTFS'.split('').map((d,i)=>`<button class="${h.days.includes(i)?'on':''}" data-act="day" data-v="${i}">${d}</button>`).join('')}</div></div>
+ <div class="rw"><span>Starts</span><span class="sp"></span><input id="hs" type="date" value="${h.start}"></div></div>
+ <div class="gl">Notifications</div><div class="grp"><div class="rw"><span class="ico" style="background:#ff3b30">${svg(IC.bell,'',2,16)}</span><span>Remind me</span><button class="sw ${h.reminder?'on':''}" id="rsw" data-act="rtog" role="switch" aria-checked="${!!h.reminder}" aria-label="Remind me"></button></div>
+ <div class="rem ${h.reminder?'show':''}" id="rem"><div class="rw"><span>Time</span><span class="sp"></span><input id="hr" type="time" value="${h.reminder||''}"></div></div></div>
+ <div class="gf">A gentle nudge at this time on scheduled days, only if the habit isn't done yet.</div>
+ <div class="gl">Category</div><div class="grp"><div class="rw"><input class="l" id="hc" value="${esc(h.category||'')}" placeholder="Optional"></div></div>`);
+}
+function updPrev(){const p=document.getElementById('prev');if(p){p.style.background=V.draft.color+'22';p.style.color=V.draft.color;p.innerHTML=ico(V.draft.icon,34)}}
+
+function detailSheet(id){
+ const h=D.habits.find(x=>x.id===id),t=todayK(),st=Engine.streaks(h,t,D.logs),sm=Engine.summary([h],h.start,t,t,D.logs);
+ const days=[];for(let i=0;i<28;i++)days.push(Engine.addDays(t,-i));
+ sheet(`<div class="row"><div class="ic" style="background:${h.color}1f;color:${h.color}">${ico(h.icon)}</div><h1 class="sp" style="font-size:22px">${esc(h.name)}</h1></div>
+ <div class="row" style="margin-top:14px"><div class="stat"><span class="mute">Streak</span><div>${st.cur}</div></div><div class="stat"><span class="mute">Best</span><div>${st.best}</div></div><div class="stat"><span class="mute">Rate</span><div>${sm.rate==null?'—':sm.rate+'%'}</div></div></div>
+ <h2>Last 28 days · tap to edit</h2><div class="grid">${days.reverse().map(k=>{const s=Engine.state(h,k,t,D.logs),col={COMPLETED:h.color,PARTIAL:'var(--warn)',SKIPPED:'var(--mute)',MISSED:'color-mix(in srgb,var(--bad) 40%,transparent)'}[s]||'var(--rest)';return`<button class="cd2" style="background:${col};color:${s==='COMPLETED'?'#fff':'inherit'}" data-act="log2" data-h="${h.id}" data-k="${k}" ${['UNSCHEDULED','BEFORE_START','PAUSED'].includes(s)?'disabled':''} aria-label="${k} ${s}">${+k.slice(8)}</button>`}).join('')}</div>
+ <div class="row" style="margin-top:20px;flex-wrap:wrap"><button class="btn g" data-act="edit" data-h="${id}">Edit</button>
+ ${h.status==='archived'?`<button class="btn g" data-act="restore" data-h="${id}">Restore</button>`:`<button class="btn g" data-act="pause" data-h="${id}">${h.status==='paused'?'Resume':'Pause'}</button><button class="btn g" data-act="archive" data-h="${id}">Archive</button>`}
+ <button class="btn d" data-act="del" data-h="${id}">Delete</button></div>`);
+}
+
+function welcome(){
+ const starters=[['Read','book','yesno',1,''],['Exercise','dumbbell','yesno',1,''],['Study','target','duration',60,'min'],['Water','drop','count',3,'L'],['Meditate','leaf','duration',10,'min'],['Journal','pen','yesno',1,'']];
+ V.starters=new Set();
+ sheet(`<h1>Welcome to HabitFlow</h1><p class="mute">Consistency over perfection. Missing a day is fine — returning is what counts. Pick a few to start (or skip and create your own).</p>
+ <div class="row" style="flex-wrap:wrap">${starters.map((s,i)=>`<button class="pill" data-act="starter" data-v="${i}">${ico(s[1],18)} ${s[0]}</button>`).join('')}</div>
+ <div class="row" style="margin-top:20px"><button class="btn" data-act="finish">Get started</button></div>`);
+ V.stData=starters;
+}
+
+/* events */
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,{h,k,v,f}=el.dataset,t=todayK();
+ if(a==='close'){if(e.target===el)closeSheet();return}
+ const H=h&&D.habits.find(x=>x.id===h);
+ switch(a){
+ case'tab':V.tab=el.dataset.id;scrollTo(0,0);render();break;
+ case'toggle':{const s=Engine.state(H,k,t,D.logs);s==='COMPLETED'?setLog(h,k,null):setLog(h,k,{v:1,skip:false});break}
