@@ -146,7 +146,7 @@ h2{margin:0;font-size:clamp(34px,4.2vw,56px);line-height:1.05;letter-spacing:-.0
       </section>
       <div class="rail">
         <section class="step m-only" data-k="0"><span class="tag">Today</span><h2>Your day,<br>in order.</h2><p>Every habit for today in one list. One tap checks it off and the ring fills.</p></section>
-        <section class="step" id="s1" data-k="1"><span class="tag">Plan</span><h2>One life.<br>Clear Areas.</h2><p>Study, Fitness, Trading, Faith — give each part of your life a home, without one crowded list.</p><div class="chips"><span style="--c:#5b5bf0">Study</span><span style="--c:#14c8a8">Fitness</span><span style="--c:#ff7a45">Trading</span><span style="--c:#ff4d8d">Faith</span></div></section>
+        <section class="step" id="s1" data-k="1"><span class="tag">Plan</span><h2>One life.<br>Clear Areas.</h2><p>Study, Fitness, Reading, Mindfulness — give each part of your life a home, without one crowded list.</p><div class="chips"><span style="--c:#5b5bf0">Study</span><span style="--c:#14c8a8">Fitness</span><span style="--c:#ff7a45">Reading</span><span style="--c:#ff4d8d">Mindfulness</span></div></section>
         <section class="step" data-k="2"><span class="tag">Habits</span><h2>Know the next<br>right thing.</h2><p>Your whole week laid out as time blocks. Tap a block to edit it, or an empty spot to add a habit.</p></section>
         <section class="step" data-k="3"><span class="tag">Insights</span><h2>Notice what is<br>becoming you.</h2><p>Completed habits turn into a grounded view of your consistency. No invented streaks — just your own record, made useful.</p></section>
         <section class="step" data-k="4"><span class="tag">Calendar</span><h2>See your days<br>take shape.</h2><p>Every day you showed up glows. Tap one to look back at what you did.</p></section>
@@ -178,7 +178,7 @@ h2{margin:0;font-size:clamp(34px,4.2vw,56px);line-height:1.05;letter-spacing:-.0
   const $=s=>document.querySelector(s);
   const dock=$('#dock'),view=$('#view'),box=$('#screens'),tabs=$('#tabs'),notif=$('#notif'),halo=$('.halo');
   const ACC=['#5b5bf0','#14c8a8','#ff7a45','#2ea0ff','#ff4d8d','#f5a623'];
-  const PG=[['today','Today','Your day in order. One tap checks a habit off and the ring fills.'],['areas','Plan','Study, Fitness, Trading, Faith — each area with its own progress.'],['habits','Habits','Your whole week as time blocks. Tap one to edit it.'],['insights','Insights','Consistency drawn from your own record, week by week.'],['calendar','Calendar','Every day you showed up glows. Tap one to look back.'],['profile','Profile','Weekly goal, theme and reminders, set your way.']];
+  const PG=[['today','Today','Your day in order. One tap checks a habit off and the ring fills.'],['areas','Plan','Study, Fitness, Reading, Mindfulness — each area with its own progress.'],['habits','Habits','Your whole week as time blocks. Tap one to edit it.'],['insights','Insights','Consistency drawn from your own record, week by week.'],['calendar','Calendar','Every day you showed up glows. Tap one to look back.'],['profile','Profile','Weekly goal, theme and reminders, set your way.']];
   const pages=(k,alt)=>`<img class="pg" src="${IMG[PG[k][0]==='today'?'today_a':PG[k][0]]}" alt="${alt}" draggable="false">`+(k===0?`<img class="pg b" src="${IMG.today_b}" alt="" draggable="false">`:'');
   box.innerHTML=PG.map((p,k)=>`<div class="pgw">${pages(k,'HabitFlow '+p[1]+' screen')}</div>`).join('');
   const sc=box.children,btns=[...tabs.children];

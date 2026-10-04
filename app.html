@@ -1121,7 +1121,7 @@ function nextOf(a){const k=dk(new Date()),l=order(stat(a,new Date()).l.filter(h=
 const ring=(p,c,z=52)=>{const r=z/2-5,C=2*Math.PI*r;return`<div class="xg-ring" style="width:${z}px;height:${z}px"><svg width="${z}" height="${z}"><circle cx="${z/2}" cy="${z/2}" r="${r}" fill="none" stroke="var(--rest)" stroke-width="5"/><circle class="xg-rc" cx="${z/2}" cy="${z/2}" r="${r}" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" style="--C:${C};stroke-dashoffset:${C*(1-p/100)}" transform="rotate(-90 ${z/2} ${z/2})"/></svg><b>${p}%</b></div>`};
 const mkFresh=()=>{let l=0;return()=>{const f=Date.now()-l>1500;l=Date.now();return f}},frA=mkFresh(),frW=mkFresh();
 /* ---- Areas tab: card grid ---- */
-window.xgGrid=()=>{const t=new Date(),k=dk(t);return`<div class="xg-hd"><b>Planner</b><button class="xg-btn" data-act="xg_newarea">${ic('plus',14,2.6)}New Area</button></div><div class="xg-grid ${frA()?'xg-fresh':''}">${D.areas.map((a,i)=>{const s=stat(a,t),nx=nextOf(a),up=order(s.l.filter(h=>!h.done[k]&&(h.start==null||h.end>nowM()))).slice(0,3);
+window.xgGrid=()=>{const t=new Date(),k=dk(t);return`<div class="xg-hd"><b>Planner</b><button class="xg-btn xg-ghost" data-act="hf_example">Example</button><button class="xg-btn" data-act="xg_newarea">${ic('plus',14,2.6)}New Area</button></div><div class="xg-grid ${frA()?'xg-fresh':''}">${D.areas.map((a,i)=>{const s=stat(a,t),nx=nextOf(a),up=order(s.l.filter(h=>!h.done[k]&&(h.start==null||h.end>nowM()))).slice(0,3);
 return`<div class="xg-card" style="--i:${i}" role="button" data-act="xg_open" data-xa="${a.id}"><div class="xg-r">${tile(a.icon,a.color,46)}<div class="xg-sp"><div class="xg-t">${esc(a.name)}</div><div class="xg-m xg-sm">${s.d}/${s.n} done · ${fd(s.cm)} / ${fd(s.pl)}</div></div>${ring(s.p,a.color)}</div>
 <div><div style="font-weight:600">${s.n} habit${s.n==1?'':'s'} • ${fd(s.pl)} planned</div><div class="xg-m xg-sm">${nx?`Next: ${esc(nx.name)} · ${nx.start==null?'Anytime':f12(nx.start)}`:s.n?'All done for today':'Nothing scheduled today'}</div></div>
 ${up.length?`<div class="xg-up">${up.map(h=>`<div class="xg-ur"><span class="tm">${h.start==null?'Anytime':f12(h.start)}</span><span class="n">${esc(h.name)}</span><span class="xg-m">${fd(h.dur)}</span></div>`).join('')}</div>`:''}
@@ -1227,4 +1227,32 @@ window.xgMerge=arr=>{const k=dk(new Date()),n=nowM(),mine=todayList().map(({a,h}
 document.addEventListener('scroll',e=>{if(e.target.classList&&e.target.classList.contains('xg-sc')&&e.target.closest('#app'))SL=e.target.scrollLeft},true);
 ensure();save();
 })();
-</script></body></html>
+</script><style>.xg-ghost{background:var(--rest);color:var(--text);margin-left:auto}.xg-ghost+.xg-btn{margin-left:0}
+.hfx{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.45)}
+.hfx-c{background:var(--surf);color:var(--text);border-radius:22px;max-width:380px;width:100%;max-height:86vh;overflow:auto;padding:20px;box-shadow:var(--sh)}
+.hfx-c h2{margin:0 0 4px;font-size:20px}.hfx-c p{margin:0 0 14px;color:var(--mute);font-size:14px}
+.hfx-a{border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px}.hfx-a b{display:flex;justify-content:space-between;font-size:15px}
+.hfx-a i{display:block;font-style:normal;color:var(--mute);font-size:13px;margin-top:4px}.hfx-bar{height:6px;border-radius:9px;background:var(--rest);margin-top:8px;overflow:hidden}.hfx-bar s{display:block;height:100%;background:var(--c)}
+.hfx-s{display:none;margin:8px 0 14px;padding-left:18px;font-size:14px;line-height:1.5}.hfx-s.on{display:block}
+.hfx-r{display:flex;gap:8px;margin-top:6px}.hfx-r button{flex:1}.hfx-tag{font-size:11px;color:var(--mute);text-align:center;margin-top:10px}</style>
+<script>
+(function(){
+var EX=[['Study','#5b5bf0',[['Read a chapter','8:00 AM'],['Practice problems','4:30 PM']],75],['Fitness','#14c8a8',[['Morning run','6:30 AM'],['Stretch','9:00 PM']],50],['Mindfulness','#ff4d8d',[['Meditate','7:15 AM'],['Journal','9:30 PM']],100]];
+function close(){var e=document.getElementById('hfx');if(e)e.remove()}
+function open(){
+  close();
+  var h=EX.map(function(a){return '<div class="hfx-a" style="--c:'+a[1]+'"><b>'+a[0]+'<span style="color:'+a[1]+'">'+a[3]+'%</span></b>'+a[2].map(function(x){return '<i>'+x[1]+' · '+x[0]+'</i>'}).join('')+'<div class="hfx-bar"><s style="width:'+a[3]+'%"></s></div></div>'}).join('');
+  var d=document.createElement('div');d.id='hfx';d.className='hfx';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');
+  d.innerHTML='<div class="hfx-c"><h2>How Areas work</h2><p>A quick example. Nothing here is saved to your account.</p>'+h+
+  '<ol class="hfx-s" id="hfx-s"><li>Create an Area for a part of your life.</li><li>Add habits to it and give each one a time.</li><li>Check habits off each day and watch the progress fill.</li><li>Everything you add is saved to your account.</li></ol>'+
+  '<div class="hfx-r"><button class="xg-btn xg-ghost" id="hfx-l" style="margin:0;justify-content:center">Learn more</button><button class="xg-btn" id="hfx-n" style="justify-content:center">Create my first area</button></div><div class="hfx-tag">Example only</div></div>';
+  document.body.appendChild(d);
+  d.addEventListener('click',function(e){if(e.target===d)close()});
+  document.getElementById('hfx-l').onclick=function(){var s=document.getElementById('hfx-s');s.classList.toggle('on');this.textContent=s.classList.contains('on')?'Hide':'Learn more'};
+  document.getElementById('hfx-n').onclick=function(){close();var b=document.querySelector('[data-act="xg_newarea"]');if(b)b.click()};
+}
+document.addEventListener('click',function(e){if(e.target.closest('[data-act="hf_example"]'))open()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+})();
+</script>
+</body></html>
