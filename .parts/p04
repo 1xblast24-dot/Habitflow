@@ -1,0 +1,94 @@
+ if(h.type==='yesno')ctl=`<button class="chk ${s}${V.fresh===h.id+k?' fresh':''}" ${c} data-act="toggle" data-h="${h.id}" data-k="${k}" aria-label="${s==='COMPLETED'?'Mark not done':'Complete'} ${esc(h.name)}">${SYM[s]}</button>`;
+ else ctl=`<button class="step" data-act="dec" data-h="${h.id}" data-k="${k}" aria-label="Decrease">−</button><button class="val" data-act="log" data-h="${h.id}" data-k="${k}" aria-label="Enter exact value">${v} / ${h.target}${unit(h)?' '+esc(unit(h)):''}</button><button class="step" data-act="inc" data-h="${h.id}" data-k="${k}" aria-label="Increase">+</button>`;
+ return`<div class="item"><div class="ic" style="background:${h.color}1f;color:${h.color}">${ico(h.icon)}</div><div class="sp" data-act="log" data-h="${h.id}" data-k="${k}" style="cursor:pointer"><div>${esc(h.name)}</div><div class="mute">${s==='SKIPPED'?'Skipped':s==='PARTIAL'?'Partial':s==='MISSED'?'Not logged':s==='COMPLETED'?'Done':'To do'}</div></div>${ctl}</div>`;
+}
+
+function vToday(){
+ const t=todayK(),p=Engine.dayProgress(D.habits,t,t,D.logs),X=window.xgCount?window.xgCount():{n:0,d:0},pct=(p.total+X.n)?Math.round((p.done+X.d)/(p.total+X.n)*100):0;
+ const best=Math.max(0,...D.habits.filter(h=>h.status==='active').map(h=>Engine.streaks(h,t,D.logs).cur));
+ const hr=new Date().getHours(),gr=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+ const msg=!(p.total+X.n)?'Nothing scheduled today. Rest is part of the plan.':p.done+X.d===p.total+X.n?'Everything done. That is consistency.':p.done+X.d?'Nice momentum. Keep it going.':'Start with the easiest one.';
+ const C=2*Math.PI*42,from=V.ringPct||0;V.ringPct=pct;
+ return`<div class="mute" style="font-weight:600">${fmtDate(t)}</div><h1>${gr}</h1>
+ <div class="hero"><div class="ring"><svg width="96" height="96" viewBox="0 0 96 96"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14c8a8"/><stop offset="1" stop-color="#5b5bf0"/></linearGradient></defs><circle cx="48" cy="48" r="42" fill="none" stroke="var(--rest)" stroke-width="9"/><circle cx="48" cy="48" r="42" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-from/100)}" data-off="${C*(1-pct/100)}" style="transition:stroke-dashoffset .8s cubic-bezier(.3,.9,.3,1)"/></svg><b>${pct}%</b></div>
+ <div class="sp"><div style="font-size:20px;font-weight:800">${p.done+X.d} of ${p.total+X.n} done</div><div class="mute" style="margin:2px 0 8px">${msg}</div>${best?`<span class="chip"><i style="color:var(--warn);display:inline-flex">${svg(IC.flame,'',2,16)}</i> ${best} day streak</span>`:''}</div></div>
+ <h2>Today's habits</h2>
+ ${p.items.length||X.n?`<div class="card">${window.xgMerge?window.xgMerge(p.items.map(i=>({k:i.h.reminder||'99:99',html:habitRow(i.h,t,t,1)}))):p.items.map(i=>habitRow(i.h,t,t,1)).join('')}</div>`:D.habits.some(h=>h.status==='active')?'<div class="empty">No habits scheduled today.</div>':`<div class="empty">Add your first habit to begin.<br><br><button class="btn" data-act="new">Create habit</button></div>`}`;
+}
+
+function vHabits(){
+ const t=todayK(),list=D.habits.filter(h=>V.showArch?h.status==='archived':h.status!=='archived');
+ const sched=h=>h.days.length===7?'Every day':h.days.map(d=>'SMTWTFS'[d]).join(' ');
+ return`<div class="row"><h1 class="sp">Habits</h1><button class="btn" data-act="new">+ New</button></div>${window.xgWeek?window.xgWeek():''}
+ <div class="seg" style="margin:10px 0"><button class="pill ${!V.showArch?'on':''}" data-act="arch" data-v="0">Active</button><button class="pill ${V.showArch?'on':''}" data-act="arch" data-v="1">Archived</button></div>
+ ${list.length?`<div class="card">${list.map(h=>{const st=Engine.streaks(h,t,D.logs),sm=Engine.summary([h],h.start,t,t,D.logs);
+ return`<div class="item" data-act="detail" data-h="${h.id}" style="cursor:pointer"><div class="ic" style="background:${h.color}1f;color:${h.color}">${ico(h.icon)}</div><div class="sp"><div>${esc(h.name)}${h.status==='paused'?' <span class="mute">· paused</span>':''}</div><div class="mute">${sched(h)}${h.type!=='yesno'?` · ${h.target} ${esc(unit(h))}`:''}${h.reminder?` · ${h.reminder}`:''}</div></div><div style="text-align:right"><b>${st.cur}</b><div class="mute" style="font-size:12px">best ${st.best} · ${sm.rate==null?'—':sm.rate+'%'}</div></div></div>`}).join('')}</div>`:`<div class="empty">${V.showArch?'No archived habits.':'No habits yet.'}</div>`}`;
+}
+
+
+const gProg=g=>{const t=todayK(),h=g.habit&&D.habits.find(x=>x.id===g.habit);if(!h)return g.done||0;let n=0;for(let k=g.start;k<=t;k=Engine.addDays(k,1))if(Engine.state(h,k,t,D.logs)==='COMPLETED')n++;return n};
+const slot=h=>!h.reminder?3:h.reminder<'12:00'?0:h.reminder<'17:00'?1:2;
+
+const seg=t=>`<div class="sg" style="margin:12px 0 0">${[['plan','Plan'],['week','Week'],['areas','Areas'],['goals','Goals']].map(([i,l])=>`<button class="${t===i?'on':''}" data-act="ptab" data-v="${i}">${l}</button>`).join('')}</div>`;
+const CK='<path d="M5 12.5l4.5 4.5L19 7.5"/>';
+const rDone=(r,k)=>((D.rlogs[r.id]||{})[k]||[]).filter(i=>r.steps.some(s=>s.id===i)).length;
+const rOn=(r,k)=>r.status!=='archived'&&k>=r.start&&r.days.includes(Engine.parse(k).getDay());
+const rFull=(r,k)=>r.steps.length>0&&rDone(r,k)>=r.steps.length;
+function rStreak(r,t){let c=0,k=t;for(let i=0;i<400&&k>=r.start;i++,k=Engine.addDays(k,-1)){if(!r.days.includes(Engine.parse(k).getDay()))continue;if(rFull(r,k))c++;else if(k!==t)break}return c}
+const ringSm=(p,c)=>{const C=2*Math.PI*14;return`<svg width="38" height="38" viewBox="0 0 38 38" style="transform:rotate(-90deg);flex:none"><circle cx="19" cy="19" r="14" fill="none" stroke="var(--rest)" stroke-width="4.5"/><circle cx="19" cy="19" r="14" fill="none" stroke="${c}" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" style="transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1)"/></svg>`};
+const PLUS='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const TPL=[['Morning routine','leaf','07:00',[0,1,2,3,4,5,6],['Drink water','Stretch 5 min','Plan the day']],['Workout','dumbbell','17:30',[1,3,5],['Warm up','Main sets','Cool down']],['Evening wind-down','moon','21:30',[0,1,2,3,4,5,6],['Journal','Prepare tomorrow','Screens off']]];
+function vPlan(){
+ const t=todayK(),tab=V.ptab||'plan';if(tab==='goals')return vGoals();if(tab==='areas')return V.area?vArea(V.area):vAreas();
+ const R=D.routines.filter(r=>r.status!=='archived'),dow=Engine.parse(t).getDay(),ws=Engine.addDays(t,-dow);
+ const head=`<div class="row"><div class="sp"><div class="mute" style="font-weight:600">${tab==='plan'?'Your routine system':'Weekly template'}</div><h1>${tab==='plan'?'Plan':'Week'}</h1></div><button class="plus" data-act="rnew" aria-label="New routine">${PLUS}</button></div>${seg(tab)}`;
+ if(!R.length)return head+`<div class="empty" style="padding-top:56px"><div style="color:var(--acc);display:grid;place-items:center;margin-bottom:12px">${svg('<path d="M5 21V4M5 4h11.5l-2.3 4 2.3 4H5"/>','',1.6,54)}</div><div style="font-weight:700;color:var(--text);font-size:18px">Build your weekly routine</div><div style="margin:6px 0 20px">Routines repeat on the days you choose, with steps you check off.</div><div class="row" style="justify-content:center;flex-wrap:wrap"><button class="btn" data-act="rnew">New routine</button><button class="btn g" data-act="rtpl">Use starter set</button></div></div>`;
+ if(tab==='week'){
+  const sessions=R.reduce((n,r)=>n+r.days.length,0),steps=R.reduce((n,r)=>n+r.days.length*r.steps.length,0);
+  let dn=0;for(let i=0;i<=dow;i++){const k=Engine.addDays(ws,i);R.forEach(r=>{if(rOn(r,k)&&rFull(r,k))dn++})}
+  return head+`<div class="gl">Repeats every week</div><div class="grp"><div class="wg"><span></span>${'SMTWTFS'.split('').map((d,i)=>`<small class="${i===dow?'t':''}">${d}</small>`).join('')}</div>
+  ${[...R].sort((a,b)=>(a.time||'99')<(b.time||'99')?-1:1).map(r=>`<div class="wg"><div data-act="redit" data-r="${r.id}" style="cursor:pointer;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.name)}</div><div class="mute" style="font-size:12px">${r.time||'Anytime'} · ${r.steps.length} steps</div></div>${[0,1,2,3,4,5,6].map(i=>`<button class="wc ${r.days.includes(i)?'on':''}" style="--c:${r.color}" data-act="wday" data-r="${r.id}" data-v="${i}" aria-label="${'Sun Mon Tue Wed Thu Fri Sat'.split(' ')[i]}" aria-pressed="${r.days.includes(i)}">${svg(CK,'',3.2,14)}</button>`).join('')}</div>`).join('')}</div>
+  <div class="gf">Tap a circle to add or remove a day. The Plan tab follows this template automatically.</div>
+  <div class="tp"><div class="stat"><span class="mute">Routines</span><div>${R.length}</div></div><div class="stat"><span class="mute">Per week</span><div>${sessions}</div></div><div class="stat"><span class="mute">Done</span><div>${dn}</div></div></div>
+  <div class="gf" style="text-align:center">${steps} steps planned each week</div>`}
+ // ---- Plan (day view)
+ const sel=V.psel&&V.psel>=ws&&V.psel<=Engine.addDays(ws,6)?V.psel:t;
+ const agg=k=>{const p=Engine.dayProgress(D.habits,k,t,D.logs);let tot=p.total,dn=p.done;R.forEach(r=>{if(rOn(r,k)){tot++;if(rFull(r,k))dn++}});return[tot,dn]};
+ const strip=Array.from({length:7},(_,i)=>{const k=Engine.addDays(ws,i),[tot,dn]=agg(k);return`<button class="dy ${k===sel?'sel':''} ${k===t?'t':''}" data-act="psel" data-k="${k}"><small>${'SMTWTFS'[i]}</small><b>${+k.slice(8)}</b><i class="${tot&&dn===tot?'f':dn?'p':''}"></i></button>`}).join('');
+ const todays=R.filter(r=>rOn(r,sel)).sort((a,b)=>(a.time||'99')<(b.time||'99')?-1:1);
+ let sch=0,cmp=0;for(let i=0;i<=dow;i++){const k=Engine.addDays(ws,i);R.forEach(r=>{if(rOn(r,k)){sch++;if(rFull(r,k))cmp++}})}
+ const rate=sch?Math.round(cmp/sch*100):null,goal=D.settings.goal,hab=Engine.dayProgress(D.habits,sel,t,D.logs).items;
+ const card=r=>{const n=rDone(r,sel),tot=r.steps.length,st=rStreak(r,t),dn=(D.rlogs[r.id]||{})[sel]||[];
+  return`<div class="grp rc"><div class="rw rh" data-act="redit" data-r="${r.id}" style="cursor:pointer"><div class="ic" style="background:${r.color}1f;color:${r.color}">${ico(r.icon)}</div><div class="sp"><div class="t">${esc(r.name)}</div><div class="mute" style="font-size:13px">${r.time||'Anytime'} · ${n} of ${tot}${st>1?' · '+st+' day streak':''}</div></div>${ringSm(tot?n/tot:0,r.color)}</div>
+  ${r.steps.map(x=>{const d=dn.includes(x.id);return`<div class="rw st ${d?'dn':''}"><button class="chk ${d?'COMPLETED':''} ${V.fresh===r.id+x.id+sel?'fresh':''}" style="--c:${r.color}" data-act="rstep" data-r="${r.id}" data-s="${x.id}" data-k="${sel}" ${sel>t?'disabled':''} aria-label="${d?'Uncheck':'Check'} ${esc(x.t)}">${svg(CK,'',3.4,15)}</button><span class="sp" data-act="${sel>t?'':'rstep'}" data-r="${r.id}" data-s="${x.id}" data-k="${sel}">${esc(x.t)}</span></div>`}).join('')}</div>`};
+ return head+`<div class="wk7">${strip}</div><div class="gl">${fmtDate(sel)}</div>
+ ${todays.length?todays.map(card).join(''):'<div class="empty" style="padding:28px 12px">No routines on this day.<br>Rest is part of the plan.</div>'}
+ ${hab.length?`<div class="gl">Habits</div><div class="grp">${[...hab].sort((a,b)=>(a.h.reminder||'99')<(b.h.reminder||'99')?-1:1).map(({h,s})=>`<div class="rw pr" data-act="detail" data-h="${h.id}" style="cursor:pointer"><span class="tm">${h.reminder||'Anytime'}</span><div class="ic" style="background:${h.color}1f;color:${h.color}">${ico(h.icon,20)}</div><div class="sp" style="font-weight:600">${esc(h.name)}</div>${s==='COMPLETED'?`<span class="ok">${svg(CK,'',3,14)}</span>`:''}</div>`).join('')}</div>`:''}
+ <div class="gl">Weekly consistency</div><div class="grp gh"><div class="row"><div class="sp"><b style="font-size:26px;letter-spacing:-.5px">${rate==null?'—':rate+'%'}</b><div class="mute">${cmp} of ${sch} routine sessions · goal ${goal}%</div></div><div class="chip">${rate!=null&&rate>=goal?'On track':'Keep going'}</div></div><div class="bar"><i style="width:${rate||0}%"></i></div></div>`;
+}
+const stepsHTML=st=>st.map((x,i)=>`<div class="rw"><span class="mute" style="width:20px;flex:none">${i+1}</span><input class="l sti" data-i="${i}" value="${esc(x.t)}" placeholder="Step name" maxlength="60"><button class="mx" data-act="srm" data-i="${i}" aria-label="Remove step">−</button></div>`).join('');
+const readSteps=()=>V.draft.steps.forEach((x,i)=>{const e=document.querySelector(`.sti[data-i="${i}"]`);if(e)x.t=e.value});
+function routineSheet(id){
+ const r=id?D.routines.find(x=>x.id===id):{name:'',icon:'leaf',color:COLORS[0],days:[1,2,3,4,5],time:'',remind:false,steps:[{id:uid(),t:''}],status:'active'};
+ V.draft={...r,days:[...r.days],steps:r.steps.map(x=>({...x}))};
+ sheet(`<div class="ios-top"><button data-act="close2">Cancel</button><b>${id?'Edit Routine':'New Routine'}</b><button data-act="rsave" data-r="${id||''}">${id?'Save':'Add'}</button></div>
+ <div class="ios-prev"><div class="ic" id="prev" style="background:${r.color}22;color:${r.color}">${ico(r.icon,34)}</div></div>
+ <div class="grp"><div class="rw"><input class="l" id="rn" value="${esc(r.name)}" maxlength="60" placeholder="Routine name" style="font-size:18px;font-weight:600"></div></div>
+ <div class="gl">Repeat every week</div><div class="grp"><div class="rw" style="padding:10px 14px"><div class="wd" style="width:100%">${'SMTWTFS'.split('').map((d,i)=>`<button class="${r.days.includes(i)?'on':''}" data-act="day" data-v="${i}">${d}</button>`).join('')}</div></div>
+ <div class="rw"><span>Start time</span><span class="sp"></span><input id="rt" type="time" value="${r.time||''}"></div>
+ <div class="rw"><span class="ico" style="background:#ff3b30">${svg(IC.bell,'',2,16)}</span><span>Remind me</span><button class="sw ${r.remind?'on':''}" data-act="rrem" role="switch" aria-label="Remind me"></button></div></div>
+ <div class="gl">Steps</div><div class="grp"><div id="stl">${stepsHTML(V.draft.steps)}</div><button class="addrow" data-act="sadd">Add step</button></div>
+ <div class="gl">Appearance</div><div class="grp"><div class="pk">${ICONS.map(i=>`<button class="pill ${i===r.icon?'on':''}" data-act="pick" data-f="icon" data-v="${i}" aria-label="${i}">${ico(i)}</button>`).join('')}</div>
+ <div class="rw" style="padding:10px 14px;gap:10px;flex-wrap:wrap">${COLORS.map(c=>`<button class="step" style="background:${c};border-color:${c===r.color?'var(--text)':'transparent'}" data-act="pick" data-f="color" data-v="${c}" aria-label="Color"></button>`).join('')}</div></div>
+ ${id?`<div class="grp" style="margin-top:20px"><button class="dgd" data-act="rdel" data-r="${id}">Delete routine</button></div>`:''}`);
+}
+
+function vGoals(){
+ const t=todayK(),S=D.settings,tab='goals',act=D.habits.filter(h=>h.status==='active'),dow=Engine.parse(t).getDay(),ws=Engine.addDays(t,-dow);
+ const head=`<div class="row"><div class="sp"><div class="mute" style="font-weight:600">${tab==='plan'?'This week':'Long-term'}</div><h1>${tab==='plan'?'Plan':'Goals'}</h1></div>${tab==='goals'?'<button class="plus" data-act="gnew" aria-label="New goal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>':''}</div>
+ ${seg("goals")}`;
+ if(tab==='goals'){const G=D.goals||[];
+  return head+(G.length?`<div style="margin-top:16px">${G.map(g=>{const n=gProg(g),pct=Math.min(100,Math.round(n/g.target*100)),C=2*Math.PI*24,done=n>=g.target,left=g.due?Math.ceil((Engine.parse(g.due)-Engine.parse(t))/864e5):null;
+   return`<div class="grp goal" data-act="gedit" data-g="${g.id}"><div class="gr"><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" fill="none" stroke="var(--rest)" stroke-width="6"/><circle cx="28" cy="28" r="24" fill="none" stroke="${g.color}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct/100)}" data-off="${C*(1-pct/100)}" style="transition:stroke-dashoffset .8s cubic-bezier(.3,.9,.3,1)"/></svg><span style="color:${g.color}">${ico(g.icon,20)}</span></div>
+   <div class="sp"><div class="t">${esc(g.title)}</div><div class="mute">${n} of ${g.target}${g.habit?' · linked habit':''}${left==null?'':left<0&&!done?' · overdue':left===0?' · due today':' · '+left+' days left'}</div>${done?`<div class="badge">${svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>','',2.6,14)} Achieved</div>`:''}</div>
+   ${g.habit?`<b style="font-size:18px">${pct}%</b>`:`<div class="mini"><button data-act="gdec" data-g="${g.id}" aria-label="Decrease">−</button><button data-act="ginc" data-g="${g.id}" aria-label="Increase">+</button></div>`}</div>`}).join('')}</div>`
