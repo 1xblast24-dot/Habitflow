@@ -318,6 +318,7 @@ HF.signout=function(){
 };
 if(!HF.cloud)return;
 
+HF.api={url:URL,key:KEY,token:token};
 var ready=false,busy=false,again=false,timer=null,shown=false;
 var root=document.documentElement;root.style.visibility='hidden';
 function reveal(){if(!shown){shown=true;root.style.visibility=''}}
@@ -785,10 +786,11 @@ document.addEventListener('change',e=>{const a=e.target.dataset.act;
 /* reminders: browser notifications, only while this tab is open */
 async function toggleNotify(){
  if(!('Notification' in window)){toast('This browser does not support notifications');return}
- if(D.settings.notify){D.settings.notify=false;return commit()}
+ if(D.settings.notify){D.settings.notify=false;if(window.HFPush)HFPush.disable();return commit()}
  const p=await Notification.requestPermission();
  if(p!=='granted'){toast('Notification permission was not granted');return}
  D.settings.notify=true;commit();
+ if(window.HFPush)HFPush.enable().then(ok=>{toast(ok?'Push reminders are on for this device':'Sign in to your account to get push reminders')});
 }
 const fired=new Set();
 setInterval(()=>{
@@ -1253,6 +1255,30 @@ function open(){
 }
 document.addEventListener('click',function(e){if(e.target.closest('[data-act="hf_example"]'))open()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+})();
+</script>
+<script>
+(function(){
+var PUB='BDrxJOfoPQ7fgDZ2YVMhOrP5e708r6Ef5D-VkZP2dz_l7Y-X9VQ7nmbGmCuevr8fLv8-IdXCJFNR_Z4jeb-UveQ';
+function key(s){var p='='.repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,'+').replace(/_/g,'/')),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+function b64(buf){var s='',a=new Uint8Array(buf);for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+async function rpc(fn,body){var A=window.HF&&HF.api;if(!A)return false;var t=await A.token();var r=await fetch(A.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:A.key,Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(body)});return r.ok}
+async function reg(){if(!('serviceWorker' in navigator)||!('PushManager' in window))return null;return navigator.serviceWorker.ready}
+window.HFPush={
+  async enable(){
+    try{
+      if(!window.HF||!HF.cloud||!HF.api||Notification.permission!=='granted')return false;
+      var r=await reg();if(!r)return false;
+      var s=await r.pushManager.getSubscription()||await r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key(PUB)});
+      var j=s.toJSON();
+      return await rpc('register_push',{p_endpoint:s.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_tz:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'});
+    }catch(e){return false}
+  },
+  async disable(){
+    try{var r=await reg();var s=r&&await r.pushManager.getSubscription();if(s){await rpc('unregister_push',{p_endpoint:s.endpoint});await s.unsubscribe()}}catch(e){}
+  }
+};
+addEventListener('load',function(){setTimeout(function(){try{var d=JSON.parse(localStorage.getItem('habitflow')||'null');if(d&&d.settings&&d.settings.notify&&window.Notification&&Notification.permission==='granted')HFPush.enable()}catch(e){}},3000)});
 })();
 </script>
 </body></html>

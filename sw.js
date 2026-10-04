@@ -4,7 +4,7 @@
      from other hosts always go straight to the network, so sign-in and cloud
      sync are never served from a stale cache.
    Bump VERSION whenever you deploy changes you want users to receive. */
-const VERSION = 'hf-v4';
+const VERSION = 'hf-v5';
 const SHELL = [
   '/', '/login', '/app', 'pwa.js',
   'manifest.webmanifest',
@@ -59,4 +59,22 @@ self.addEventListener('fetch', e => {
       return hit || net;
     })
   );
+});
+
+// Push notifications sent by the send-reminders Edge Function
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data.json(); } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'HabitFlow', {
+    body: d.body || '', tag: d.tag, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+    data: { url: d.url || '/app' }
+  }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || '/app';
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+    for (const c of cs) { if (c.url.includes('/app') && 'focus' in c) return c.focus(); }
+    return clients.openWindow(url);
+  }));
 });
