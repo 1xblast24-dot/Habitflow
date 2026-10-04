@@ -1,0 +1,10 @@
+{
+  "appId": "com.habitflow.app",
+  "appName": "HabitFlow",
+  "webDir": "www",
+  "server": {
+    "url": "https://habitflow-self.vercel.app/login",
+    "cleartext": false,
+    "allowNavigation": ["habitflow-self.vercel.app", "*.supabase.co"]
+  }
+}
