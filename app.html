@@ -289,6 +289,10 @@ button,[data-act],.xg-bk,.xg-chip{touch-action:manipulation}
 /* weekly bars only animate when the page first pushes in, not on every toggle */
 .xg-wk i{animation:none}
 .xg-det.in .xg-wk i{animation:xg-rise .6s both}
+
+/* ---- app-shell scrolling: the page never scrolls, #scr does. Mobile Chrome / Samsung Internet then keep a constant viewport and the fixed glass dock cannot dip. ---- */
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+#scr{position:fixed;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding-top:env(safe-area-inset-top,0px)}
 </style><script>
 /* HabitFlow account guard + cloud sync (Supabase). Habits stay in localStorage and are mirrored to the user's account. */
 (function(){
@@ -393,8 +397,9 @@ sync();
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script src="pwa.js" defer></script>
-</head><body><main id="app"></main><div id="over"></div>
+</head><body><div id="scr"><main id="app"></main></div><div id="over"></div>
 <script>
+const SCR=document.getElementById('scr');
 /* ===== lib/engine: all calculation lives here, UI never computes ===== */
 const Engine=(()=>{
  const pad=n=>String(n).padStart(2,'0');
@@ -633,12 +638,12 @@ function vProfile(){
 
 function render(){
  const enter=V.last!==V.tab,ni=TABS.findIndex(x=>x[0]===V.tab),dir=enter&&V.li!=null?(ni>V.li?'dr':'dl'):'';V.li=ni;V.last=V.tab;if(enter&&V.tab==='today')V.ringPct=0;
- const y=scrollY,f={today:vToday,plan:vPlan,habits:vHabits,insights:vInsights,calendar:vCalendar,profile:vProfile}[V.tab];
+ const y=SCR.scrollTop,f={today:vToday,plan:vPlan,habits:vHabits,insights:vInsights,calendar:vCalendar,profile:vProfile}[V.tab];
  document.getElementById('app').innerHTML=`<section class="${enter?'enter '+dir:''}">${f()}</section>`;V.fresh=null;
  document.querySelectorAll('[data-off]').forEach(e=>requestAnimationFrame(()=>requestAnimationFrame(()=>e.style.strokeDashoffset=e.dataset.off)));
  const dk=document.getElementById('dock');dk.style.setProperty('--i',ni);if(enter){const ind=dk.querySelector('.ind');ind.classList.remove('move');void ind.offsetWidth;ind.classList.add('move')}
  dk.querySelectorAll('button').forEach(b=>b.dataset.id===V.tab?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
- scrollTo(0,enter?0:y);applyTheme();
+ SCR.scrollTop=enter?0:y;applyTheme();
 }
 function buildDock(){const n=document.createElement('nav');n.className='dock';n.id='dock';n.setAttribute('aria-label','Main');
  n.innerHTML='<i class="ind"></i>'+TABS.map(([id,i,l])=>`<button data-act="tab" data-id="${id}" aria-label="${l}"><span>${i}</span>${l}</button>`).join('');
@@ -702,7 +707,7 @@ document.addEventListener('click',e=>{
  if(a==='close'){if(e.target===el)closeSheet();return}
  const H=h&&D.habits.find(x=>x.id===h);
  switch(a){
- case'tab':V.tab=el.dataset.id;scrollTo(0,0);render();break;
+ case'tab':V.tab=el.dataset.id;SCR.scrollTop=0;render();break;
  case'toggle':{const s=Engine.state(H,k,t,D.logs);s==='COMPLETED'?setLog(h,k,null):setLog(h,k,{v:1,skip:false});break}
  case'inc':case'dec':{const cur=((D.logs[h]||{})[k]||{}).v||0;const n=cur+(a==='inc'?step(H):-step(H));n<=0?setLog(h,k,null):setLog(h,k,{v:n,skip:false});break}
  case'log':case'log2':logSheet(h,k);break;
@@ -992,7 +997,7 @@ document.addEventListener('click',e=>{
  const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,d=el.dataset,t=todayK(),I=d.i&&IT().find(x=>x.id===d.i);
  switch(a){
  case'ptab':if(d.v==='areas'&&V.area){V.area=null;render()}break;
- case'li_area':V.area=d.a;scrollTo(0,0);render();break;
+ case'li_area':V.area=d.a;SCR.scrollTop=0;render();break;
  case'li_back':V.area=null;render();break;
  case'li_new':itemSheet(d.a);break;
  case'li_edit':if(I)itemSheet(I.area,I.id);break;
@@ -1060,18 +1065,18 @@ buildDock();render();
   const n=e.type==='pointercancel'?TABS.findIndex(x=>x[0]===V.tab):Math.round(idxAt(e.clientX)),id=TABS[n][0];
   ind.style.removeProperty('--i');dk.style.setProperty('--i',n);mark(n);
   const b=bs[n];b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump');
-  if(id!==V.tab){V.tab=id;scrollTo(0,0);render()}};
+  if(id!==V.tab){V.tab=id;SCR.scrollTop=0;render()}};
  dk.addEventListener('pointerup',end);dk.addEventListener('pointercancel',end);
  dk.addEventListener('click',e=>{if(e.detail!==0){e.stopPropagation();e.preventDefault()}},true);
 })();
 
 /* scroll-reactive nav: goes glassier while scrolling, tucks away on scroll down, returns on scroll up */
-(()=>{const dk=document.getElementById('dock'),fd=document.querySelector('.dockfade');let ly=scrollY,tm,tk=false,lt=V.tab,ui=0;
+(()=>{const dk=document.getElementById('dock'),fd=document.querySelector('.dockfade');let ly=SCR.scrollTop,tm,tk=false,lt=V.tab,ui=0;
  /* only a real finger/wheel/key scroll may tuck the nav away; tab switches and re-renders reset scroll in code and must never trigger it */
  ['touchstart','touchmove','wheel','keydown','pointerdown'].forEach(n=>addEventListener(n,e=>{if(e.target.closest&&e.target.closest('#dock'))return;ui=performance.now()},{passive:true,capture:true}));
  dk.addEventListener('pointerdown',()=>{ui=0});
- addEventListener('scroll',()=>{if(tk)return;tk=true;requestAnimationFrame(()=>{
-  const y=Math.max(0,scrollY),d=y-ly;
+ SCR.addEventListener('scroll',()=>{if(tk)return;tk=true;requestAnimationFrame(()=>{
+  const y=Math.max(0,SCR.scrollTop),d=y-ly;
   if(V.tab!==lt){lt=V.tab;ly=y;ui=0;clearTimeout(tm);dk.classList.remove('scrolling','hide');fd.classList.remove('hide');tk=false;return}
   const usr=performance.now()-ui<2500;
   dk.classList.add('scrolling');clearTimeout(tm);tm=setTimeout(()=>{dk.classList.remove('scrolling');dk.classList.remove('hide');fd.classList.remove('hide')},700);
