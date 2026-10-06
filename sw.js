@@ -4,11 +4,11 @@
      from other hosts always go straight to the network, so sign-in and cloud
      sync are never served from a stale cache.
    Bump VERSION whenever you deploy changes you want users to receive. */
-const VERSION = 'hf-v5';
+const VERSION = 'hf-v6';
 const SHELL = [
   '/', '/login', '/app', 'pwa.js',
   'manifest.webmanifest',
-  'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'
+  'icons/icon-192.png', 'icons/badge-96.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', e => {
@@ -66,7 +66,7 @@ self.addEventListener('push', e => {
   let d = {};
   try { d = e.data.json(); } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'HabitFlow', {
-    body: d.body || '', tag: d.tag, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+    body: d.body || '', tag: d.tag, icon: '/icons/icon-192.png', badge: '/icons/badge-96.png',
     data: { url: d.url || '/app' }
   }));
 });
