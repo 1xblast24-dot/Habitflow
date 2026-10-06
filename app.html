@@ -324,6 +324,8 @@ HF.signout=function(){
 if(!HF.cloud)return;
 
 HF.api={url:URL,key:KEY,token:token};
+HF.statusText=function(){var m=rd(META)||{};return !navigator.onLine?'Offline - saved on this device':(m.dirty?'Waiting to upload':'Up to date')};
+setInterval(function(){var el=document.getElementById('syncSt');if(el)el.textContent=HF.statusText()},2000);
 var ready=false,busy=false,again=false,timer=null,shown=false;
 var root=document.documentElement;root.style.visibility='hidden';
 function reveal(){if(!shown){shown=true;root.style.visibility=''}}
@@ -402,6 +404,7 @@ async function sync(){
   ready=true;reveal();
   if((rd(META)||{}).dirty)schedule();
 }
+addEventListener('online',function(){if(!ready)sync();else if((rd(META)||{}).dirty)push()});
 sync();
 })();
 </script>
@@ -648,6 +651,7 @@ function vProfile(){
  <div class="gf">Reminders only fire while HabitFlow is open in a tab; there's no background push. Status: ${np}.</div>
  <h2>Data</h2><div class="row"><button class="btn g" data-act="arch2">Archived habits (${arch})</button><button class="btn g" data-act="export">Export JSON</button></div>
  <div style="margin-top:12px"><button class="btn d" data-act="wipe">Delete all data</button></div>
+ <div class="gl">Sync</div><div class="grp"><div class="rw"><span class="ico" style="background:#34c759">&#8635;</span><span class="sp">Status</span><span class="mute" id="syncSt">${window.HF&&HF.statusText?HF.statusText():'This device only'}</span></div></div><div class="gf">Changes are saved on this device first and uploaded when you have a connection.</div>
  <div class="gl">About</div><div class="grp"><div class="rw"><span class="ico" style="background:linear-gradient(135deg,#14c8a8,#5b5bf0)">H</span><span class="sp">HabitFlow</span><span class="mute">v1.0</span></div><div class="rw"><span class="ico" style="background:#ff9f0a">&#9829;</span><span class="sp">Built by</span><span class="mute">Amin</span></div></div><div class="gf">Designed and built by Amin.</div>`;
 }
 
