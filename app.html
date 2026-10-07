@@ -507,7 +507,7 @@ function habitRow(h,k,today,withControls){
 
 function vToday(){
  const t=todayK(),p=Engine.dayProgress(D.habits,t,t,D.logs),X=window.xgCount?window.xgCount():{n:0,d:0},pct=(p.total+X.n)?Math.round((p.done+X.d)/(p.total+X.n)*100):0;
- const best=Math.max(0,...D.habits.filter(h=>h.status==='active').map(h=>Engine.streaks(h,t,D.logs).cur));
+ const best=Math.max(0,overallStreak(),...D.habits.filter(h=>h.status==='active').map(h=>Engine.streaks(h,t,D.logs).cur));
  const hr=new Date().getHours(),gr=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
  const msg=!(p.total+X.n)?'Nothing scheduled today. Rest is part of the plan.':p.done+X.d===p.total+X.n?'Everything done. That is consistency.':p.done+X.d?'Nice momentum. Keep it going.':'Start with the easiest one.';
  const C=2*Math.PI*42,from=V.ringPct||0;V.ringPct=pct;
@@ -624,17 +624,23 @@ function vInsights(){
  <h2>By habit</h2><div class="card">${act.map(h=>{const x=Engine.summary([h],from,t,t,D.logs),st=Engine.streaks(h,t,D.logs);return`<div class="item" style="min-height:70px;display:block"><div class="row"><span class="row" style="gap:8px"><i style="color:${h.color};display:inline-flex">${ico(h.icon,18)}</i>${esc(h.name)}</span><span class="sp"></span><b>${x.rate==null?'—':x.rate+'%'}</b></div><div class="bar" style="margin:8px 0 4px"><i style="width:${x.rate||0}%;background:${h.color}"></i></div><div class="mute" style="font-size:12px">streak ${st.cur} · best ${st.best} · ${x.COMPLETED} done</div></div>`}).join('')}</div>`}`;
 }
 
+/* Combined day view: habits + routines + plan items (used by Calendar and streak) */
+function dayAll(k){const t=todayK(),p=Engine.dayProgress(D.habits,k,t,D.logs);let tot=p.total,dn=p.done;
+ for(const r of (D.routines||[])){if(rOn(r,k)&&r.steps.length){tot++;if(rFull(r,k))dn++}}
+ for(const o of occ(k)){if(o.st==='skipped')continue;tot++;if(o.st==='completed')dn++}
+ return{total:tot,done:dn,p}}
+function overallStreak(){const t=todayK();let c=0;for(let i=0,k=t;i<400;i++,k=Engine.addDays(k,-1)){const a=dayAll(k);if(!a.total)continue;if(a.done*2>=a.total)c++;else if(k!==t)break}return c}
 function vCalendar(){
  const t=todayK(),[y,m]=V.month.split('-').map(Number),first=new Date(y,m-1,1),n=new Date(y,m,0).getDate(),cells=[];
  for(let i=0;i<first.getDay();i++)cells.push('<i></i>');
- for(let d=1;d<=n;d++){const k=`${V.month}-${pad2(d)}`,p=Engine.dayProgress(D.habits,k,t,D.logs),fut=k>t,pc=p.total?Math.round(p.done/p.total*100):0;
+ for(let d=1;d<=n;d++){const k=`${V.month}-${pad2(d)}`,p=dayAll(k),fut=k>t,pc=p.total?Math.round(p.done/p.total*100):0;
   cells.push(`<button class="cd ${k===V.sel?'sel':''} ${k===t?'t':''} ${!p.total||fut?'u':''}" style="--p:${pc}" data-act="sel" data-k="${k}" aria-label="${fmtDate(k)}${p.total&&!fut?`, ${p.done} of ${p.total} done`:''}"><span>${d}</span></button>`)}
- const p=Engine.dayProgress(D.habits,V.sel,t,D.logs),chev=d=>svg(`<path d="${d}"/>`,'',2.4,18);
+ const p=Engine.dayProgress(D.habits,V.sel,t,D.logs),pa=dayAll(V.sel),chev=d=>svg(`<path d="${d}"/>`,'',2.4,18);
  return`<div class="mute" style="font-weight:600">Your history</div><h1>Calendar</h1>
  <div class="calcard"><div class="row" style="margin-bottom:16px"><div class="sp" style="font-size:20px;font-weight:800;letter-spacing:-.4px">${first.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</div><button class="nav" data-act="mo" data-v="-1" aria-label="Previous month">${chev('M15 6l-6 6 6 6')}</button><button class="nav" data-act="mo" data-v="1" aria-label="Next month">${chev('M9 6l6 6-6 6')}</button></div>
  <div class="grid wk">${'SMTWTFS'.split('').map(x=>`<div>${x}</div>`).join('')}</div><div class="grid days">${cells.join('')}</div></div>
- <div style="margin:28px 2px 12px"><div style="font-size:18px;font-weight:800">${fmtDate(V.sel)}</div><div class="mute">${V.sel>t?'Not yet':p.total?`${p.done} of ${p.total} done`:'Rest day'}</div></div>
- ${V.sel>t?'<div class="empty">This day hasn\'t happened yet.</div>':p.items.length?`<div class="card">${p.items.map(i=>habitRow(i.h,V.sel,t,1)).join('')}</div>`:'<div class="empty">Nothing scheduled. Rest is part of the plan.</div>'}`;
+ <div style="margin:28px 2px 12px"><div style="font-size:18px;font-weight:800">${fmtDate(V.sel)}</div><div class="mute">${V.sel>t?'Not yet':pa.total?`${pa.done} of ${pa.total} done`:'Rest day'}</div></div>
+ ${V.sel>t?'<div class="empty">This day hasn\'t happened yet.</div>':p.items.length?`<div class="card">${p.items.map(i=>habitRow(i.h,V.sel,t,1)).join('')}</div>`:(pa.total?'':'<div class="empty">Nothing scheduled. Rest is part of the plan.</div>')}`;
 }
 const pad2=n=>String(n).padStart(2,'0');
 
@@ -976,7 +982,8 @@ const _vt=vToday;vToday=()=>{const h=_vt(),b=lifeNow();return b?h.replace("<h2>T
 /* ---- Calendar: one shared view of every system ---- */
 function lifeCal(){
  const k=V.sel,O=occ(k),ws=Engine.addDays(k,-Engine.parse(k).getDay()),rows=Object.keys(AR).filter(a=>IT().some(i=>arOf(i)===a&&i.sch&&i.sch.days.length));
- return(O.length?`<div class="gl">Study, gym, meals and cooking</div><div class="grp">${O.map(o=>orow(o,AR[arOf(o.i)].n+(o.i.sch.dur?' · '+o.i.sch.dur+' min':''))).join('')}</div>`:'')+
+ const RR=(D.routines||[]).filter(r=>rOn(r,k)&&r.steps.length);
+ return(RR.length?`<div class="gl">Routines</div><div class="grp">${RR.map(r=>`<div class="rw"><span class="sp">${esc(r.name)}</span><span class="mute">${rDone(r,k)} of ${r.steps.length} steps${rFull(r,k)?' · Done':''}</span></div>`).join('')}</div>`:'')+(O.length?`<div class="gl">Study, gym, meals and cooking</div><div class="grp">${O.map(o=>orow(o,AR[arOf(o.i)].n+(o.i.sch.dur?' · '+o.i.sch.dur+' min':''))).join('')}</div>`:'')+
  (rows.length?`<div class="gl">Week at a glance</div><div class="grp"><div class="wg"><span></span>${'SMTWTFS'.split('').map((d,x)=>`<small class="${Engine.addDays(ws,x)===todayK()?'t':''}">${d}</small>`).join('')}</div>${rows.map(a=>`<div class="wg"><div style="font-weight:600;font-size:14px;color:${AR[a].c}">${AR[a].n}</div>${[0,1,2,3,4,5,6].map(x=>{const os=occ(Engine.addDays(ws,x)).filter(o=>arOf(o.i)===a),dn=os.filter(o=>o.st==='completed').length,full=os.length&&dn===os.length;return`<div class="wc ${full?'on':''}" style="--c:${AR[a].c};font-size:12px;font-weight:700;opacity:${os.length?1:.3};${os.length&&!full?`border-color:${AR[a].c};color:var(--text)`:''}">${os.length||''}</div>`}).join('')}</div>`).join('')}</div><div class="gf">Number = activities that day. Filled circle = all completed.</div>`:'')}
 const _vc=vCalendar;vCalendar=()=>_vc()+lifeCal();
 
