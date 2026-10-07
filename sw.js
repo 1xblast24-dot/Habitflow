@@ -4,7 +4,7 @@
      from other hosts always go straight to the network, so sign-in and cloud
      sync are never served from a stale cache.
    Bump VERSION whenever you deploy changes you want users to receive. */
-const VERSION = 'hf-v6';
+const VERSION = 'hf-v7';
 const SHELL = [
   '/', '/login', '/app', 'pwa.js',
   'manifest.webmanifest',
@@ -65,16 +65,25 @@ self.addEventListener('fetch', e => {
 self.addEventListener('push', e => {
   let d = {};
   try { d = e.data.json(); } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
-  e.waitUntil(self.registration.showNotification(d.title || 'HabitFlow', {
-    body: d.body || '', tag: d.tag, icon: '/icons/icon-192.png', badge: '/icons/badge-96.png',
-    data: { url: d.url || '/app' }
+  const title = d.title || 'HabitFlow', body = d.body || '', url = d.url || '/app';
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+    const vis = cs.find(c => c.visibilityState === 'visible' && c.url.includes('/app'));
+    if (vis) { vis.postMessage({ type: 'hf-reminder', title, body }); return; }
+    return self.registration.showNotification(title, {
+      body, tag: d.tag, renotify: !!d.tag, requireInteraction: true, vibrate: [300, 150, 300, 150, 600],
+      icon: '/icons/icon-192.png', badge: '/icons/badge-96.png', data: { url, title, body }
+    });
   }));
 });
 self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  const url = (e.notification.data && e.notification.data.url) || '/app';
+  const n = e.notification, dd = n.data || {};
+  n.close();
   e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
-    for (const c of cs) { if (c.url.includes('/app') && 'focus' in c) return c.focus(); }
-    return clients.openWindow(url);
+    for (const c of cs) {
+      if (c.url.includes('/app') && 'focus' in c) { c.postMessage({ type: 'hf-reminder', title: dd.title, body: dd.body }); return c.focus(); }
+    }
+    const u = new URL(dd.url || '/app', self.location.origin);
+    u.searchParams.set('r', (dd.title || '') + '|' + (dd.body || ''));
+    return clients.openWindow(u.href);
   }));
 });
