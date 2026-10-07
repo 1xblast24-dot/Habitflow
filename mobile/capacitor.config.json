@@ -3,8 +3,8 @@
   "appName": "HabitFlow",
   "webDir": "www",
   "server": {
-    "url": "https://habitflow-self.vercel.app/login",
+    "url": "https://habitsflows.vercel.app/login",
     "cleartext": false,
-    "allowNavigation": ["habitflow-self.vercel.app", "*.supabase.co"]
+    "allowNavigation": ["habitsflows.vercel.app", "*.supabase.co"]
   }
 }
