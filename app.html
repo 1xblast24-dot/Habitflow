@@ -304,6 +304,7 @@ input,select,textarea{font-size:16px}
 .av:active{transform:scale(.96)}.av img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
 .av .cam{position:absolute;right:-2px;bottom:-2px;width:32px;height:32px;border-radius:50%;background:var(--surf);color:var(--acc);display:grid;place-items:center;border:1px solid var(--line);box-shadow:var(--sh)}
 .pn{font-size:24px;font-weight:700;margin-top:14px;letter-spacing:-.02em}.pa{display:flex;gap:8px;margin-top:12px}
+.dd{position:absolute;bottom:3px;left:0;right:0;display:flex;justify-content:center;gap:2px;pointer-events:none;font-style:normal}.dd s{width:5px;height:5px;border-radius:50%;display:block;text-decoration:none}
 </style><script>
 /* HabitFlow account guard + cloud sync (Supabase). Habits stay in localStorage and are mirrored to the user's account. */
 (function(){
@@ -630,16 +631,25 @@ function dayAll(k){const t=todayK(),p=Engine.dayProgress(D.habits,k,t,D.logs);le
  for(const o of occ(k)){if(o.st==='skipped')continue;tot++;if(o.st==='completed')dn++}
  return{total:tot,done:dn,p}}
 function overallStreak(){const t=todayK();let c=0;for(let i=0,k=t;i<400;i++,k=Engine.addDays(k,-1)){const a=dayAll(k);if(!a.total)continue;if(a.done*2>=a.total)c++;else if(k!==t)break}return c}
+/* What was completed on a day (shown on Calendar) */
+function doneOf(k){const t=todayK();if(k>t)return[];const o=[];
+ for(const x of Engine.dayProgress(D.habits,k,t,D.logs).items)if(x.s==='COMPLETED')o.push({n:x.h.name,c:x.h.color||'var(--acc)'});
+ for(const r of (D.routines||[]))if(rOn(r,k)&&r.steps.length&&rFull(r,k))o.push({n:r.name,c:'#14c8a8'});
+ for(const q of occ(k))if(q.st==='completed'){const m=AR[arOf(q.i)]||{};o.push({n:q.i.title||'Plan',c:m.c||'var(--acc)'})}
+ return o}
+function calDots(k){const d=doneOf(k).slice(0,3);return d.length?`<em class="dd">${d.map(x=>`<s style="background:${x.c}"></s>`).join('')}</em>`:''}
+function doneChips(k){const d=doneOf(k);return d.length?`<div class="gl">Done</div><div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:12px">${d.map(x=>`<span class="pill on" style="border-color:${x.c}"><span style="color:${x.c}">&#10003;</span> ${esc(x.n)}</span>`).join('')}</div>`:''}
 function vCalendar(){
  const t=todayK(),[y,m]=V.month.split('-').map(Number),first=new Date(y,m-1,1),n=new Date(y,m,0).getDate(),cells=[];
  for(let i=0;i<first.getDay();i++)cells.push('<i></i>');
  for(let d=1;d<=n;d++){const k=`${V.month}-${pad2(d)}`,p=dayAll(k),fut=k>t,pc=p.total?Math.round(p.done/p.total*100):0;
-  cells.push(`<button class="cd ${k===V.sel?'sel':''} ${k===t?'t':''} ${!p.total||fut?'u':''}" style="--p:${pc}" data-act="sel" data-k="${k}" aria-label="${fmtDate(k)}${p.total&&!fut?`, ${p.done} of ${p.total} done`:''}"><span>${d}</span></button>`)}
+  cells.push(`<button class="cd ${k===V.sel?'sel':''} ${k===t?'t':''} ${!p.total||fut?'u':''}" style="--p:${pc}" data-act="sel" data-k="${k}" aria-label="${fmtDate(k)}${p.total&&!fut?`, ${p.done} of ${p.total} done`:''}"><span>${d}</span>${calDots(k)}</button>`)}
  const p=Engine.dayProgress(D.habits,V.sel,t,D.logs),pa=dayAll(V.sel),chev=d=>svg(`<path d="${d}"/>`,'',2.4,18);
  return`<div class="mute" style="font-weight:600">Your history</div><h1>Calendar</h1>
  <div class="calcard"><div class="row" style="margin-bottom:16px"><div class="sp" style="font-size:20px;font-weight:800;letter-spacing:-.4px">${first.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</div><button class="nav" data-act="mo" data-v="-1" aria-label="Previous month">${chev('M15 6l-6 6 6 6')}</button><button class="nav" data-act="mo" data-v="1" aria-label="Next month">${chev('M9 6l6 6-6 6')}</button></div>
  <div class="grid wk">${'SMTWTFS'.split('').map(x=>`<div>${x}</div>`).join('')}</div><div class="grid days">${cells.join('')}</div></div>
  <div style="margin:28px 2px 12px"><div style="font-size:18px;font-weight:800">${fmtDate(V.sel)}</div><div class="mute">${V.sel>t?'Not yet':pa.total?`${pa.done} of ${pa.total} done`:'Rest day'}</div></div>
+ ${doneChips(V.sel)}
  ${V.sel>t?'<div class="empty">This day hasn\'t happened yet.</div>':p.items.length?`<div class="card">${p.items.map(i=>habitRow(i.h,V.sel,t,1)).join('')}</div>`:(pa.total?'':'<div class="empty">Nothing scheduled. Rest is part of the plan.</div>')}`;
 }
 const pad2=n=>String(n).padStart(2,'0');
