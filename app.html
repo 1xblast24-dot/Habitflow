@@ -975,13 +975,20 @@ function lifeCal(){
 const _vc=vCalendar;vCalendar=()=>_vc()+lifeCal();
 
 /* ---- Insights: discipline, consistency, productivity (kept separate) ---- */
+/* Overall discipline: habits + routines + life-area plans + goals */
+function allDis(f,to){const t=todayK(),a=agg(f,to);let c=a.c,n=a.c+a.s+a.m;
+ for(let k=f;k<=to&&k<=t;k=Engine.addDays(k,1)){
+  for(const x of Engine.dayProgress(D.habits,k,t,D.logs).items){if(x.s==='COMPLETED'){c++;n++}else if(x.s==='PARTIAL'){c+=.5;n++}else if(x.s==='MISSED')n++}
+  for(const r of D.routines){if(!rOn(r,k)||!r.steps.length)continue;if(rFull(r,k)){c++;n++}else if(k<t){c+=rDone(r,k)/r.steps.length;n++}}}
+ for(const g of (D.goals||[])){if(g.due&&g.due>=f&&g.due<=to&&g.due<=t){n++;if(gProg(g)>=g.target)c++}}
+ return n?Math.round(c/n*100):null}
 function lifeIns(){
- if(!IT().length)return'';
+ if(!IT().length&&!D.habits.length&&!D.routines.length&&!(D.goals||[]).length)return'';
  const t=todayK(),W=n=>Engine.addDays(t,-n),dis=g=>{const n=g.c+g.s+g.m;return n?Math.round(g.c/n*100):null},hrs=g=>Math.round(g.cm/6)/10;
- const A=agg(W(27),t),B=agg(W(13),t),P=agg(W(27),W(14)),W1=agg(W(6),t),W0=agg(W(13),W(7)),dB=dis(B),dP=dis(P);
+ const A=agg(W(27),t),B=agg(W(13),t),P=agg(W(27),W(14)),W1=agg(W(6),t),W0=agg(W(13),W(7)),dB=allDis(W(13),t),dP=allDis(W(27),W(14));
  let act=0;for(let x=0;x<28;x++){const k=W(x);if(A.days.has(k)||Engine.dayProgress(D.habits,k,t,D.logs).done>0)act++}
  const st=(l,v,s)=>`<div class="stat"><span class="mute">${l}</span><div>${v}</div><div class="mute" style="font-size:12px;font-weight:500;letter-spacing:0">${s}</div></div>`;
- const wk=[3,2,1,0].map(x=>dis(agg(W(x*7+6),W(x*7)))||0);
+ const wk=[3,2,1,0].map(x=>allDis(W(x*7+6),W(x*7))||0);
  const M=[];
  Object.entries(B.by).filter(([,v])=>v.m>=2).sort((x,y)=>y[1].m-x[1].m).slice(0,3).forEach(([id,v])=>{const i=IT().find(x=>x.id===id);if(i)M.push(`"${i.title}" was missed ${v.m} times in 2 weeks. Try a different time or fewer days.`)});
  if(dB!=null&&dP!=null&&dB!==dP)M.push(`Discipline is ${dB>dP?'up':'down'} ${Math.abs(dB-dP)} points compared with the two weeks before.`);
@@ -992,7 +999,7 @@ function lifeIns(){
  if(W1.cm||W0.cm){const d=Math.round((hrs(W1)-hrs(W0))*10)/10;M.push(`Productive time: ${hrs(W1)} h this week, ${d>=0?'up':'down'} ${Math.abs(d)} h from last week.`)}
  const fn=(a)=>{const g=agg(W(27),t,i=>arOf(i)===a),its=areaItems(a);if(!its.length)return'';const pl=its.filter(i=>!(i.sch&&i.sch.days.length)).length,tot=g.c+g.s+g.m||1,seg2=(n,c)=>`<i style="width:${n/tot*100}%;background:${c}"></i>`;
   return`<div class="item" style="display:block;min-height:0"><div class="row"><b class="sp" style="color:${AR[a].c}">${AR[a].n}</b><span class="mute" style="font-size:12px">${pl} planned · ${its.length-pl} scheduled · ${g.sch} sessions</span></div><div style="display:flex;height:8px;border-radius:9px;overflow:hidden;background:var(--rest);margin:8px 0 4px">${seg2(g.c,'var(--acc2)')}${seg2(g.s,'var(--mute)')}${seg2(g.m,'var(--bad)')}</div><div class="mute" style="font-size:12px">${g.c} completed · ${g.s} skipped · ${g.m} missed</div></div>`};
- return`<h2>Life areas · last 4 weeks</h2><div class="tp" style="margin-top:0">${st('Discipline',dis(A)==null?'—':dis(A)+'%','scheduled work you did')}${st('Consistency',cons(act),'days with activity')}${st('Productivity',hrs(W1)+' h','done this week')}</div>
+ return`<h2>Overall · last 4 weeks</h2><div class="tp" style="margin-top:0">${st('Discipline',allDis(W(27),t)==null?'—':allDis(W(27),t)+'%','habits, routines, plans & goals')}${st('Consistency',cons(act),'days with activity')}${st('Productivity',hrs(W1)+' h','done this week')}</div>
  <div class="gf">Kept separate on purpose: discipline is follow-through on what you scheduled, consistency is how many days you showed up, productivity is time spent completing work.</div>
  <h2>Discipline by week</h2><div class="bars">${wk.map(w=>`<i style="height:${Math.max(w,3)}%" title="${w}%"></i>`).join('')}</div><div class="row mute" style="font-size:12px"><span>3 weeks ago</span><span class="sp"></span><span>This week</span></div>
  <h2>Planned → scheduled → completed</h2><div class="card">${Object.keys(AR).map(fn).join('')||'<div class="empty">Add plans in Plan > Areas.</div>'}</div>
