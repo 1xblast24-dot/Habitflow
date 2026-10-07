@@ -1313,4 +1313,26 @@ window.HFPush={
 addEventListener('load',function(){setTimeout(function(){try{var d=JSON.parse(localStorage.getItem('habitflow')||'null');if(d&&d.settings&&d.settings.notify&&window.Notification&&Notification.permission==='granted')HFPush.enable()}catch(e){}},3000)});
 })();
 </script>
+<script>
+(function(){
+var st=document.createElement('style');st.textContent='#hfRem{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);background:linear-gradient(160deg,#0b1220,#1b1f4b);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}#hfRem .hr-t{font-size:64px;font-weight:700;letter-spacing:-.03em}#hfRem .hr-i{font-size:44px}#hfRem .hr-h{font-size:28px;font-weight:700}#hfRem .hr-b{font-size:18px;opacity:.8;max-width:420px}#hfRem button{width:min(320px,86%);padding:16px;border-radius:16px;font-size:17px;font-weight:600;border:0;cursor:pointer}#hfRem .hr-p{background:#fff;color:#0b1220;margin-top:18px}#hfRem .hr-s{background:rgba(255,255,255,.14);color:#fff}';
+document.head.appendChild(st);
+function show(title,body){
+ if(document.getElementById('hfRem'))return;
+ var o=document.createElement('div');o.id='hfRem';o.setAttribute('role','alertdialog');o.setAttribute('aria-label','Reminder');
+ o.innerHTML='<div class="hr-t"></div><div class="hr-i">&#128276;</div><div class="hr-h"></div><div class="hr-b"></div><button class="hr-p">Open HabitFlow</button><button class="hr-s">Dismiss</button>';
+ var n=new Date();
+ o.querySelector('.hr-t').textContent=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);
+ o.querySelector('.hr-h').textContent=title||'Reminder';
+ o.querySelector('.hr-b').textContent=body||'';
+ var close=function(){o.remove()};
+ o.querySelector('.hr-p').onclick=close;o.querySelector('.hr-s').onclick=close;
+ document.body.appendChild(o);
+ try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}
+}
+window.hfShowReminder=show;
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',function(e){var d=e.data||{};if(d.type==='hf-reminder')show(d.title,d.body)});
+try{var q=new URLSearchParams(location.search).get('r');if(q){var p=q.split('|');show(p[0],p.slice(1).join('|'));history.replaceState(null,'',location.pathname)}}catch(e){}
+})();
+</script>
 </body></html>
