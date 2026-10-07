@@ -864,11 +864,17 @@ const gSets=(from,to)=>{let n=0;IT().filter(i=>i.area==='gym').forEach(i=>{for(c
 
 /* ---- Areas hub + area screens (inside Plan > Areas) ---- */
 function vAreas(){
- const t=todayK(),O=occ(t),C=2*Math.PI*24;
- return`<div class="row"><div class="sp"><div class="mute" style="font-weight:600">Life areas</div><h1>Areas</h1></div></div>${seg('areas')}${window.xgGrid?window.xgGrid():''}
- <div style="margin-top:16px">${Object.entries(AR).map(([a,m])=>{const its=areaItems(a),os=O.filter(o=>arOf(o.i)===a),dn=os.filter(o=>o.st==='completed').length,p=os.length?dn/os.length:0;
- return`<div class="grp goal" data-act="li_area" data-a="${a}"><div class="gr"><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" fill="none" stroke="var(--rest)" stroke-width="6"/><circle cx="28" cy="28" r="24" fill="none" stroke="${m.c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}"/></svg><span style="color:${m.c}">${ico(m.i,20)}</span></div><div class="sp"><div class="t">${m.n}</div><div class="mute">${its.length} ${a==='cook'||a==='recipes'?'recipe':'plan'}${its.length===1?'':'s'}${os.length?` · ${dn} of ${os.length} today`:''}</div></div><div class="mute" style="font-size:22px">›</div></div>`}).join('')}</div><div class="grp" style="margin-top:12px"><button class="addrow" data-act="ar_new">Create your own area</button></div>
- <div class="gf">Anything you schedule here appears on Home, Calendar and Insights, with reminders. Tip: set a habit's Category to an area name to show it inside that area.</div>`}
+ const t=todayK(),O=occ(t),od=new Map(O.map(o=>[o.i.id,o])),its=IT(),dn=O.filter(o=>o.st==='completed').length,na=a=>a==='cook'?'recipes':a;
+ const row=i=>{const m=AR[arOf(i)]||{n:'',c:'var(--acc)',i:'book'},o=od.get(i.id),dd=o&&o.st==='completed';
+  return`<div class="item" data-act="li_edit" data-i="${i.id}" style="cursor:pointer"><div class="ic" style="background:${m.c}1f;color:${m.c}">${ico(m.i)}</div><div class="sp"><div>${esc(i.title||'Untitled')}</div><div class="mute">${esc(m.n)} · ${schTxt(i)}</div></div>${o?`<button class="pill ${dd?'on':''}" data-act="${dd?'li_clr':'li_done'}" data-i="${i.id}" data-k="${t}">${dd?'Done':'Mark done'}</button>`:''}</div>`};
+ const later=its.filter(i=>!od.has(i.id));
+ return`<div class="row"><h1 class="sp">Plans</h1></div>${seg('areas')}${window.xgGrid?window.xgGrid():''}
+ <div class="mute" style="margin:12px 0 6px">Add</div><div class="row" style="flex-wrap:wrap;gap:8px">${Object.entries(AR).map(([a,m])=>`<button class="pill" data-act="li_new" data-a="${na(a)}">+ ${esc(m.n)}</button>`).join('')}</div>
+ ${O.length?`<div class="gl">Today · ${dn} of ${O.length} done</div><div class="card">${O.map(o=>row(o.i)).join('')}</div>`:''}
+ ${later.length?`<div class="gl">${O.length?'Other plans':'All plans'}</div><div class="card">${later.map(row).join('')}</div>`:''}
+ ${its.length?'':'<div class="empty">No plans yet. Tap a + button above to add one.</div>'}
+ <div class="gl">Browse by area</div><div class="row" style="flex-wrap:wrap;gap:8px">${Object.entries(AR).map(([a,m])=>`<button class="pill" data-act="li_area" data-a="${a}">${esc(m.n)} ›</button>`).join('')}<button class="pill" data-act="ar_new">+ New area</button></div>
+ <div class="gf">Anything you schedule here appears on Home, Calendar and Insights, with reminders.</div>`}
 
 const HK={study:/study|read|learn|homework|revis/i,gym:/gym|exercise|workout|run|train|stretch|walk/i,meals:/water|meal|eat|vitamin|protein|fruit/i,recipes:/cook|bake/i,cook:/cook|bake/i};
 function areaHabits(a){const t=todayK(),n=AR[a].n.toLowerCase();return Engine.dayProgress(D.habits,t,t,D.logs).items.filter(({h})=>{const c=(h.category||'').trim().toLowerCase();return c?c===n:(HK[a]?HK[a].test(h.name):h.name.toLowerCase().includes(n))}).sort((x,y)=>((x.s==='COMPLETED')-(y.s==='COMPLETED'))||(x.h.reminder||'99').localeCompare(y.h.reminder||'99'))}
