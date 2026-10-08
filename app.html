@@ -1364,7 +1364,7 @@ try{var q=new URLSearchParams(location.search).get('r');if(q){var p=q.split('|')
 (function(){
 var BAD=/^\s*(ceo|admin|administrator|owner|boss|founder|president|moderator)\s*$/i;
 function bad(n,flag){return !!flag||!n||n.trim().length<2||BAD.test(n)}
-function gate(old){
+function gate(old,sug){
  if(document.getElementById('hfName'))return;
  var st=document.createElement('style');st.textContent='#hfName{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:linear-gradient(160deg,#0b1220,#1b1f4b);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}#hfName h2{margin:0;font-size:26px}#hfName p{margin:0;max-width:340px;opacity:.85;line-height:1.45}#hfName input{width:min(320px,86%);padding:15px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-size:17px;text-align:center}#hfName button{width:min(320px,86%);padding:15px;border-radius:14px;border:0;background:#fff;color:#0b1220;font-size:17px;font-weight:600;cursor:pointer}#hfName .er{color:#ff9f9f;min-height:20px;font-size:14px}';
  document.head.appendChild(st);
@@ -1372,6 +1372,7 @@ function gate(old){
  o.innerHTML='<h2>Please enter your real name</h2><p class="m"></p><input id="hfNameIn" type="text" maxlength="40" autocomplete="name" placeholder="Your real name"><div class="er" id="hfNameEr"></div><button id="hfNameBtn">Save and continue</button>';
  o.querySelector('.m').textContent=(old&&BAD.test(old)?'The name \u201C'+old.trim()+'\u201D is not allowed in HabitFlow. ':'A real name is required in HabitFlow. ')+'Enter your real name to continue using the app.';
  document.body.appendChild(o);
+ if(sug&&sug.length){var w=document.createElement('div');w.style.cssText='display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:340px';var lb=document.createElement('div');lb.style.cssText='width:100%;opacity:.7;font-size:14px';lb.textContent='Suggested:';w.appendChild(lb);sug.slice(0,4).forEach(function(s){var c=document.createElement('button');c.type='button';c.textContent=s;c.style.cssText='width:auto;padding:10px 16px;border-radius:20px;background:rgba(255,255,255,.14);color:#fff;font-size:16px';c.onclick=function(){document.getElementById('hfNameIn').value=s};w.appendChild(c)});o.insertBefore(w,document.getElementById('hfNameIn'))}
  var inp=document.getElementById('hfNameIn'),er=document.getElementById('hfNameEr'),btn=document.getElementById('hfNameBtn');
  btn.onclick=async function(){
   var n=inp.value.trim().replace(/\s+/g,' ');
@@ -1393,7 +1394,9 @@ async function check(){
   var r=await fetch(HF.api.url+'/auth/v1/user',{headers:{apikey:HF.api.key,Authorization:'Bearer '+tk}});
   if(!r.ok)return;
   var u=await r.json(),m=u.user_metadata||{};
-  if(bad(m.name,m.name_required))gate(m.name);
+  var sg=Array.isArray(m.name_suggest)&&m.name_suggest.length?m.name_suggest:null;
+  if(!sg&&u.email){var lp=String(u.email).split('@')[0].replace(/[^A-Za-z]/g,'');if(lp.length>=2)sg=[lp.charAt(0).toUpperCase()+lp.slice(1).toLowerCase()]}
+  if(bad(m.name,m.name_required))gate(m.name,sg);
  }catch(e){}
 }
 setTimeout(check,1500);
