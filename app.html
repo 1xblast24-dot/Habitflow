@@ -1359,4 +1359,44 @@ if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('messag
 try{var q=new URLSearchParams(location.search).get('r');if(q){var p=q.split('|');show(p[0],p.slice(1).join('|'));history.replaceState(null,'',location.pathname)}}catch(e){}
 })();
 </script>
+<script>
+/* Real-name requirement: blocks the app until an allowed name is entered */
+(function(){
+var BAD=/^\s*(ceo|admin|administrator|owner|boss|founder|president|moderator)\s*$/i;
+function bad(n,flag){return !!flag||!n||n.trim().length<2||BAD.test(n)}
+function gate(old){
+ if(document.getElementById('hfName'))return;
+ var st=document.createElement('style');st.textContent='#hfName{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:linear-gradient(160deg,#0b1220,#1b1f4b);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}#hfName h2{margin:0;font-size:26px}#hfName p{margin:0;max-width:340px;opacity:.85;line-height:1.45}#hfName input{width:min(320px,86%);padding:15px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-size:17px;text-align:center}#hfName button{width:min(320px,86%);padding:15px;border-radius:14px;border:0;background:#fff;color:#0b1220;font-size:17px;font-weight:600;cursor:pointer}#hfName .er{color:#ff9f9f;min-height:20px;font-size:14px}';
+ document.head.appendChild(st);
+ var o=document.createElement('div');o.id='hfName';o.setAttribute('role','alertdialog');o.setAttribute('aria-label','Enter your real name');
+ o.innerHTML='<h2>Please enter your real name</h2><p class="m"></p><input id="hfNameIn" type="text" maxlength="40" autocomplete="name" placeholder="Your real name"><div class="er" id="hfNameEr"></div><button id="hfNameBtn">Save and continue</button>';
+ o.querySelector('.m').textContent=(old&&BAD.test(old)?'The name \u201C'+old.trim()+'\u201D is not allowed in HabitFlow. ':'A real name is required in HabitFlow. ')+'Enter your real name to continue using the app.';
+ document.body.appendChild(o);
+ var inp=document.getElementById('hfNameIn'),er=document.getElementById('hfNameEr'),btn=document.getElementById('hfNameBtn');
+ btn.onclick=async function(){
+  var n=inp.value.trim().replace(/\s+/g,' ');
+  if(n.length<2||BAD.test(n)||!/^[\p{L}][\p{L}\s.'-]*$/u.test(n)){er.textContent='Please enter your real name (letters only, at least 2).';return}
+  btn.disabled=true;er.textContent='';
+  try{
+   var tk=await HF.api.token();
+   var r=await fetch(HF.api.url+'/auth/v1/user',{method:'PUT',headers:{apikey:HF.api.key,Authorization:'Bearer '+tk,'Content-Type':'application/json'},body:JSON.stringify({data:{name:n,name_required:false}})});
+   if(!r.ok)throw 0;
+   try{var s=JSON.parse(localStorage.getItem('habitflow.session')||'{}');s.name=n;localStorage.setItem('habitflow.session',JSON.stringify(s))}catch(e){}
+   location.reload();
+  }catch(e){er.textContent='Could not save. Check your connection and try again.';btn.disabled=false}
+ };
+}
+async function check(){
+ try{
+  if(!(window.HF&&HF.api))return;
+  var tk=await HF.api.token();if(!tk)return;
+  var r=await fetch(HF.api.url+'/auth/v1/user',{headers:{apikey:HF.api.key,Authorization:'Bearer '+tk}});
+  if(!r.ok)return;
+  var u=await r.json(),m=u.user_metadata||{};
+  if(bad(m.name,m.name_required))gate(m.name);
+ }catch(e){}
+}
+setTimeout(check,1500);
+})();
+</script>
 </body></html>
