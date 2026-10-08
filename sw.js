@@ -4,7 +4,7 @@
      from other hosts always go straight to the network, so sign-in and cloud
      sync are never served from a stale cache.
    Bump VERSION whenever you deploy changes you want users to receive. */
-const VERSION = 'hf-v7';
+const VERSION = 'hf-v8';
 const SHELL = [
   '/', '/login', '/app', 'pwa.js',
   'manifest.webmanifest',
@@ -62,7 +62,8 @@ self.addEventListener('fetch', e => {
 });
 
 // Push notifications sent by the send-reminders Edge Function
-self.addEventListener('push', e => {
+self.const FN = 'https://imtmooehxqhaikwdxiiy.supabase.co/functions/v1/notif-action';
+addEventListener('push', e => {
   let d = {};
   try { d = e.data.json(); } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
   const title = d.title || 'HabitFlow', body = d.body || '', url = d.url || '/app';
@@ -71,13 +72,32 @@ self.addEventListener('push', e => {
     if (vis) { vis.postMessage({ type: 'hf-reminder', title, body }); return; }
     return self.registration.showNotification(title, {
       body, tag: d.tag, renotify: !!d.tag, requireInteraction: true, vibrate: [300, 150, 300, 150, 600],
-      icon: '/icons/icon-192.png', badge: '/icons/badge-96.png', data: { url, title, body }
+      icon: '/icons/icon-192.png', badge: '/icons/badge-96.png',
+      actions: d.act ? [{ action: 'done', title: '\u2713 Done' }, { action: 'snooze', title: 'Snooze 10 min' }] : [],
+      data: { url, title, body, tag: d.tag, act: d.act }
     });
   }));
 });
 self.addEventListener('notificationclick', e => {
   const n = e.notification, dd = n.data || {};
   n.close();
+  if ((e.action === 'done' || e.action === 'snooze') && dd.act) {
+    e.waitUntil((async () => {
+      let ok = false;
+      try {
+        const sub = await self.registration.pushManager.getSubscription();
+        const j = sub && sub.toJSON();
+        const r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: e.action, endpoint: j.endpoint, auth: j.keys.auth, act: dd.act, payload: { title: dd.title, body: dd.body, tag: dd.tag, url: dd.url, act: dd.act } }) });
+        ok = r.ok;
+      } catch (_) {}
+      const rt = (dd.tag || 'hf') + '-result';
+      await self.registration.showNotification(ok ? (e.action === 'done' ? 'Marked done \u2713' : 'Snoozed for 10 minutes') : 'Could not reach the server. Open HabitFlow.', { tag: rt, icon: '/icons/icon-192.png', badge: '/icons/badge-96.png', silent: true });
+      await new Promise(res => setTimeout(res, 3000));
+      (await self.registration.getNotifications({ tag: rt })).forEach(x => x.close());
+    })());
+    return;
+  }
   e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
     for (const c of cs) {
       if (c.url.includes('/app') && 'focus' in c) { c.postMessage({ type: 'hf-reminder', title: dd.title, body: dd.body }); return c.focus(); }
