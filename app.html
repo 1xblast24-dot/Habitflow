@@ -1028,7 +1028,14 @@ function lifeIns(){
  <h2>Planned → scheduled → completed</h2><div class="card">${Object.keys(AR).map(fn).join('')||'<div class="empty">Add plans in Plan > Areas.</div>'}</div>
  <h2>Patterns</h2><div class="card">${M.length?M.map(x=>`<div class="item" style="min-height:56px">${esc(x)}</div>`).join(''):'<div class="item" style="min-height:56px">Complete a few scheduled activities and patterns will appear here.</div>'}</div>`}
 const cons=a=>Math.round(a/28*100)+'%';
-const _vi=vInsights;vInsights=()=>_vi()+lifeIns();
+/* Achievements: what you completed (habits, routines, plans) and how disciplined that makes you */
+function winsCard(){const t=todayK();let n=0,a=0;const cnt=new Map();
+ for(let i=0;i<28;i++){const k=Engine.addDays(t,-i),d=doneOf(k);if(d.length)a++;n+=d.length;for(const x of d){const o=cnt.get(x.n)||{c:x.c,n:0};o.n++;cnt.set(x.n,o)}}
+ if(!n)return'';
+ const dis=allDis(Engine.addDays(t,-27),t),lv=dis==null?'Keep going':dis>=80?'Highly disciplined':dis>=60?'Disciplined':dis>=40?'Building discipline':'Getting started';
+ const top=[...cnt.entries()].sort((x,y)=>y[1].n-x[1].n).slice(0,6),mx=top[0][1].n;
+ return`<div class="gl">Achieved · last 28 days</div><div class="card"><div class="row"><div class="sp"><div style="font-size:20px;font-weight:700">${lv}</div><div class="mute">You completed ${n} ${n===1?'thing':'things'} on ${a} of the last 28 days${dis==null?'':' · discipline '+dis+'%'}</div></div></div>${top.map(([nm,o])=>`<div class="item"><div class="sp"><div>${esc(nm)}</div><div style="height:6px;border-radius:3px;background:var(--line);margin-top:6px"><div style="height:100%;width:${Math.round(o.n/mx*100)}%;border-radius:3px;background:${o.c}"></div></div></div><span class="mute">${o.n}&times;</span></div>`).join('')}</div>`}
+const _vi=vInsights;vInsights=()=>_vi()+winsCard()+lifeIns();
 
 /* ---- user-created areas: same planning, schedule, reminders, tracking and analysis ---- */
 const CA=()=>D.areas||(D.areas=[]);
