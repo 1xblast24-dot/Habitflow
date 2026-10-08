@@ -305,6 +305,24 @@ input,select,textarea{font-size:16px}
 .av .cam{position:absolute;right:-2px;bottom:-2px;width:32px;height:32px;border-radius:50%;background:var(--surf);color:var(--acc);display:grid;place-items:center;border:1px solid var(--line);box-shadow:var(--sh)}
 .pn{font-size:24px;font-weight:700;margin-top:14px;letter-spacing:-.02em}.pa{display:flex;gap:8px;margin-top:12px}
 .dd{position:absolute;bottom:3px;left:0;right:0;display:flex;justify-content:center;gap:2px;pointer-events:none;font-style:normal}.dd s{width:5px;height:5px;border-radius:50%;display:block;text-decoration:none}
+@media (min-width:900px){
+body{padding-left:232px;font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",system-ui,sans-serif;letter-spacing:-.006em}
+main{max-width:780px;padding:44px 44px 72px}
+h1{font-size:28px;font-weight:700;letter-spacing:-.02em}
+h2{font-size:11px;letter-spacing:.08em}
+.dock{left:0;right:auto;top:0;bottom:0;width:232px;max-width:none;margin:0;flex-direction:column;justify-content:flex-start;gap:2px;padding:56px 10px 16px;border-radius:0;border:0;border-right:1px solid var(--line);box-shadow:none;background:color-mix(in srgb,var(--surf) 62%,transparent);-webkit-backdrop-filter:blur(40px) saturate(180%);backdrop-filter:blur(40px) saturate(180%)}
+.dock::before{content:"HabitFlow";position:absolute;top:20px;left:22px;font-size:13px;font-weight:600;color:var(--mute);letter-spacing:0}
+.dock button{flex:none;flex-direction:row;justify-content:flex-start;gap:10px;min-height:34px;padding:0 12px;border-radius:7px;font-size:13px;font-weight:500;text-align:left;cursor:pointer}
+.dock button:hover{background:color-mix(in srgb,var(--text) 6%,transparent)}
+.dock button[aria-current="page"]{background:color-mix(in srgb,var(--acc) 15%,transparent);color:var(--acc);font-weight:600}
+.dock svg{width:17px;height:17px;stroke-width:1.8}
+.card{box-shadow:none;border:1px solid var(--line);border-radius:12px}
+.item,.btn,.pill,.cd,.rw{cursor:pointer;transition:background .15s,border-color .15s}
+.item:hover,.rw:hover{background:color-mix(in srgb,var(--text) 4%,transparent)}
+.btn:hover,.pill:hover{filter:brightness(.97)}
+}
+:focus-visible{outline:2px solid color-mix(in srgb,var(--acc) 70%,transparent);outline-offset:2px}
+@media (hover:hover){::-webkit-scrollbar{width:12px}::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--text) 22%,transparent);border-radius:10px;border:3px solid transparent;background-clip:content-box}::-webkit-scrollbar-track{background:transparent}}
 </style><script>
 /* HabitFlow account guard + cloud sync (Supabase). Habits stay in localStorage and are mirrored to the user's account. */
 (function(){
@@ -1339,12 +1357,12 @@ addEventListener('load',function(){setTimeout(function(){try{var d=JSON.parse(lo
 </script>
 <script>
 (function(){
-var st=document.createElement('style');st.textContent='#hfRem{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);background:linear-gradient(160deg,#0b1220,#1b1f4b);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}#hfRem .hr-t{font-size:64px;font-weight:700;letter-spacing:-.03em}#hfRem .hr-i{font-size:44px}#hfRem .hr-h{font-size:28px;font-weight:700}#hfRem .hr-b{font-size:18px;opacity:.8;max-width:420px}#hfRem button{width:min(320px,86%);padding:16px;border-radius:16px;font-size:17px;font-weight:600;border:0;cursor:pointer}#hfRem .hr-p{background:#fff;color:#0b1220;margin-top:18px}#hfRem .hr-s{background:rgba(255,255,255,.14);color:#fff}';
+var st=document.createElement('style');st.textContent='#hfRem{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);background:#0b0d12;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}#hfRem .hr-t{font-size:64px;font-weight:700;letter-spacing:-.03em}#hfRem .hr-i{font-size:44px}#hfRem .hr-h{font-size:28px;font-weight:700}#hfRem .hr-b{font-size:18px;opacity:.8;max-width:420px}#hfRem button{width:min(320px,86%);padding:16px;border-radius:16px;font-size:17px;font-weight:600;border:0;cursor:pointer}#hfRem .hr-p{background:#fff;color:#0b1220;margin-top:18px}#hfRem .hr-s{background:rgba(255,255,255,.14);color:#fff}';
 document.head.appendChild(st);
 function show(title,body){
  if(document.getElementById('hfRem'))return;
  var o=document.createElement('div');o.id='hfRem';o.setAttribute('role','alertdialog');o.setAttribute('aria-label','Reminder');
- o.innerHTML='<div class="hr-t"></div><div class="hr-i">&#128276;</div><div class="hr-h"></div><div class="hr-b"></div><button class="hr-p">Open HabitFlow</button><button class="hr-s">Dismiss</button>';
+ o.innerHTML='<div class="hr-t"></div><div class="hr-h"></div><div class="hr-b"></div><button class="hr-p">Open HabitFlow</button><button class="hr-s">Dismiss</button>';
  var n=new Date();
  o.querySelector('.hr-t').textContent=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);
  o.querySelector('.hr-h').textContent=title||'Reminder';
@@ -1366,7 +1384,7 @@ var BAD=/^\s*(ceo|admin|administrator|owner|boss|founder|president|moderator)\s*
 function bad(n,flag){return !!flag||!n||n.trim().length<2||BAD.test(n)}
 function gate(old,sug){
  if(document.getElementById('hfName'))return;
- var st=document.createElement('style');st.textContent='#hfName{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:linear-gradient(160deg,#0b1220,#1b1f4b);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}#hfName h2{margin:0;font-size:26px}#hfName p{margin:0;max-width:340px;opacity:.85;line-height:1.45}#hfName input{width:min(320px,86%);padding:15px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-size:17px;text-align:center}#hfName button{width:min(320px,86%);padding:15px;border-radius:14px;border:0;background:#fff;color:#0b1220;font-size:17px;font-weight:600;cursor:pointer}#hfName .er{color:#ff9f9f;min-height:20px;font-size:14px}';
+ var st=document.createElement('style');st.textContent='#hfName{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:#0b0d12;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}#hfName h2{margin:0;font-size:26px}#hfName p{margin:0;max-width:340px;opacity:.85;line-height:1.45}#hfName input{width:min(320px,86%);padding:15px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-size:17px;text-align:center}#hfName button{width:min(320px,86%);padding:15px;border-radius:14px;border:0;background:#fff;color:#0b1220;font-size:17px;font-weight:600;cursor:pointer}#hfName .er{color:#ff9f9f;min-height:20px;font-size:14px}';
  document.head.appendChild(st);
  var o=document.createElement('div');o.id='hfName';o.setAttribute('role','alertdialog');o.setAttribute('aria-label','Enter your real name');
  o.innerHTML='<h2>Please enter your real name</h2><p class="m"></p><input id="hfNameIn" type="text" maxlength="40" autocomplete="name" placeholder="Your real name"><div class="er" id="hfNameEr"></div><button id="hfNameBtn">Save and continue</button>';
@@ -1401,5 +1419,14 @@ async function check(){
 }
 setTimeout(check,1500);
 })();
+</script>
+<script>
+/* Keyboard: press 1-5 to switch tabs on desktop */
+document.addEventListener('keydown',function(e){
+ if(e.metaKey||e.ctrlKey||e.altKey)return;
+ var a=document.activeElement,tg=a&&a.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT'||(a&&a.isContentEditable))return;
+ if(document.getElementById('hfRem')||document.getElementById('hfName'))return;
+ if(/^[1-9]$/.test(e.key)){var b=document.querySelectorAll('.dock button')[+e.key-1];if(b){b.click();e.preventDefault()}}
+});
 </script>
 </body></html>
