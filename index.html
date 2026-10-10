@@ -124,8 +124,54 @@ h2{margin:0;font-size:clamp(34px,4.2vw,56px);line-height:1.05;letter-spacing:-.0
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script src="pwa.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+<section class="hfh" id="hero" aria-label="HabitFlow">
+<style>
+.hfh{position:relative;z-index:50;height:100vh;height:100svh;display:flex;flex-direction:column;overflow:hidden;background:#0C0C0C;color:#D7E2EA;font-family:'Kanit',system-ui,sans-serif}
+.hfh *{box-sizing:border-box}
+.hfh a{text-decoration:none}
+.hfh-r{animation:hfh-in .8s cubic-bezier(.25,.1,.25,1) both;animation-delay:var(--d,0s)}
+@keyframes hfh-in{from{opacity:0;transform:translateY(var(--y,20px))}to{opacity:1;transform:none}}
+.hfh-nav{display:flex;justify-content:space-between;padding:24px 24px 0;position:relative;z-index:3}
+.hfh-nav a{color:#D7E2EA;font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:.875rem;transition:opacity .2s}
+.hfh-nav a:hover{opacity:.7}
+.hfh-hw{overflow:hidden;margin-top:24px;text-align:center;position:relative;z-index:1}
+.hfh h1{margin:0;font-weight:900;text-transform:uppercase;line-height:1;white-space:nowrap;letter-spacing:-.04em;font-size:14vw;background:linear-gradient(180deg,#646973 0%,#BBCCD7 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hfh-ph{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:200px;z-index:2}
+.hfh-mag{will-change:transform}
+.hfh-shot{display:block;width:100%;height:auto;border-radius:28px;border:1px solid rgba(215,226,234,.16);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.hfh-bar{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding:0 24px 28px;position:relative;z-index:3}
+.hfh-copy{margin:0;font-weight:300;text-transform:uppercase;letter-spacing:.12em;line-height:1.2;font-size:clamp(.75rem,1.4vw,1.5rem);max-width:160px}
+.hfh-cta{display:inline-block;border-radius:9999px;color:#fff;font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;padding:12px 32px;background:linear-gradient(123deg,#18011F 7%,#B600A8 37%,#7621B0 72%,#BE4C00 100%);box-shadow:0 4px 4px rgba(181,1,167,.25),4px 4px 12px #7721B1 inset;outline:2px solid #fff;outline-offset:-3px}
+@media(min-width:640px){.hfh-hw{margin-top:16px}.hfh h1{font-size:15vw}.hfh-ph{top:auto;bottom:0;transform:translateX(-50%);width:250px}.hfh-copy{max-width:220px}.hfh-bar{padding-bottom:32px}.hfh-cta{font-size:.875rem;padding:14px 40px}}
+@media(min-width:768px){.hfh-nav{padding:32px 40px 0}.hfh-nav a{font-size:1.125rem}.hfh-hw{margin-top:-20px}.hfh h1{font-size:16vw}.hfh-ph{width:290px}.hfh-copy{max-width:260px}.hfh-bar{padding:0 40px 40px}.hfh-cta{font-size:1rem;padding:16px 48px}}
+@media(min-width:1024px){.hfh-nav a{font-size:1.4rem}.hfh h1{font-size:17.5vw}.hfh-ph{width:330px}}
+@media(prefers-reduced-motion:reduce){.hfh-r{animation:none}}
+</style>
+<nav class="hfh-nav hfh-r" style="--d:0s;--y:-20px" aria-label="Main"><a href="#top">How it works</a><a href="#s1">Features</a><a href="/login">Sign in</a><a href="/login#signup">Get started</a></nav>
+<div class="hfh-hw hfh-r" style="--d:.15s;--y:40px"><h1>HabitFlow</h1></div>
+<div class="hfh-ph"><div class="hfh-mag" id="hfhMag"><img class="hfh-shot hfh-r" id="hfhShot" alt="HabitFlow Today screen" style="--d:.6s;--y:30px"></div></div>
+<div class="hfh-bar">
+<p class="hfh-copy hfh-r" style="--d:.35s;--y:20px">A habit system built around your time, made for steady, lasting consistency.</p>
+<a class="hfh-cta hfh-r" href="/login#signup" style="--d:.5s;--y:20px">Get started</a>
+</div>
+<script>
+(function(){
+var ph=document.querySelector('.hfh-ph'),mag=document.getElementById('hfhMag'),img=document.getElementById('hfhShot');
+addEventListener('load',function(){try{if(typeof IMG!=='undefined'&&IMG.today_a){img.src=IMG.today_a;return}}catch(e){}mag.style.display='none'});
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var on=false;
+addEventListener('mousemove',function(e){
+ var r=ph.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
+ if(Math.abs(dx)<r.width/2+150&&Math.abs(dy)<r.height/2+150){mag.style.transition='transform .3s ease-out';mag.style.transform='translate3d('+dx/3+'px,'+dy/3+'px,0)';on=true}
+ else if(on){mag.style.transition='transform .6s cubic-bezier(.34,1.56,.64,1)';mag.style.transform='translate3d(0,0,0)';on=false}
+},{passive:true});
+})();
+</script>
+</section>
+
 <div class="scene" id="top">
   <div class="earth" aria-hidden="true"><video id="earth-video" muted autoplay loop playsinline preload="auto" poster="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202133_508c64b8-a31e-4290-bdfc-1187df70e0a6.png"><source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202422_3ffb4889-c520-432d-8458-038009eb40df.mp4" type="video/mp4"></video></div>
   <div class="shade" aria-hidden="true"></div>
