@@ -172,6 +172,31 @@ addEventListener('mousemove',function(e){
 </script>
 </section>
 
+<section class="hfm" id="hfm" aria-hidden="true">
+<style>
+.hfm{position:relative;z-index:50;background:#0C0C0C;overflow:hidden;padding:96px 0 40px}
+@media(min-width:640px){.hfm{padding-top:128px}}@media(min-width:768px){.hfm{padding-top:160px}}
+.hfm-row{display:flex;gap:12px;width:max-content;will-change:transform}
+.hfm-row+.hfm-row{margin-top:12px}
+.hfm-r1{margin-left:-2000px}
+.hfm img{width:clamp(130px,14vw,200px);aspect-ratio:780/1672;height:auto;object-fit:cover;border-radius:16px;flex:none;display:block}
+</style>
+<div class="hfm-row hfm-r1" id="hfmR1"></div>
+<div class="hfm-row" id="hfmR2"></div>
+<script>
+(function(){
+var sec=document.getElementById('hfm'),r1=document.getElementById('hfmR1'),r2=document.getElementById('hfmR2');
+function upd(){var o=(scrollY-sec.offsetTop+innerHeight)*.3;r1.style.transform='translateX('+(o-200)+'px)';r2.style.transform='translateX('+(-(o-200))+'px)'}
+addEventListener('load',function(){
+ if(typeof IMG==='undefined')return;
+ function fill(row,keys){for(var n=0;n<6;n++)keys.forEach(function(k){var i=new Image();i.alt='';i.loading='lazy';i.decoding='async';i.src=IMG[k];row.appendChild(i)})}
+ fill(r1,['today_a','habits','calendar']);fill(r2,['areas','insights','profile']);
+ upd();
+});
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches){var tk=0;addEventListener('scroll',function(){if(!tk){tk=1;requestAnimationFrame(function(){tk=0;upd()})}},{passive:true})}
+})();
+</script>
+</section>
 <div class="scene" id="top">
   <div class="earth" aria-hidden="true"><video id="earth-video" muted autoplay loop playsinline preload="auto" poster="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202133_508c64b8-a31e-4290-bdfc-1187df70e0a6.png"><source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202422_3ffb4889-c520-432d-8458-038009eb40df.mp4" type="video/mp4"></video></div>
   <div class="shade" aria-hidden="true"></div>
