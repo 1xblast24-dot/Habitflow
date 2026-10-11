@@ -171,7 +171,7 @@ button{transition:transform .15s cubic-bezier(.3,.9,.3,1),background .25s,color 
 .agb.missed{border-left-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}.agb.skipped{opacity:.5;border-left-style:dashed}.agb.due{box-shadow:0 0 0 1.5px var(--warn)}
 .rg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
 .rcard{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--sh);min-width:0}
-/* ===== Areas planner + weekly grid (added) · iOS structure ===== */
+/* ===== Areas planner + weekly grid (added) Â· iOS structure ===== */
 .xg-hd{display:flex;align-items:center;gap:10px;margin:22px 2px 12px}.xg-hd b{flex:1;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--mute)}
 .xg-btn{background:var(--acc);color:#fff;border-radius:99px;padding:9px 16px;font:inherit;font-weight:600;font-size:14px;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:transform .18s,opacity .18s}.xg-btn:active{transform:scale(.94);opacity:.85}
 .xg-pill{background:var(--surf);box-shadow:var(--sh);border-radius:99px;padding:8px 14px;font:inherit;font-weight:600;color:var(--acc);border:0;cursor:pointer;display:inline-flex;align-items:center;gap:2px;transition:transform .18s}.xg-pill:active{transform:scale(.94)}
@@ -520,7 +520,7 @@ function habitRow(h,k,today,withControls){
  const s=Engine.state(h,k,today,D.logs),v=((D.logs[h.id]||{})[k]||{}).v||0,c=`style="--c:${h.color}"`;
  let ctl;
  if(h.type==='yesno')ctl=`<button class="chk ${s}${V.fresh===h.id+k?' fresh':''}" ${c} data-act="toggle" data-h="${h.id}" data-k="${k}" aria-label="${s==='COMPLETED'?'Mark not done':'Complete'} ${esc(h.name)}">${SYM[s]}</button>`;
- else ctl=`<button class="step" data-act="dec" data-h="${h.id}" data-k="${k}" aria-label="Decrease">−</button><button class="val" data-act="log" data-h="${h.id}" data-k="${k}" aria-label="Enter exact value">${v} / ${h.target}${unit(h)?' '+esc(unit(h)):''}</button><button class="step" data-act="inc" data-h="${h.id}" data-k="${k}" aria-label="Increase">+</button>`;
+ else ctl=`<button class="step" data-act="dec" data-h="${h.id}" data-k="${k}" aria-label="Decrease">â</button><button class="val" data-act="log" data-h="${h.id}" data-k="${k}" aria-label="Enter exact value">${v} / ${h.target}${unit(h)?' '+esc(unit(h)):''}</button><button class="step" data-act="inc" data-h="${h.id}" data-k="${k}" aria-label="Increase">+</button>`;
  return`<div class="item"><div class="ic" style="background:${h.color}1f;color:${h.color}">${ico(h.icon)}</div><div class="sp" data-act="log" data-h="${h.id}" data-k="${k}" style="cursor:pointer"><div>${esc(h.name)}</div><div class="mute">${s==='SKIPPED'?'Skipped':s==='PARTIAL'?'Partial':s==='MISSED'?'Not logged':s==='COMPLETED'?'Done':'To do'}</div></div>${ctl}</div>`;
 }
 
@@ -543,7 +543,7 @@ function vHabits(){
  return`<div class="row"><h1 class="sp">Habits</h1><button class="btn" data-act="new">+ New</button></div>${window.xgWeek?window.xgWeek():''}
  <div class="seg" style="margin:10px 0"><button class="pill ${!V.showArch?'on':''}" data-act="arch" data-v="0">Active</button><button class="pill ${V.showArch?'on':''}" data-act="arch" data-v="1">Archived</button></div>
  ${list.length?`<div class="card">${list.map(h=>{const st=Engine.streaks(h,t,D.logs),sm=Engine.summary([h],h.start,t,t,D.logs);
- return`<div class="item" data-act="detail" data-h="${h.id}" style="cursor:pointer"><div class="ic" style="background:${h.color}1f;color:${h.color}">${ico(h.icon)}</div><div class="sp"><div>${esc(h.name)}${h.status==='paused'?' <span class="mute">· paused</span>':''}</div><div class="mute">${sched(h)}${h.type!=='yesno'?` · ${h.target} ${esc(unit(h))}`:''}${h.reminder?` · ${h.reminder}`:''}</div></div><div style="text-align:right"><b>${st.cur}</b><div class="mute" style="font-size:12px">best ${st.best} · ${sm.rate==null?'—':sm.rate+'%'}</div></div></div>`}).join('')}</div>`:`<div class="empty">${V.showArch?'No archived habits.':'No habits yet.'}</div>`}`;
+ return`<div class="item" data-act="detail" data-h="${h.id}" style="cursor:pointer"><div class="ic" style="background:${h.color}1f;color:${h.color}">${ico(h.icon)}</div><div class="sp"><div>${esc(h.name)}${h.status==='paused'?' <span class="mute">Â· paused</span>':''}</div><div class="mute">${sched(h)}${h.type!=='yesno'?` Â· ${h.target} ${esc(unit(h))}`:''}${h.reminder?` Â· ${h.reminder}`:''}</div></div><div style="text-align:right"><b>${st.cur}</b><div class="mute" style="font-size:12px">best ${st.best} Â· ${sm.rate==null?'â':sm.rate+'%'}</div></div></div>`}).join('')}</div>`:`<div class="empty">${V.showArch?'No archived habits.':'No habits yet.'}</div>`}`;
 }
 
 
@@ -568,7 +568,7 @@ function vPlan(){
   const sessions=R.reduce((n,r)=>n+r.days.length,0),steps=R.reduce((n,r)=>n+r.days.length*r.steps.length,0);
   let dn=0;for(let i=0;i<=dow;i++){const k=Engine.addDays(ws,i);R.forEach(r=>{if(rOn(r,k)&&rFull(r,k))dn++})}
   return head+`<div class="gl">Repeats every week</div><div class="grp"><div class="wg"><span></span>${'SMTWTFS'.split('').map((d,i)=>`<small class="${i===dow?'t':''}">${d}</small>`).join('')}</div>
-  ${[...R].sort((a,b)=>(a.time||'99')<(b.time||'99')?-1:1).map(r=>`<div class="wg"><div data-act="redit" data-r="${r.id}" style="cursor:pointer;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.name)}</div><div class="mute" style="font-size:12px">${r.time||'Anytime'} · ${r.steps.length} steps</div></div>${[0,1,2,3,4,5,6].map(i=>`<button class="wc ${r.days.includes(i)?'on':''}" style="--c:${r.color}" data-act="wday" data-r="${r.id}" data-v="${i}" aria-label="${'Sun Mon Tue Wed Thu Fri Sat'.split(' ')[i]}" aria-pressed="${r.days.includes(i)}">${svg(CK,'',3.2,14)}</button>`).join('')}</div>`).join('')}</div>
+  ${[...R].sort((a,b)=>(a.time||'99')<(b.time||'99')?-1:1).map(r=>`<div class="wg"><div data-act="redit" data-r="${r.id}" style="cursor:pointer;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.name)}</div><div class="mute" style="font-size:12px">${r.time||'Anytime'} Â· ${r.steps.length} steps</div></div>${[0,1,2,3,4,5,6].map(i=>`<button class="wc ${r.days.includes(i)?'on':''}" style="--c:${r.color}" data-act="wday" data-r="${r.id}" data-v="${i}" aria-label="${'Sun Mon Tue Wed Thu Fri Sat'.split(' ')[i]}" aria-pressed="${r.days.includes(i)}">${svg(CK,'',3.2,14)}</button>`).join('')}</div>`).join('')}</div>
   <div class="gf">Tap a circle to add or remove a day. The Plan tab follows this template automatically.</div>
   <div class="tp"><div class="stat"><span class="mute">Routines</span><div>${R.length}</div></div><div class="stat"><span class="mute">Per week</span><div>${sessions}</div></div><div class="stat"><span class="mute">Done</span><div>${dn}</div></div></div>
   <div class="gf" style="text-align:center">${steps} steps planned each week</div>`}
@@ -580,14 +580,14 @@ function vPlan(){
  let sch=0,cmp=0;for(let i=0;i<=dow;i++){const k=Engine.addDays(ws,i);R.forEach(r=>{if(rOn(r,k)){sch++;if(rFull(r,k))cmp++}})}
  const rate=sch?Math.round(cmp/sch*100):null,goal=D.settings.goal,hab=Engine.dayProgress(D.habits,sel,t,D.logs).items;
  const card=r=>{const n=rDone(r,sel),tot=r.steps.length,st=rStreak(r,t),dn=(D.rlogs[r.id]||{})[sel]||[];
-  return`<div class="grp rc"><div class="rw rh" data-act="redit" data-r="${r.id}" style="cursor:pointer"><div class="ic" style="background:${r.color}1f;color:${r.color}">${ico(r.icon)}</div><div class="sp"><div class="t">${esc(r.name)}</div><div class="mute" style="font-size:13px">${r.time||'Anytime'} · ${n} of ${tot}${st>1?' · '+st+' day streak':''}</div></div>${ringSm(tot?n/tot:0,r.color)}</div>
+  return`<div class="grp rc"><div class="rw rh" data-act="redit" data-r="${r.id}" style="cursor:pointer"><div class="ic" style="background:${r.color}1f;color:${r.color}">${ico(r.icon)}</div><div class="sp"><div class="t">${esc(r.name)}</div><div class="mute" style="font-size:13px">${r.time||'Anytime'} Â· ${n} of ${tot}${st>1?' Â· '+st+' day streak':''}</div></div>${ringSm(tot?n/tot:0,r.color)}</div>
   ${r.steps.map(x=>{const d=dn.includes(x.id);return`<div class="rw st ${d?'dn':''}"><button class="chk ${d?'COMPLETED':''} ${V.fresh===r.id+x.id+sel?'fresh':''}" style="--c:${r.color}" data-act="rstep" data-r="${r.id}" data-s="${x.id}" data-k="${sel}" ${sel>t?'disabled':''} aria-label="${d?'Uncheck':'Check'} ${esc(x.t)}">${svg(CK,'',3.4,15)}</button><span class="sp" data-act="${sel>t?'':'rstep'}" data-r="${r.id}" data-s="${x.id}" data-k="${sel}">${esc(x.t)}</span></div>`}).join('')}</div>`};
  return head+`<div class="wk7">${strip}</div><div class="gl">${fmtDate(sel)}</div>
  ${todays.length?todays.map(card).join(''):'<div class="empty" style="padding:28px 12px">No routines on this day.<br>Rest is part of the plan.</div>'}
  ${hab.length?`<div class="gl">Habits</div><div class="grp">${[...hab].sort((a,b)=>(a.h.reminder||'99')<(b.h.reminder||'99')?-1:1).map(({h,s})=>`<div class="rw pr" data-act="detail" data-h="${h.id}" style="cursor:pointer"><span class="tm">${h.reminder||'Anytime'}</span><div class="ic" style="background:${h.color}1f;color:${h.color}">${ico(h.icon,20)}</div><div class="sp" style="font-weight:600">${esc(h.name)}</div>${s==='COMPLETED'?`<span class="ok">${svg(CK,'',3,14)}</span>`:''}</div>`).join('')}</div>`:''}
- <div class="gl">Weekly consistency</div><div class="grp gh"><div class="row"><div class="sp"><b style="font-size:26px;letter-spacing:-.5px">${rate==null?'—':rate+'%'}</b><div class="mute">${cmp} of ${sch} routine sessions · goal ${goal}%</div></div><div class="chip">${rate!=null&&rate>=goal?'On track':'Keep going'}</div></div><div class="bar"><i style="width:${rate||0}%"></i></div></div>`;
+ <div class="gl">Weekly consistency</div><div class="grp gh"><div class="row"><div class="sp"><b style="font-size:26px;letter-spacing:-.5px">${rate==null?'â':rate+'%'}</b><div class="mute">${cmp} of ${sch} routine sessions Â· goal ${goal}%</div></div><div class="chip">${rate!=null&&rate>=goal?'On track':'Keep going'}</div></div><div class="bar"><i style="width:${rate||0}%"></i></div></div>`;
 }
-const stepsHTML=st=>st.map((x,i)=>`<div class="rw"><span class="mute" style="width:20px;flex:none">${i+1}</span><input class="l sti" data-i="${i}" value="${esc(x.t)}" placeholder="Step name" maxlength="60"><button class="mx" data-act="srm" data-i="${i}" aria-label="Remove step">−</button></div>`).join('');
+const stepsHTML=st=>st.map((x,i)=>`<div class="rw"><span class="mute" style="width:20px;flex:none">${i+1}</span><input class="l sti" data-i="${i}" value="${esc(x.t)}" placeholder="Step name" maxlength="60"><button class="mx" data-act="srm" data-i="${i}" aria-label="Remove step">â</button></div>`).join('');
 const readSteps=()=>V.draft.steps.forEach((x,i)=>{const e=document.querySelector(`.sti[data-i="${i}"]`);if(e)x.t=e.value});
 function routineSheet(id){
  const r=id?D.routines.find(x=>x.id===id):{name:'',icon:'leaf',color:COLORS[0],days:[1,2,3,4,5],time:'',remind:false,steps:[{id:uid(),t:''}],status:'active'};
@@ -611,8 +611,8 @@ function vGoals(){
  if(tab==='goals'){const G=D.goals||[];
   return head+(G.length?`<div style="margin-top:16px">${G.map(g=>{const n=gProg(g),pct=Math.min(100,Math.round(n/g.target*100)),C=2*Math.PI*24,done=n>=g.target,left=g.due?Math.ceil((Engine.parse(g.due)-Engine.parse(t))/864e5):null;
    return`<div class="grp goal" data-act="gedit" data-g="${g.id}"><div class="gr"><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" fill="none" stroke="var(--rest)" stroke-width="6"/><circle cx="28" cy="28" r="24" fill="none" stroke="${g.color}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct/100)}" data-off="${C*(1-pct/100)}" style="transition:stroke-dashoffset .8s cubic-bezier(.3,.9,.3,1)"/></svg><span style="color:${g.color}">${ico(g.icon,20)}</span></div>
-   <div class="sp"><div class="t">${esc(g.title)}</div><div class="mute">${n} of ${g.target}${g.habit?' · linked habit':''}${left==null?'':left<0&&!done?' · overdue':left===0?' · due today':' · '+left+' days left'}</div>${done?`<div class="badge">${svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>','',2.6,14)} Achieved</div>`:''}</div>
-   ${g.habit?`<b style="font-size:18px">${pct}%</b>`:`<div class="mini"><button data-act="gdec" data-g="${g.id}" aria-label="Decrease">−</button><button data-act="ginc" data-g="${g.id}" aria-label="Increase">+</button></div>`}</div>`}).join('')}</div>`
+   <div class="sp"><div class="t">${esc(g.title)}</div><div class="mute">${n} of ${g.target}${g.habit?' Â· linked habit':''}${left==null?'':left<0&&!done?' Â· overdue':left===0?' Â· due today':' Â· '+left+' days left'}</div>${done?`<div class="badge">${svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>','',2.6,14)} Achieved</div>`:''}</div>
+   ${g.habit?`<b style="font-size:18px">${pct}%</b>`:`<div class="mini"><button data-act="gdec" data-g="${g.id}" aria-label="Decrease">â</button><button data-act="ginc" data-g="${g.id}" aria-label="Increase">+</button></div>`}</div>`}).join('')}</div>`
   :`<div class="empty" style="padding-top:60px"><div style="color:var(--acc);display:grid;place-items:center;margin-bottom:12px">${svg(IC.target,'',1.6,54)}</div><div style="font-weight:700;color:var(--text);font-size:18px">Set your first goal</div><div style="margin:6px 0 20px">Link it to a habit or track it by hand.</div><button class="btn" data-act="gnew">New goal</button></div>`);}
  return head;
 }
@@ -623,7 +623,7 @@ function goalSheet(id){
  <div class="grp"><div class="rw"><input class="l" id="gn" value="${esc(g.title)}" maxlength="60" placeholder="Goal name" style="font-size:18px;font-weight:600"></div></div>
  <div class="gl">Progress</div><div class="grp"><div class="rw"><span>Linked habit</span><select id="gh" style="color:var(--acc);font-weight:600"><option value="">None (manual)</option>${D.habits.filter(h=>h.status!=='archived').map(h=>`<option value="${h.id}" ${h.id===g.habit?'selected':''}>${esc(h.name)}</option>`).join('')}</select></div>
  <div class="rw"><span>Target</span><input id="gt" type="number" min="1" inputmode="numeric" value="${g.target}"></div><div class="rw"><span>Deadline</span><span class="sp"></span><input id="gd" type="date" value="${g.due||''}"></div></div>
- <div class="gf">Linked goals count completed days of that habit from today on. Manual goals use the + and − buttons.</div>
+ <div class="gf">Linked goals count completed days of that habit from today on. Manual goals use the + and â buttons.</div>
  <div class="gl">Appearance</div><div class="grp"><div class="pk">${ICONS.map(i=>`<button class="pill ${i===g.icon?'on':''}" data-act="pick" data-f="icon" data-v="${i}" aria-label="${i}">${ico(i)}</button>`).join('')}</div>
  <div class="rw" style="padding:10px 14px;gap:10px;flex-wrap:wrap">${COLORS.map(c=>`<button class="step" style="background:${c};border-color:${c===g.color?'var(--text)':'transparent'}" data-act="pick" data-f="color" data-v="${c}" aria-label="Color"></button>`).join('')}</div></div>
  ${id?`<div class="grp" style="margin-top:20px"><button class="dgd" data-act="gdel" data-g="${id}">Delete goal</button></div>`:''}`);
@@ -636,11 +636,11 @@ function vInsights(){
  const weeks=[];for(let i=7;i>=0;i--){const e=Engine.addDays(t,-i*7),b=Engine.addDays(e,-6);weeks.push(Engine.summary(act,b,e,t,D.logs).rate||0)}
  return`<h1>Insights</h1><div class="seg" style="margin:10px 0">${[[7,'7 days'],[30,'30 days'],[90,'90 days'],[0,'All time']].map(([r,l])=>`<button class="pill ${V.range===r?'on':''}" data-act="range" data-v="${r}">${l}</button>`).join('')}</div>
  ${!act.length?'<div class="empty">Insights appear once you add and log habits.</div>':`
- <div class="row"><div class="stat hero"><span class="mute">Consistency</span><div>${s.rate==null?'—':s.rate+'%'}</div></div><div class="stat"><span class="mute">Completed</span><div>${s.COMPLETED}</div></div></div>
+ <div class="row"><div class="stat hero"><span class="mute">Consistency</span><div>${s.rate==null?'â':s.rate+'%'}</div></div><div class="stat"><span class="mute">Completed</span><div>${s.COMPLETED}</div></div></div>
  <div class="row" style="margin-top:10px"><div class="stat"><span class="mute">Partial</span><div>${s.PARTIAL}</div></div><div class="stat"><span class="mute">Skipped</span><div>${s.SKIPPED}</div></div><div class="stat"><span class="mute">Missed</span><div>${s.MISSED}</div></div></div>
  <p class="mute">Partial counts as half. Skipped days don't count against you. Rest days are ignored.</p>
  <h2>Weekly consistency</h2><div class="bars">${weeks.map(w=>`<i style="height:${Math.max(w,3)}%" title="${w}%"></i>`).join('')}</div><div class="row mute" style="font-size:12px"><span>8 weeks ago</span><span class="sp"></span><span>This week</span></div>
- <h2>By habit</h2><div class="card">${act.map(h=>{const x=Engine.summary([h],from,t,t,D.logs),st=Engine.streaks(h,t,D.logs);return`<div class="item" style="min-height:70px;display:block"><div class="row"><span class="row" style="gap:8px"><i style="color:${h.color};display:inline-flex">${ico(h.icon,18)}</i>${esc(h.name)}</span><span class="sp"></span><b>${x.rate==null?'—':x.rate+'%'}</b></div><div class="bar" style="margin:8px 0 4px"><i style="width:${x.rate||0}%;background:${h.color}"></i></div><div class="mute" style="font-size:12px">streak ${st.cur} · best ${st.best} · ${x.COMPLETED} done</div></div>`}).join('')}</div>`}`;
+ <h2>By habit</h2><div class="card">${act.map(h=>{const x=Engine.summary([h],from,t,t,D.logs),st=Engine.streaks(h,t,D.logs);return`<div class="item" style="min-height:70px;display:block"><div class="row"><span class="row" style="gap:8px"><i style="color:${h.color};display:inline-flex">${ico(h.icon,18)}</i>${esc(h.name)}</span><span class="sp"></span><b>${x.rate==null?'â':x.rate+'%'}</b></div><div class="bar" style="margin:8px 0 4px"><i style="width:${x.rate||0}%;background:${h.color}"></i></div><div class="mute" style="font-size:12px">streak ${st.cur} Â· best ${st.best} Â· ${x.COMPLETED} done</div></div>`}).join('')}</div>`}`;
 }
 
 /* Combined day view: habits + routines + plan items (used by Calendar and streak) */
@@ -676,10 +676,10 @@ function vProfile(){
  const S=D.settings,arch=D.habits.filter(h=>h.status==='archived').length,np='Notification' in window?Notification.permission:'unsupported';
  return`<h1>Profile</h1>
  <div class="pf"><button class="av" data-act="avatar" aria-label="Change profile photo">${S.avatar?`<img src="${S.avatar}" alt="Your profile photo">`:`<span>${esc(((SESS.name||'Guest').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('')||'G').toUpperCase())}</span>`}<i class="cam"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></i></button><input id="avIn" data-act="avfile" type="file" accept="image/*" hidden><div class="pn">${esc(SESS.name||'Guest')}</div><div class="mute">${SESS.mode==='guest'?'Guest':esc(SESS.email||'')}</div><div class="pa"><button class="btn g" data-act="avatar">${S.avatar?'Change photo':'Add photo'}</button>${S.avatar?'<button class="btn g" data-act="avrm">Remove</button>':''}</div></div>
- <h2>Account</h2><div class="card"><div class="item"><div class="sp"><div>${esc(SESS.name||'Guest')}</div><div class="mute">${SESS.mode==='guest'?'Guest mode. Your habits are saved in this browser only.':esc(SESS.email||'')+' · Synced to your account.'}</div></div><button class="btn g" data-act="signout">${SESS.mode==='guest'?'Sign in':'Sign out'}</button></div></div>
+ <h2>Account</h2><div class="card"><div class="item"><div class="sp"><div>${esc(SESS.name||'Guest')}</div><div class="mute">${SESS.mode==='guest'?'Guest mode. Your habits are saved in this browser only.':esc(SESS.email||'')+' Â· Synced to your account.'}</div></div><button class="btn g" data-act="signout">${SESS.mode==='guest'?'Sign in':'Sign out'}</button></div></div>
  <h2>Goal</h2><div class="card"><div class="item"><div class="sp">Weekly consistency goal</div><input type="number" min="10" max="100" value="${S.goal}" data-act="goal" style="width:90px"></div></div>
  <h2>Theme</h2><div class="row">${['auto','light','dark'].map(x=>`<button class="pill ${S.theme===x?'on':''}" data-act="theme" data-v="${x}">${x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div>
- <div class="gl">Notifications</div><div class="grp"><div class="nt"><div class="ap">H</div><div><small>HabitFlow · now</small><div>Read — whenever you're ready.</div></div></div>
+ <div class="gl">Notifications</div><div class="grp"><div class="nt"><div class="ap">H</div><div><small>HabitFlow Â· now</small><div>Read â whenever you're ready.</div></div></div>
  <div class="rw"><span class="ico" style="background:#ff3b30">${svg(IC.bell,'',2,16)}</span><span>Allow notifications</span><button class="sw ${S.notify?'on':''}" data-act="notify" role="switch" aria-checked="${!!S.notify}" aria-label="Allow notifications"></button></div>
  <div class="rw"><span>Quiet hours</span><span class="sp"></span><input type="time" value="${S.quiet[0]}" data-act="q0"><span class="mute">to</span><input type="time" value="${S.quiet[1]}" data-act="q1"></div></div>
  <div class="gf">Reminders only fire while HabitFlow is open in a tab; there's no background push. Status: ${np}.</div>
@@ -709,7 +709,7 @@ const closeSheet=()=>document.getElementById('over').innerHTML='';
 function logSheet(hid,k){
  const h=D.habits.find(x=>x.id===hid),l=(D.logs[hid]||{})[k]||{v:0,note:''};
  sheet(`<h1 style="font-size:22px">${h.icon} ${esc(h.name)}</h1><div class="mute">${fmtDate(k)}</div>
- ${h.type!=='yesno'?`<label>Amount (${esc(unit(h))}) · target ${h.target}</label><input id="lv" type="number" min="0" inputmode="decimal" value="${l.v||''}">`:''}
+ ${h.type!=='yesno'?`<label>Amount (${esc(unit(h))}) Â· target ${h.target}</label><input id="lv" type="number" min="0" inputmode="decimal" value="${l.v||''}">`:''}
  <label>Note (optional)</label><textarea id="ln" rows="2">${esc(l.note||'')}</textarea>
  <div class="row" style="margin-top:18px;flex-wrap:wrap"><button class="btn" data-act="lsave" data-h="${hid}" data-k="${k}">${h.type==='yesno'?'Complete':'Save'}</button><button class="btn g" data-act="lskip" data-h="${hid}" data-k="${k}">Skip</button><button class="btn d" data-act="lclear" data-h="${hid}" data-k="${k}">Clear</button></div>`);
 }
@@ -738,8 +738,8 @@ function detailSheet(id){
  const h=D.habits.find(x=>x.id===id),t=todayK(),st=Engine.streaks(h,t,D.logs),sm=Engine.summary([h],h.start,t,t,D.logs);
  const days=[];for(let i=0;i<28;i++)days.push(Engine.addDays(t,-i));
  sheet(`<div class="row"><div class="ic" style="background:${h.color}1f;color:${h.color}">${ico(h.icon)}</div><h1 class="sp" style="font-size:22px">${esc(h.name)}</h1></div>
- <div class="row" style="margin-top:14px"><div class="stat"><span class="mute">Streak</span><div>${st.cur}</div></div><div class="stat"><span class="mute">Best</span><div>${st.best}</div></div><div class="stat"><span class="mute">Rate</span><div>${sm.rate==null?'—':sm.rate+'%'}</div></div></div>
- <h2>Last 28 days · tap to edit</h2><div class="grid">${days.reverse().map(k=>{const s=Engine.state(h,k,t,D.logs),col={COMPLETED:h.color,PARTIAL:'var(--warn)',SKIPPED:'var(--mute)',MISSED:'color-mix(in srgb,var(--bad) 40%,transparent)'}[s]||'var(--rest)';return`<button class="cd2" style="background:${col};color:${s==='COMPLETED'?'#fff':'inherit'}" data-act="log2" data-h="${h.id}" data-k="${k}" ${['UNSCHEDULED','BEFORE_START','PAUSED'].includes(s)?'disabled':''} aria-label="${k} ${s}">${+k.slice(8)}</button>`}).join('')}</div>
+ <div class="row" style="margin-top:14px"><div class="stat"><span class="mute">Streak</span><div>${st.cur}</div></div><div class="stat"><span class="mute">Best</span><div>${st.best}</div></div><div class="stat"><span class="mute">Rate</span><div>${sm.rate==null?'â':sm.rate+'%'}</div></div></div>
+ <h2>Last 28 days Â· tap to edit</h2><div class="grid">${days.reverse().map(k=>{const s=Engine.state(h,k,t,D.logs),col={COMPLETED:h.color,PARTIAL:'var(--warn)',SKIPPED:'var(--mute)',MISSED:'color-mix(in srgb,var(--bad) 40%,transparent)'}[s]||'var(--rest)';return`<button class="cd2" style="background:${col};color:${s==='COMPLETED'?'#fff':'inherit'}" data-act="log2" data-h="${h.id}" data-k="${k}" ${['UNSCHEDULED','BEFORE_START','PAUSED'].includes(s)?'disabled':''} aria-label="${k} ${s}">${+k.slice(8)}</button>`}).join('')}</div>
  <div class="row" style="margin-top:20px;flex-wrap:wrap"><button class="btn g" data-act="edit" data-h="${id}">Edit</button>
  ${h.status==='archived'?`<button class="btn g" data-act="restore" data-h="${id}">Restore</button>`:`<button class="btn g" data-act="pause" data-h="${id}">${h.status==='paused'?'Resume':'Pause'}</button><button class="btn g" data-act="archive" data-h="${id}">Archive</button>`}
  <button class="btn d" data-act="del" data-h="${id}">Delete</button></div>`);
@@ -748,7 +748,7 @@ function detailSheet(id){
 function welcome(){
  const starters=[];
  V.starters=new Set();
- sheet(`<h1>Welcome to HabitFlow</h1><p class="mute">Consistency over perfection. Missing a day is fine — returning is what counts. Start by creating your own.</p>
+ sheet(`<h1>Welcome to HabitFlow</h1><p class="mute">Consistency over perfection. Missing a day is fine â returning is what counts. Start by creating your own.</p>
  
  <div class="row" style="margin-top:20px"><button class="btn" data-act="finish">Get started</button></div>`);
  V.stData=starters;
@@ -847,9 +847,9 @@ setInterval(()=>{
  const n=new Date(),hm=`${pad2(n.getHours())}:${pad2(n.getMinutes())}`,t=todayK(),[q0,q1]=D.settings.quiet;
  const quiet=q0>q1?(hm>=q0||hm<q1):(hm>=q0&&hm<q1);if(quiet)return;
  for(const h of D.habits){if(h.reminder!==hm||fired.has(h.id+t+hm))continue;
-  if(Engine.state(h,t,t,D.logs)==='PENDING'){fired.add(h.id+t+hm);new Notification('HabitFlow',{body:`${h.name} — whenever you're ready.`})}}
+  if(Engine.state(h,t,t,D.logs)==='PENDING'){fired.add(h.id+t+hm);new Notification('HabitFlow',{body:`${h.name} â whenever you're ready.`})}}
 for(const r of D.routines||[]){if(!r.remind||r.time!==hm||r.status==='archived'||!r.days.includes(n.getDay())||fired.has(r.id+t+hm))continue;
-  if(rDone(r,t)<r.steps.length){fired.add(r.id+t+hm);new Notification('HabitFlow',{body:`${r.name} — time to start.`})}}
+  if(rDone(r,t)<r.steps.length){fired.add(r.id+t+hm);new Notification('HabitFlow',{body:`${r.name} â time to start.`})}}
 },20000);
 
 /* ===== Life areas: Study, Gym, Meals, Recipes, Cooking. One scheduler feeds Home, Calendar and Insights ===== */
@@ -874,7 +874,7 @@ function lc(i,k){
 const occ=k=>IT().filter(i=>sOn(i,k)).map(i=>({i,k,st:lc(i,k),t:i.sch.time||''})).sort((a,b)=>(a.t||'99')<(b.t||'99')?-1:(a.t||'99')>(b.t||'99')?1:0);
 const LCC={planned:'var(--mute)',scheduled:'var(--acc)',due:'var(--warn)',completed:'var(--acc2)',skipped:'var(--mute)',missed:'var(--bad)'};
 const chipL=s=>`<span class="chip" style="color:${LCC[s]}">${s[0].toUpperCase()+s.slice(1)}</span>`;
-const schTxt=i=>{const s=i.sch;if(!s||!s.days.length)return'Planned';return(s.days.length===7?'Daily':s.days.map(d=>DN[d]).join(' '))+(s.time?' · '+s.time:'')+(s.dur?' · '+s.dur+' min':'')};
+const schTxt=i=>{const s=i.sch;if(!s||!s.days.length)return'Planned';return(s.days.length===7?'Daily':s.days.map(d=>DN[d]).join(' '))+(s.time?' Â· '+s.time:'')+(s.dur?' Â· '+s.dur+' min':'')};
 const exs=i=>lines(i.ex).map(l=>{const p=l.split(',').map(x=>x.trim());return{n:p[0],s:Math.max(1,+p[1]||3),r:+p[2]||10,w:+p[3]||0,rest:+p[4]||60}});
 const stp=i=>lines(i.steps).map(l=>{const p=l.split('|');return{t:p[0].trim(),m:+p[1]||0}});
 const nut=i=>{const r=i.recipe&&IT().find(x=>x.id===i.recipe),g=k=>(i[k]===''||i[k]==null)?((r&&+r[k])||0):+i[k];return{kcal:g('kcal'),pro:g('pro'),carb:g('carb'),fat:g('fat')}};
@@ -882,7 +882,7 @@ const nutH=n=>`<div class="row" style="flex-wrap:wrap;gap:8px;margin:8px 0">${[[
 const fmtCd=ms=>{if(ms<=0)return'now';const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}h ${m}m`:m>=10?`${m} min`:`${m}:${pad2(s%60)}`};
 const note=m=>{const t=document.createElement('div');t.className='toast';t.style.background='var(--acc)';t.textContent=m;document.body.append(t);setTimeout(()=>t.remove(),4000)};
 function alog(i,k,p){const L=AL()[i.id]=AL()[i.id]||{};if(p===null)delete L[k];else L[k]={...(L[k]||{}),...p,at:Date.now()};Store.save(D);render()}
-const crow=(on,act,at,n,txt,c,sub)=>`<div class="rw st ${on?'dn':''}"><button class="chk ${on?'COMPLETED':''}" style="--c:${c}" data-act="${act}" ${at} data-v="${n}" aria-label="Toggle">${svg(CK,'',3.4,15)}</button><span class="sp" data-act="${act}" ${at} data-v="${n}">${esc(txt)}${sub?` <span class="mute">· ${sub}</span>`:''}</span></div>`;
+const crow=(on,act,at,n,txt,c,sub)=>`<div class="rw st ${on?'dn':''}"><button class="chk ${on?'COMPLETED':''}" style="--c:${c}" data-act="${act}" ${at} data-v="${n}" aria-label="Toggle">${svg(CK,'',3.4,15)}</button><span class="sp" data-act="${act}" ${at} data-v="${n}">${esc(txt)}${sub?` <span class="mute">Â· ${sub}</span>`:''}</span></div>`;
 const orow=(o,sub)=>{const m=AR[arOf(o.i)];return`<div class="rw pr" data-act="li_run" data-i="${o.i.id}" data-k="${o.k}" style="cursor:pointer"><span class="tm">${o.t||'Anytime'}</span><div class="ic" style="background:${m.c}1f;color:${m.c}">${ico(m.i,20)}</div><div class="sp"><div style="font-weight:600">${esc(o.i.title)}</div><div class="mute" style="font-size:12px">${sub}</div></div>${chipL(o.st)}</div>`};
 
 /* analysis: counts occurrences in a date range */
@@ -900,14 +900,14 @@ const gSets=(from,to)=>{let n=0;IT().filter(i=>i.area==='gym').forEach(i=>{for(c
 function vAreas(){
  const t=todayK(),O=occ(t),od=new Map(O.map(o=>[o.i.id,o])),its=IT(),dn=O.filter(o=>o.st==='completed').length,na=a=>a==='cook'?'recipes':a;
  const row=i=>{const m=AR[arOf(i)]||{n:'',c:'var(--acc)',i:'book'},o=od.get(i.id),dd=o&&o.st==='completed';
-  return`<div class="item" data-act="li_edit" data-i="${i.id}" style="cursor:pointer"><div class="ic" style="background:${m.c}1f;color:${m.c}">${ico(m.i)}</div><div class="sp"><div>${esc(i.title||'Untitled')}</div><div class="mute">${esc(m.n)} · ${schTxt(i)}</div></div>${o?`<button class="pill ${dd?'on':''}" data-act="${dd?'li_clr':'li_done'}" data-i="${i.id}" data-k="${t}">${dd?'Done':'Mark done'}</button>`:''}</div>`};
+  return`<div class="item" data-act="li_edit" data-i="${i.id}" style="cursor:pointer"><div class="ic" style="background:${m.c}1f;color:${m.c}">${ico(m.i)}</div><div class="sp"><div>${esc(i.title||'Untitled')}</div><div class="mute">${esc(m.n)} Â· ${schTxt(i)}</div></div>${o?`<button class="pill ${dd?'on':''}" data-act="${dd?'li_clr':'li_done'}" data-i="${i.id}" data-k="${t}">${dd?'Done':'Mark done'}</button>`:''}</div>`};
  const later=its.filter(i=>!od.has(i.id));
  return`<div class="row"><h1 class="sp">Plans</h1></div>${seg('areas')}${window.xgGrid?window.xgGrid():''}
  <div class="mute" style="margin:12px 0 6px">Add</div><div class="row" style="flex-wrap:wrap;gap:8px">${Object.entries(AR).map(([a,m])=>`<button class="pill" data-act="li_new" data-a="${na(a)}">+ ${esc(m.n)}</button>`).join('')}</div>
- ${O.length?`<div class="gl">Today · ${dn} of ${O.length} done</div><div class="card">${O.map(o=>row(o.i)).join('')}</div>`:''}
+ ${O.length?`<div class="gl">Today Â· ${dn} of ${O.length} done</div><div class="card">${O.map(o=>row(o.i)).join('')}</div>`:''}
  ${later.length?`<div class="gl">${O.length?'Other plans':'All plans'}</div><div class="card">${later.map(row).join('')}</div>`:''}
  ${its.length?'':'<div class="empty">No plans yet. Tap a + button above to add one.</div>'}
- <div class="gl">Browse by area</div><div class="row" style="flex-wrap:wrap;gap:8px">${Object.entries(AR).map(([a,m])=>`<button class="pill" data-act="li_area" data-a="${a}">${esc(m.n)} ›</button>`).join('')}<button class="pill" data-act="ar_new">+ New area</button></div>
+ <div class="gl">Browse by area</div><div class="row" style="flex-wrap:wrap;gap:8px">${Object.entries(AR).map(([a,m])=>`<button class="pill" data-act="li_area" data-a="${a}">${esc(m.n)} âº</button>`).join('')}<button class="pill" data-act="ar_new">+ New area</button></div>
  <div class="gf">Anything you schedule here appears on Home, Calendar and Insights, with reminders.</div>`}
 
 const HK={study:/study|read|learn|homework|revis/i,gym:/gym|exercise|workout|run|train|stretch|walk/i,meals:/water|meal|eat|vitamin|protein|fruit/i,recipes:/cook|bake/i,cook:/cook|bake/i};
@@ -934,17 +934,17 @@ function vArea(a){
   G=`<div class="gl">This week</div><div class="grp agw"><div class="ag"><div class="h"></div>${days.map(k=>`<div class="h ${k===t?'t':''}">${DN[Engine.parse(k).getDay()]}<b>${+k.slice(8)}</b></div>`).join('')}
   ${R.map(r=>`<div class="rl">${a==='study'?`<i style="width:8px;height:8px;border-radius:50%;flex:none;background:${pc[['High','Medium','Low'][rp[r]]]}"></i>`:''}<span style="overflow:hidden;text-overflow:ellipsis">${esc(r)}</span></div>${days.map(k=>`<div class="c ${k===t?'t':''}">${S.filter(i=>rowOf(i)===r&&sOn(i,k)).sort(bt).map(i=>`<button class="agb ${lc(i,k)}" style="--c:${m.c}" data-act="li_run" data-i="${i.id}" data-k="${k}">${cell(i)}</button>`).join('')}</div>`).join('')}`).join('')}
   ${a==='meals'?`<div class="rl">Total</div>${days.map(k=>{const q=S.filter(i=>sOn(i,k)).reduce((z,i)=>z+nut(i).kcal,0);return`<div class="c ${k===t?'t':''}"><span class="mute" style="font-size:12px;font-weight:700">${q?q+' kcal':''}</span></div>`}).join('')}`:''}
-  </div></div><div class="gf">${a==='study'?'Rows are subjects, highest priority first. ':''}Filled = done · red = missed · amber outline = due now. Tap a block to open it.</div>`}
- if(isR&&its.length)G=`<div class="rg">${its.map(i=>`<div class="rcard" data-act="li_run" data-i="${i.id}" data-k="${t}" style="cursor:pointer"><div class="row"><i style="color:${m.c};display:inline-flex">${ico(m.i,20)}</i><b class="sp" style="font-size:15px">${esc(i.title)}</b></div><div class="mute" style="font-size:12px">${i.kind||'Cooking'} · ${(+i.prep||0)+stp(i).reduce((z,x)=>z+x.m,0)} min${nut(i).kcal?' · '+nut(i).kcal+' kcal':''}</div><div class="mute" style="font-size:12px">${schTxt(i)}${used(i)?` · in ${used(i)} meal${used(i)>1?'s':''}`:''}</div>${a==='cook'?`<button class="pill on" style="justify-content:center;margin-top:4px" data-act="li_cook" data-i="${i.id}">Start</button>`:''}</div>`).join('')}</div>`;
+  </div></div><div class="gf">${a==='study'?'Rows are subjects, highest priority first. ':''}Filled = done Â· red = missed Â· amber outline = due now. Tap a block to open it.</div>`}
+ if(isR&&its.length)G=`<div class="rg">${its.map(i=>`<div class="rcard" data-act="li_run" data-i="${i.id}" data-k="${t}" style="cursor:pointer"><div class="row"><i style="color:${m.c};display:inline-flex">${ico(m.i,20)}</i><b class="sp" style="font-size:15px">${esc(i.title)}</b></div><div class="mute" style="font-size:12px">${i.kind||'Cooking'} Â· ${(+i.prep||0)+stp(i).reduce((z,x)=>z+x.m,0)} min${nut(i).kcal?' Â· '+nut(i).kcal+' kcal':''}</div><div class="mute" style="font-size:12px">${schTxt(i)}${used(i)?` Â· in ${used(i)} meal${used(i)>1?'s':''}`:''}</div>${a==='cook'?`<button class="pill on" style="justify-content:center;margin-top:4px" data-act="li_cook" data-i="${i.id}">Start</button>`:''}</div>`).join('')}</div>`;
  const OT=[];if(cl)its.forEach(i=>lines(i.tasks).forEach((x,n)=>{if(!(i.td||{})[x])OT.push(crow(false,'li_task',`data-i="${i.id}"`,n,x,m.c,esc(i.title)))}));
- const irow=i=>`<div class="item" data-act="li_run" data-i="${i.id}" data-k="${t}" style="cursor:pointer"><div class="ic" style="background:${m.c}1f;color:${m.c}">${ico(m.i)}</div><div class="sp"><div>${esc(i.title)}</div><div class="mute">Not scheduled · tap to open</div></div>${chipL('planned')}</div>`;
+ const irow=i=>`<div class="item" data-act="li_run" data-i="${i.id}" data-k="${t}" style="cursor:pointer"><div class="ic" style="background:${m.c}1f;color:${m.c}">${ico(m.i)}</div><div class="sp"><div>${esc(i.title)}</div><div class="mute">Not scheduled Â· tap to open</div></div>${chipL('planned')}</div>`;
  let hist='';if(a==='cook'){const q=[];its.forEach(i=>Object.entries(AL()[i.id]||{}).forEach(([k,v])=>{if(v.s==='done')q.push([k,i.title])}));q.sort().reverse();hist=q.length?`<div class="gl">Recently cooked</div><div class="grp">${q.slice(0,5).map(([k,x])=>`<div class="rw" style="min-height:44px"><span>${esc(x)}</span><span class="sp"></span><span class="mute">${sd(k)}</span></div>`).join('')}</div>`:''}
  return`<div class="row"><button class="nav" data-act="li_back" aria-label="Back">${svg('<path d="M15 6l-6 6 6 6"/>','',2.4,18)}</button><div class="sp"><div class="mute" style="font-weight:600">${m.x&&m.d?esc(m.d):'Life area'}</div><h1>${esc(m.n)}</h1></div>${m.x?'<button class="pill" data-act="ar_edit">Edit</button>':''}<button class="plus" data-act="li_new" data-a="${na}" aria-label="New">${PLUS}</button></div>${seg('areas')}
- <div class="grp gh" style="margin-top:16px"><div class="row"><div class="sp"><b style="font-size:24px">${g.sch?pct+'%':'—'}</b><div class="mute">${g.c} of ${g.sch} scheduled this week${g.m?` · ${g.m} missed`:''}</div></div><div class="chip">${its.length} ${isR?'recipe':'plan'}${its.length===1?'':'s'}</div></div><div class="bar"><i style="width:${pct}%"></i></div></div>
+ <div class="grp gh" style="margin-top:16px"><div class="row"><div class="sp"><b style="font-size:24px">${g.sch?pct+'%':'â'}</b><div class="mute">${g.c} of ${g.sch} scheduled this week${g.m?` Â· ${g.m} missed`:''}</div></div><div class="chip">${its.length} ${isR?'recipe':'plan'}${its.length===1?'':'s'}</div></div><div class="bar"><i style="width:${pct}%"></i></div></div>
  ${its.length?'':`<div class="empty">Nothing here yet.<br><br><button class="btn" data-act="li_new" data-a="${na}">Add ${noun}</button></div>`}
  ${fo?`<h2>Today</h2>${fo}`:S.length?'<div class="gf">Nothing scheduled in this area today.</div>':''}
- ${hb.length?`<div class="gl">Habits & reminders · ${hb.filter(x=>x.s!=='COMPLETED').length} to do</div><div class="card">${hb.map(({h})=>habitRow(h,t,t,1)).join('')}</div>`:''}
- ${G}${ex}${OT.length?`<div class="gl">Open tasks · ${OT.length}</div><div class="grp rc" style="margin-top:0">${OT.slice(0,6).join('')}</div>`:''}
+ ${hb.length?`<div class="gl">Habits & reminders Â· ${hb.filter(x=>x.s!=='COMPLETED').length} to do</div><div class="card">${hb.map(({h})=>habitRow(h,t,t,1)).join('')}</div>`:''}
+ ${G}${ex}${OT.length?`<div class="gl">Open tasks Â· ${OT.length}</div><div class="grp rc" style="margin-top:0">${OT.slice(0,6).join('')}</div>`:''}
  ${!isR&&U.length?`<div class="gl">Not scheduled yet</div><div class="card">${U.map(irow).join('')}</div>`:''}${hist}`}
 
 /* ---- create / edit ---- */
@@ -974,28 +974,28 @@ function itemSheet(ar,id){
 function runSheet(id,k){
  const i=IT().find(x=>x.id===id);if(!i)return;k=k||todayK();
  const m=AR[arOf(i)],l=lg(i,k),st=lc(i,k),t=todayK(),fut=k>t,ar=i.area,sc=sOn(i,k),H=AL()[id]||{};let b='',meta='';
- if(ar!=='gym'&&ar!=='meals'&&ar!=='recipes'){meta=`${i.subject||AR[ar].n} · ${i.pri||'Medium'} priority`;const tk=lines(i.tasks);b=tk.length?`<div class="gl">Tasks</div><div class="grp rc" style="margin-top:0">${tk.map((x,n)=>crow(!!(i.td||{})[x],'li_task',`data-i="${id}" data-k="${k}"`,n,x,m.c)).join('')}</div>`:''}
- if(ar==='gym'){const E=exs(i),S=l.sets||{},tot=E.reduce((a,e)=>a+e.s,0),dn=Object.values(S).reduce((a,c)=>a+c,0);meta=`${i.prog?i.prog+' · ':''}${dn} of ${tot} sets done`;
-  b=`<div class="gl">Exercises · tap a set when done</div><div class="grp rc" style="margin-top:0">${E.map((e,n)=>`<div class="rw st" style="padding:10px 16px;flex-wrap:wrap"><div class="sp"><div style="font-weight:600">${esc(e.n)}</div><div class="mute" style="font-size:12px">${e.s} × ${e.r}${e.w?' · '+e.w+' kg':''} · rest ${e.rest}s</div></div><div class="row" style="gap:6px;flex-wrap:wrap">${Array.from({length:e.s},(_,j)=>`<button class="mx" style="width:30px;height:30px;font-size:12px;font-weight:700;background:${j<(S[n]||0)?m.c:'var(--rest)'};color:${j<(S[n]||0)?'#fff':'var(--mute)'}" data-act="li_set" data-i="${id}" data-k="${k}" data-e="${n}" data-v="${j}" aria-label="Set ${j+1}">${j+1}</button>`).join('')}</div></div>`).join('')}</div>`}
- if(ar==='meals'){meta=`${i.slot||'Lunch'}${i.por?' · '+i.por:''}`;const ig=lines(i.ing);b=nutH(nut(i))+(ig.length?`<div class="gl">Ingredients</div><div class="grp">${ig.map(x=>`<div class="rw" style="min-height:44px">${esc(x)}</div>`).join('')}</div>`:'')}
- if(ar==='recipes'){const ig=lines(i.ing);meta=`${i.kind||'Cooking'}${i.serv?' · serves '+i.serv:''} · ${(+i.prep||0)+stp(i).reduce((s,x)=>s+x.m,0)} min`;b=nutH(nut(i))+(ig.length?`<div class="gl">Ingredients</div><div class="grp">${ig.map(x=>`<div class="rw" style="min-height:44px">${esc(x)}</div>`).join('')}</div>`:'')}
+ if(ar!=='gym'&&ar!=='meals'&&ar!=='recipes'){meta=`${i.subject||AR[ar].n} Â· ${i.pri||'Medium'} priority`;const tk=lines(i.tasks);b=tk.length?`<div class="gl">Tasks</div><div class="grp rc" style="margin-top:0">${tk.map((x,n)=>crow(!!(i.td||{})[x],'li_task',`data-i="${id}" data-k="${k}"`,n,x,m.c)).join('')}</div>`:''}
+ if(ar==='gym'){const E=exs(i),S=l.sets||{},tot=E.reduce((a,e)=>a+e.s,0),dn=Object.values(S).reduce((a,c)=>a+c,0);meta=`${i.prog?i.prog+' Â· ':''}${dn} of ${tot} sets done`;
+  b=`<div class="gl">Exercises Â· tap a set when done</div><div class="grp rc" style="margin-top:0">${E.map((e,n)=>`<div class="rw st" style="padding:10px 16px;flex-wrap:wrap"><div class="sp"><div style="font-weight:600">${esc(e.n)}</div><div class="mute" style="font-size:12px">${e.s} Ã ${e.r}${e.w?' Â· '+e.w+' kg':''} Â· rest ${e.rest}s</div></div><div class="row" style="gap:6px;flex-wrap:wrap">${Array.from({length:e.s},(_,j)=>`<button class="mx" style="width:30px;height:30px;font-size:12px;font-weight:700;background:${j<(S[n]||0)?m.c:'var(--rest)'};color:${j<(S[n]||0)?'#fff':'var(--mute)'}" data-act="li_set" data-i="${id}" data-k="${k}" data-e="${n}" data-v="${j}" aria-label="Set ${j+1}">${j+1}</button>`).join('')}</div></div>`).join('')}</div>`}
+ if(ar==='meals'){meta=`${i.slot||'Lunch'}${i.por?' Â· '+i.por:''}`;const ig=lines(i.ing);b=nutH(nut(i))+(ig.length?`<div class="gl">Ingredients</div><div class="grp">${ig.map(x=>`<div class="rw" style="min-height:44px">${esc(x)}</div>`).join('')}</div>`:'')}
+ if(ar==='recipes'){const ig=lines(i.ing);meta=`${i.kind||'Cooking'}${i.serv?' Â· serves '+i.serv:''} Â· ${(+i.prep||0)+stp(i).reduce((s,x)=>s+x.m,0)} min`;b=nutH(nut(i))+(ig.length?`<div class="gl">Ingredients</div><div class="grp">${ig.map(x=>`<div class="rw" style="min-height:44px">${esc(x)}</div>`).join('')}</div>`:'')}
  const hs=Object.entries(H).filter(([,v])=>v.s).sort((x,y)=>x[0]<y[0]?1:-1).slice(0,6);
- sheet(`<div class="row"><div class="ic" style="background:${m.c}1f;color:${m.c}">${ico(m.i)}</div><div class="sp"><div style="font-size:20px;font-weight:800">${esc(i.title)}</div><div class="mute">${meta?esc(meta)+' · ':''}${schTxt(i)}${k!==t?' · '+sd(k):''}</div></div>${sc||st==='planned'?chipL(st):''}</div>${b}
+ sheet(`<div class="row"><div class="ic" style="background:${m.c}1f;color:${m.c}">${ico(m.i)}</div><div class="sp"><div style="font-size:20px;font-weight:800">${esc(i.title)}</div><div class="mute">${meta?esc(meta)+' Â· ':''}${schTxt(i)}${k!==t?' Â· '+sd(k):''}</div></div>${sc||st==='planned'?chipL(st):''}</div>${b}
  <div class="row" style="margin-top:18px;flex-wrap:wrap">${ar==='recipes'?`<button class="btn" data-act="li_cook" data-i="${id}">Start cooking</button>`:''}${fut?'':`<button class="btn ${ar==='recipes'?'g':''}" data-act="li_done" data-i="${id}" data-k="${k}">${ar==='meals'?'Mark eaten':ar==='recipes'?'Log as cooked':ar==='gym'?'Finish workout':'Complete'}</button>${ar==='recipes'?'':`<button class="btn g" data-act="li_skip" data-i="${id}" data-k="${k}">Skip</button>`}`}${l.s?`<button class="btn d" data-act="li_clr" data-i="${id}" data-k="${k}">Clear</button>`:''}</div>
  <div class="row" style="margin-top:10px"><button class="btn g" data-act="li_edit" data-i="${id}">Edit</button></div>
- ${hs.length?`<div class="gl">History</div><div class="grp">${hs.map(([d,v])=>`<div class="rw" style="min-height:44px"><span>${sd(d)}</span><span class="sp"></span><span class="mute">${v.s==='done'?'Completed':'Skipped'}${v.sets?' · '+Object.values(v.sets).reduce((a,c)=>a+c,0)+' sets':''}</span></div>`).join('')}</div>`:''}`);
+ ${hs.length?`<div class="gl">History</div><div class="grp">${hs.map(([d,v])=>`<div class="rw" style="min-height:44px"><span>${sd(d)}</span><span class="sp"></span><span class="mute">${v.s==='done'?'Completed':'Skipped'}${v.sets?' Â· '+Object.values(v.sets).reduce((a,c)=>a+c,0)+' sets':''}</span></div>`).join('')}</div>`:''}`);
 }
 
 /* ---- cooking / baking flow: Ingredients > Preparation > Steps > Timing > Completion ---- */
 function cookSheet(){
  const c=V.ck,i=IT().find(x=>x.id===c.id);if(!i){closeSheet();return}
  const ing=lines(i.ing),S=stp(i),act=S.reduce((a,x)=>a+x.m,0),prep=+i.prep||0,n=c.n,col=AR.cook.c;let b='';
- if(n===0)b=`<div class="gl" style="margin-top:0">${ing.length} ingredient${ing.length===1?'':'s'}${i.serv?' · serves '+i.serv:''}</div><div class="grp rc" style="margin-top:0">${ing.map((x,j)=>crow(!!c.ing[j],'ck_i','',j,x,col)).join('')}</div>`;
+ if(n===0)b=`<div class="gl" style="margin-top:0">${ing.length} ingredient${ing.length===1?'':'s'}${i.serv?' Â· serves '+i.serv:''}</div><div class="grp rc" style="margin-top:0">${ing.map((x,j)=>crow(!!c.ing[j],'ck_i','',j,x,col)).join('')}</div>`;
  if(n===1)b=`<div class="tp" style="margin-top:0"><div class="stat"><span class="mute">Prep</span><div>${prep}m</div></div><div class="stat"><span class="mute">${i.kind==='Baking'?'Bake':'Cook'}</span><div>${act}m</div></div><div class="stat"><span class="mute">Total</span><div>${prep+act}m</div></div></div><div class="gl">Preparation</div><div class="grp"><div style="padding:14px 16px">${i.note?esc(i.note).replace(/\n/g,'<br>'):'Measure and prepare everything on the ingredients list before you start.'}</div></div>`;
  if(n===2)b=`<div class="grp rc" style="margin-top:0">${S.map((s,j)=>crow(!!c.stp[j],'ck_s','',j,s.t,col,s.m?s.m+' min':'')).join('')}</div>`;
  if(n===3)b=`<div class="grp">${S.map((s,j)=>{const e=V.tm[i.id+':'+j];return`<div class="rw" style="min-height:58px"><div class="sp"><div style="font-weight:600">${esc(s.t)}</div><div class="mute" style="font-size:12px">${s.m?s.m+' min':'No timer'}</div></div>${s.m?(e?`<span class="chip" style="color:${col}"><span data-cd="${e}">${fmtCd(e-Date.now())}</span></span>`:`<button class="pill" data-act="ck_t" data-v="${j}">Start timer</button>`):''}</div>`}).join('')}</div><div class="gf">Total ${prep+act} min: ${prep} prep + ${act} ${i.kind==='Baking'?'baking':'cooking'}.</div>`;
  if(n===4)b=`<div style="text-align:center;padding:18px 0"><div style="color:${col};display:grid;place-items:center;margin-bottom:10px">${svg(CK,'',2,54)}</div><div style="font-size:20px;font-weight:800">${esc(i.title)} is ready</div><div class="mute">Nutrition per serving</div>${nutH(nut({...i,recipe:''}))}</div>`;
- sheet(`<div id="ckw"><div class="ios-top"><button data-act="${n?'ck_n':'close2'}" data-v="-1">${n?'Back':'Close'}</button><b>${CKS[n]}</b>${n<4?'<button data-act="ck_n" data-v="1">Next</button>':'<button data-act="ck_fin">Finish</button>'}</div><div class="bar" style="margin:-4px 0 12px"><i style="width:${(n+1)*20}%"></i></div><div class="mute" style="margin-bottom:10px">${esc(i.title)} · stage ${n+1} of 5</div>${b}</div>`);
+ sheet(`<div id="ckw"><div class="ios-top"><button data-act="${n?'ck_n':'close2'}" data-v="-1">${n?'Back':'Close'}</button><b>${CKS[n]}</b>${n<4?'<button data-act="ck_n" data-v="1">Next</button>':'<button data-act="ck_fin">Finish</button>'}</div><div class="bar" style="margin:-4px 0 12px"><i style="width:${(n+1)*20}%"></i></div><div class="mute" style="margin-bottom:10px">${esc(i.title)} Â· stage ${n+1} of 5</div>${b}</div>`);
 }
 
 /* ---- Home: what is happening now, what is next ---- */
@@ -1004,14 +1004,14 @@ function lifeNow(a){
  const at=o=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()+tmin(o.t)*6e4},end=o=>o.t?tmin(o.t)+(o.i.sch.dur||30):1440;
  const cur=O.filter(o=>o.st==='due'&&n<end(o)),late=O.filter(o=>o.st==='due'&&!cur.includes(o)),nx=O.filter(o=>o.st==='scheduled'&&o.t).slice(0,3),dn=O.filter(o=>o.st==='completed').length;
  const sec=(l,a,f)=>a.length?`<div class="gl">${l}</div><div class="grp">${a.map(f).join('')}</div>`:'';
- return(a?'':'<h2>Now & next</h2>')+`${sec('Now',cur,o=>orow(o,o.t?'Happening now · until '+hm(end(o)):'Anytime today'))}${sec('Up next',nx,o=>orow(o,`Starts in <b data-cd="${at(o)}">${fmtCd(at(o)-Date.now())}</b>${o.i.sch.rem?' · reminder '+o.i.sch.rem+' min before':''}`))}${sec('Still open',late,o=>orow(o,'Was due at '+o.t))}<div class="gf">${dn} of ${O.length} scheduled activit${O.length===1?'y':'ies'} done today</div>`}
+ return(a?'':'<h2>Now & next</h2>')+`${sec('Now',cur,o=>orow(o,o.t?'Happening now Â· until '+hm(end(o)):'Anytime today'))}${sec('Up next',nx,o=>orow(o,`Starts in <b data-cd="${at(o)}">${fmtCd(at(o)-Date.now())}</b>${o.i.sch.rem?' Â· reminder '+o.i.sch.rem+' min before':''}`))}${sec('Still open',late,o=>orow(o,'Was due at '+o.t))}<div class="gf">${dn} of ${O.length} scheduled activit${O.length===1?'y':'ies'} done today</div>`}
 const _vt=vToday;vToday=()=>{const h=_vt(),b=lifeNow();return b?h.replace("<h2>Today's habits</h2>",b+"<h2>Today's habits</h2>"):h};
 
 /* ---- Calendar: one shared view of every system ---- */
 function lifeCal(){
  const k=V.sel,O=occ(k),ws=Engine.addDays(k,-Engine.parse(k).getDay()),rows=Object.keys(AR).filter(a=>IT().some(i=>arOf(i)===a&&i.sch&&i.sch.days.length));
  const RR=(D.routines||[]).filter(r=>rOn(r,k)&&r.steps.length);
- return(RR.length?`<div class="gl">Routines</div><div class="grp">${RR.map(r=>`<div class="rw"><span class="sp">${esc(r.name)}</span><span class="mute">${rDone(r,k)} of ${r.steps.length} steps${rFull(r,k)?' · Done':''}</span></div>`).join('')}</div>`:'')+(O.length?`<div class="gl">Study, gym, meals and cooking</div><div class="grp">${O.map(o=>orow(o,AR[arOf(o.i)].n+(o.i.sch.dur?' · '+o.i.sch.dur+' min':''))).join('')}</div>`:'')+
+ return(RR.length?`<div class="gl">Routines</div><div class="grp">${RR.map(r=>`<div class="rw"><span class="sp">${esc(r.name)}</span><span class="mute">${rDone(r,k)} of ${r.steps.length} steps${rFull(r,k)?' Â· Done':''}</span></div>`).join('')}</div>`:'')+(O.length?`<div class="gl">Study, gym, meals and cooking</div><div class="grp">${O.map(o=>orow(o,AR[arOf(o.i)].n+(o.i.sch.dur?' Â· '+o.i.sch.dur+' min':''))).join('')}</div>`:'')+
  (rows.length?`<div class="gl">Week at a glance</div><div class="grp"><div class="wg"><span></span>${'SMTWTFS'.split('').map((d,x)=>`<small class="${Engine.addDays(ws,x)===todayK()?'t':''}">${d}</small>`).join('')}</div>${rows.map(a=>`<div class="wg"><div style="font-weight:600;font-size:14px;color:${AR[a].c}">${AR[a].n}</div>${[0,1,2,3,4,5,6].map(x=>{const os=occ(Engine.addDays(ws,x)).filter(o=>arOf(o.i)===a),dn=os.filter(o=>o.st==='completed').length,full=os.length&&dn===os.length;return`<div class="wc ${full?'on':''}" style="--c:${AR[a].c};font-size:12px;font-weight:700;opacity:${os.length?1:.3};${os.length&&!full?`border-color:${AR[a].c};color:var(--text)`:''}">${os.length||''}</div>`}).join('')}</div>`).join('')}</div><div class="gf">Number = activities that day. Filled circle = all completed.</div>`:'')}
 const _vc=vCalendar;vCalendar=()=>_vc()+lifeCal();
 
@@ -1039,11 +1039,11 @@ function lifeIns(){
  if(sl.length>1){const bs=sl.reduce((a,b)=>b[1]>a[1]?b:a);M.push(`You follow through best in the ${{M:'morning',A:'afternoon',E:'evening'}[bs[0]]} (${Math.round(bs[1]*100)}% done).`)}
  if(W1.cm||W0.cm){const d=Math.round((hrs(W1)-hrs(W0))*10)/10;M.push(`Productive time: ${hrs(W1)} h this week, ${d>=0?'up':'down'} ${Math.abs(d)} h from last week.`)}
  const fn=(a)=>{const g=agg(W(27),t,i=>arOf(i)===a),its=areaItems(a);if(!its.length)return'';const pl=its.filter(i=>!(i.sch&&i.sch.days.length)).length,tot=g.c+g.s+g.m||1,seg2=(n,c)=>`<i style="width:${n/tot*100}%;background:${c}"></i>`;
-  return`<div class="item" style="display:block;min-height:0"><div class="row"><b class="sp" style="color:${AR[a].c}">${AR[a].n}</b><span class="mute" style="font-size:12px">${pl} planned · ${its.length-pl} scheduled · ${g.sch} sessions</span></div><div style="display:flex;height:8px;border-radius:9px;overflow:hidden;background:var(--rest);margin:8px 0 4px">${seg2(g.c,'var(--acc2)')}${seg2(g.s,'var(--mute)')}${seg2(g.m,'var(--bad)')}</div><div class="mute" style="font-size:12px">${g.c} completed · ${g.s} skipped · ${g.m} missed</div></div>`};
- return`<h2>Overall · last 4 weeks</h2><div class="tp" style="margin-top:0">${st('Discipline',allDis(W(27),t)==null?'—':allDis(W(27),t)+'%','habits, routines, plans & goals')}${st('Consistency',cons(act),'days with activity')}${st('Productivity',hrs(W1)+' h','done this week')}</div>
+  return`<div class="item" style="display:block;min-height:0"><div class="row"><b class="sp" style="color:${AR[a].c}">${AR[a].n}</b><span class="mute" style="font-size:12px">${pl} planned Â· ${its.length-pl} scheduled Â· ${g.sch} sessions</span></div><div style="display:flex;height:8px;border-radius:9px;overflow:hidden;background:var(--rest);margin:8px 0 4px">${seg2(g.c,'var(--acc2)')}${seg2(g.s,'var(--mute)')}${seg2(g.m,'var(--bad)')}</div><div class="mute" style="font-size:12px">${g.c} completed Â· ${g.s} skipped Â· ${g.m} missed</div></div>`};
+ return`<h2>Overall Â· last 4 weeks</h2><div class="tp" style="margin-top:0">${st('Discipline',allDis(W(27),t)==null?'â':allDis(W(27),t)+'%','habits, routines, plans & goals')}${st('Consistency',cons(act),'days with activity')}${st('Productivity',hrs(W1)+' h','done this week')}</div>
  <div class="gf">Kept separate on purpose: discipline is follow-through on what you scheduled, consistency is how many days you showed up, productivity is time spent completing work.</div>
  <h2>Discipline by week</h2><div class="bars">${wk.map(w=>`<i style="height:${Math.max(w,3)}%" title="${w}%"></i>`).join('')}</div><div class="row mute" style="font-size:12px"><span>3 weeks ago</span><span class="sp"></span><span>This week</span></div>
- <h2>Planned → scheduled → completed</h2><div class="card">${Object.keys(AR).map(fn).join('')||'<div class="empty">Add plans in Plan > Areas.</div>'}</div>
+ <h2>Planned â scheduled â completed</h2><div class="card">${Object.keys(AR).map(fn).join('')||'<div class="empty">Add plans in Plan > Areas.</div>'}</div>
  <h2>Patterns</h2><div class="card">${M.length?M.map(x=>`<div class="item" style="min-height:56px">${esc(x)}</div>`).join(''):'<div class="item" style="min-height:56px">Complete a few scheduled activities and patterns will appear here.</div>'}</div>`}
 const cons=a=>Math.round(a/28*100)+'%';
 /* Achievements: what you completed (habits, routines, plans) and how disciplined that makes you */
@@ -1052,7 +1052,7 @@ function winsCard(){const t=todayK();let n=0,a=0;const cnt=new Map();
  if(!n)return'';
  const dis=allDis(Engine.addDays(t,-27),t),lv=dis==null?'Keep going':dis>=80?'Highly disciplined':dis>=60?'Disciplined':dis>=40?'Building discipline':'Getting started';
  const top=[...cnt.entries()].sort((x,y)=>y[1].n-x[1].n).slice(0,6),mx=top[0][1].n;
- return`<div class="gl">Achieved · last 28 days</div><div class="card"><div class="row"><div class="sp"><div style="font-size:20px;font-weight:700">${lv}</div><div class="mute">You completed ${n} ${n===1?'thing':'things'} on ${a} of the last 28 days${dis==null?'':' · discipline '+dis+'%'}</div></div></div>${top.map(([nm,o])=>`<div class="item"><div class="sp"><div>${esc(nm)}</div><div style="height:6px;border-radius:3px;background:var(--line);margin-top:6px"><div style="height:100%;width:${Math.round(o.n/mx*100)}%;border-radius:3px;background:${o.c}"></div></div></div><span class="mute">${o.n}&times;</span></div>`).join('')}</div>`}
+ return`<div class="gl">Achieved Â· last 28 days</div><div class="card"><div class="row"><div class="sp"><div style="font-size:20px;font-weight:700">${lv}</div><div class="mute">You completed ${n} ${n===1?'thing':'things'} on ${a} of the last 28 days${dis==null?'':' Â· discipline '+dis+'%'}</div></div></div>${top.map(([nm,o])=>`<div class="item"><div class="sp"><div>${esc(nm)}</div><div style="height:6px;border-radius:3px;background:var(--line);margin-top:6px"><div style="height:100%;width:${Math.round(o.n/mx*100)}%;border-radius:3px;background:${o.c}"></div></div></div><span class="mute">${o.n}&times;</span></div>`).join('')}</div>`}
 const _vi=vInsights;vInsights=()=>_vi()+winsCard()+lifeIns();
 
 /* ---- user-created areas: same planning, schedule, reminders, tracking and analysis ---- */
@@ -1194,12 +1194,12 @@ const ring=(p,c,z=52)=>{const r=z/2-5,C=2*Math.PI*r;return`<div class="xg-ring" 
 const mkFresh=()=>{let l=0;return()=>{const f=Date.now()-l>1500;l=Date.now();return f}},frA=mkFresh(),frW=mkFresh();
 /* ---- Areas tab: card grid ---- */
 window.xgGrid=()=>{const t=new Date(),k=dk(t);return`<div class="xg-hd"><b>Planner</b><button class="xg-btn xg-ghost" data-act="hf_example">Example</button><button class="xg-btn" data-act="xg_newarea">${ic('plus',14,2.6)}New Area</button></div><div class="xg-grid ${frA()?'xg-fresh':''}">${D.areas.map((a,i)=>{const s=stat(a,t),nx=nextOf(a),up=order(s.l.filter(h=>!h.done[k]&&(h.start==null||h.end>nowM()))).slice(0,3);
-return`<div class="xg-card" style="--i:${i}" role="button" data-act="xg_open" data-xa="${a.id}"><div class="xg-r">${tile(a.icon,a.color,46)}<div class="xg-sp"><div class="xg-t">${esc(a.name)}</div><div class="xg-m xg-sm">${s.d}/${s.n} done · ${fd(s.cm)} / ${fd(s.pl)}</div></div>${ring(s.p,a.color)}</div>
-<div><div style="font-weight:600">${s.n} habit${s.n==1?'':'s'} • ${fd(s.pl)} planned</div><div class="xg-m xg-sm">${nx?`Next: ${esc(nx.name)} · ${nx.start==null?'Anytime':f12(nx.start)}`:s.n?'All done for today':'Nothing scheduled today'}</div></div>
+return`<div class="xg-card" style="--i:${i}" role="button" data-act="xg_open" data-xa="${a.id}"><div class="xg-r">${tile(a.icon,a.color,46)}<div class="xg-sp"><div class="xg-t">${esc(a.name)}</div><div class="xg-m xg-sm">${s.d}/${s.n} done Â· ${fd(s.cm)} / ${fd(s.pl)}</div></div>${ring(s.p,a.color)}</div>
+<div><div style="font-weight:600">${s.n} habit${s.n==1?'':'s'} â¢ ${fd(s.pl)} planned</div><div class="xg-m xg-sm">${nx?`Next: ${esc(nx.name)} Â· ${nx.start==null?'Anytime':f12(nx.start)}`:s.n?'All done for today':'Nothing scheduled today'}</div></div>
 ${up.length?`<div class="xg-up">${up.map(h=>`<div class="xg-ur"><span class="tm">${h.start==null?'Anytime':f12(h.start)}</span><span class="n">${esc(h.name)}</span><span class="xg-m">${fd(h.dur)}</span></div>`).join('')}</div>`:''}
 <button class="xg-add" data-act="xg_addh" data-xa="${a.id}">${ic('plus',15,2.4)}Add habit</button></div>`}).join('')}
 <button class="xg-card xg-new" style="--i:${D.areas.length}" data-act="xg_newarea">${ic('plus',26,2.2)}Add New Area</button></div>${weekTable(flt,true)}`};
-/* ---- Habits tab: weekly grid (days top→bottom, time of day left→right) ---- */
+/* ---- Habits tab: weekly grid (days topâbottom, time of day leftâright) ---- */
 function weekTable(af,full){const now=new Date(),td=now.getDay(),nm=nowM(),days=[1,2,3,4,5,6,0],names='Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
  const hs=[];D.areas.forEach(a=>{if(af==='all'||a.id===af)a.habits.forEach(h=>hs.push({a,h}))});
  const tot=hs.reduce((x,{h})=>x+h.dur*(h.rep==='daily'?7:h.days.length),0),timed=hs.filter(x=>x.h.start!=null),hasFlex=hs.some(x=>x.h.start==null);
@@ -1230,11 +1230,11 @@ return`<div><div class="xg-r"><button class="xg-pill" data-act="xg_back">${ic('c
 <div class="xg-r" style="margin:18px 0 14px">${tile(a.icon,c,56)}<div class="xg-sp"><div class="xg-h1">${esc(a.name)}</div><div class="xg-m">${esc(a.desc||'')}</div></div>${ring(s.p,c,64)}</div>
 <div class="xg-card" style="cursor:default;gap:16px"><div class="xg-stats"><div><b>${s.d}/${s.n}</b><span>Completed</span></div><div><b>${fd(s.cm)}</b><span>of ${fd(s.pl)}</span></div><div><b style="color:${miss?'var(--bad)':'inherit'}">${miss}</b><span>Missed</span></div><div><b>${aS(a)}d</b><span>Streak</span></div></div>
 <div><div class="xg-r xg-sm" style="margin-bottom:8px"><b class="xg-sp">Last 7 days</b><span class="xg-m">${wp}% weekly</span></div><div class="xg-wk">${wk}</div></div></div>
-<div class="xg-h2">Today${nx?` · Next ${nx.start==null?'anytime':f12(nx.start)}`:''}</div>
-<div class="xg-tl">${s.l.length?order(s.l).map(h=>{const st=status(h,k),isN=nx&&nx.id===h.id&&st!=='now'&&st!=='flex',hs=hS(h);return`<div class="xg-ev ${st} ${isN?'next':''}" style="--c:${c}"><div class="tm">${h.start==null?'Anytime':f12(h.start)}</div><div class="dot"></div><div class="xg-ec" data-act="xg_edith" data-xa="${a.id}" data-xh="${h.id}"><div class="xg-sp"><div class="nm" style="font-weight:600">${esc(h.name)}${st==='now'?'<span class="xg-bd">Now</span>':isN?'<span class="xg-bd">Next</span>':''}</div><div class="xg-m xg-sm">${h.start==null?'Flexible':f12(h.start)+'–'+f12(h.end)} · ${fd(h.dur)}${h.track&&hs?` · ${hs}d streak`:''}${st==='missed'?' · <span style="color:var(--bad)">Missed</span>':''}</div></div><button class="xg-chk ${h.done[k]?'on':''} ${pid===h.id?'pop':''}" style="--c:${c}" data-act="xg_tog" data-xa="${a.id}" data-xh="${h.id}" aria-label="Toggle done">${h.done[k]?ic('check',16,3.4):''}</button></div></div>`}).join(''):'<div class="xg-m" style="padding:16px 4px">Nothing scheduled today.</div>'}</div>
+<div class="xg-h2">Today${nx?` Â· Next ${nx.start==null?'anytime':f12(nx.start)}`:''}</div>
+<div class="xg-tl">${s.l.length?order(s.l).map(h=>{const st=status(h,k),isN=nx&&nx.id===h.id&&st!=='now'&&st!=='flex',hs=hS(h);return`<div class="xg-ev ${st} ${isN?'next':''}" style="--c:${c}"><div class="tm">${h.start==null?'Anytime':f12(h.start)}</div><div class="dot"></div><div class="xg-ec" data-act="xg_edith" data-xa="${a.id}" data-xh="${h.id}"><div class="xg-sp"><div class="nm" style="font-weight:600">${esc(h.name)}${st==='now'?'<span class="xg-bd">Now</span>':isN?'<span class="xg-bd">Next</span>':''}</div><div class="xg-m xg-sm">${h.start==null?'Flexible':f12(h.start)+'â'+f12(h.end)} Â· ${fd(h.dur)}${h.track&&hs?` Â· ${hs}d streak`:''}${st==='missed'?' Â· <span style="color:var(--bad)">Missed</span>':''}</div></div><button class="xg-chk ${h.done[k]?'on':''} ${pid===h.id?'pop':''}" style="--c:${c}" data-act="xg_tog" data-xa="${a.id}" data-xh="${h.id}" aria-label="Toggle done">${h.done[k]?ic('check',16,3.4):''}</button></div></div>`}).join(''):'<div class="xg-m" style="padding:16px 4px">Nothing scheduled today.</div>'}</div>
 <button class="xg-add" style="margin-top:8px" data-act="xg_addh" data-xa="${a.id}">${ic('plus',15,2.4)}Add habit</button>
 <div class="xg-h2">This week</div>${weekTable(a.id,false)}
-${off.length?`<div class="xg-h2">Other days</div><div class="xg-g">${order(off).map(h=>`<div class="xg-w" data-act="xg_edith" data-xa="${a.id}" data-xh="${h.id}" style="cursor:pointer"><span>${esc(h.name)}<div class="xg-m xg-sm">${h.start==null?'Flexible':f12(h.start)} · ${fd(h.dur)}</div></span><span class="xg-m xg-sm">${h.days.map(d=>WD[d]).join(' ')}</span></div>`).join('')}</div>`:''}</div>`}
+${off.length?`<div class="xg-h2">Other days</div><div class="xg-g">${order(off).map(h=>`<div class="xg-w" data-act="xg_edith" data-xa="${a.id}" data-xh="${h.id}" style="cursor:pointer"><span>${esc(h.name)}<div class="xg-m xg-sm">${h.start==null?'Flexible':f12(h.start)} Â· ${fd(h.dur)}</div></span><span class="xg-m xg-sm">${h.days.map(d=>WD[d]).join(' ')}</span></div>`).join('')}</div>`:''}</div>`}
 function ensure(){if(!$('#xg-det'))document.body.insertAdjacentHTML('beforeend','<div id="xg-dim" class="xg-dim"></div><div id="xg-det" class="xg-det"></div><div id="xg-sh" class="xg-sheet"></div>')}
 function refresh(){ensure();const a=open&&D.areas.find(x=>x.id===open);$('#xg-det').innerHTML=a?detail(a):'';if(!a){open=null;$('#xg-dim').classList.remove('on');$('#app').classList.remove('under-in','under-out')}if(!open){try{render()}catch(e){}}}
 const RM=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -1258,7 +1258,7 @@ sheet(`<div class="xg-top"><button data-act="xg_close">Cancel</button><b>${a?'Ed
 <div class="xg-g"><div class="xg-w"><input class="l" id="xa-n" value="${esc(t.name)}" maxlength="24" placeholder="Name e.g. Reading, Work, Sleep" style="font-size:18px;font-weight:600"></div><div class="xg-w"><input class="l" id="xa-d" value="${esc(t.desc)}" maxlength="80" placeholder="Description"></div></div>
 <div class="xg-g"><div class="xg-pk" id="xa-i">${PICK.map(i=>`<button data-act="xg_pick" data-xv="${i}" class="${i===t.icon?'on':''}" aria-label="${i}">${ic(i,22)}</button>`).join('')}</div></div>
 <div class="xg-g"><div class="xg-pk cl" id="xa-c">${COL.map(c=>`<button data-act="xg_pcol" data-xv="${c}" class="${c===t.color?'on':''}" style="background:${c}" aria-label="Colour"></button>`).join('')}</div></div>
-${a?`<div class="xg-g"><button class="xg-del" data-act="xg_dela" data-xa="${id}">Delete area</button></div>`:`<div class="xg-m xg-sm" style="margin:0 4px 6px">Habits — one per line (optional)</div><div class="xg-g"><textarea id="xa-h" rows="4" placeholder="Read 20 pages&#10;Review notes"></textarea>${rw('sun',COL[2],'Default start','<input type="time" id="xa-s" value="09:00">')}${rw('timer',COL[4],'Default duration (min)','<input type="number" inputmode="numeric" id="xa-u" value="30" min="5" style="width:80px">')}</div><div class="xg-m xg-sm" style="margin:0 4px">Habits are stacked one after another from the start time.</div>`}`)}
+${a?`<div class="xg-g"><button class="xg-del" data-act="xg_dela" data-xa="${id}">Delete area</button></div>`:`<div class="xg-m xg-sm" style="margin:0 4px 6px">Habits â one per line (optional)</div><div class="xg-g"><textarea id="xa-h" rows="4" placeholder="Read 20 pages&#10;Review notes"></textarea>${rw('sun',COL[2],'Default start','<input type="time" id="xa-s" value="09:00">')}${rw('timer',COL[4],'Default duration (min)','<input type="number" inputmode="numeric" id="xa-u" value="30" min="5" style="width:80px">')}</div><div class="xg-m xg-sm" style="margin:0 4px">Habits are stacked one after another from the start time.</div>`}`)}
 document.addEventListener('input',e=>{const i=e.target.id;if(!S||!S.hasOwnProperty('aid')||!i)return;const st=$('#xh-s'),en=$('#xh-e'),du=$('#xh-d');
  if(i==='xh-s'||i==='xh-e'){if(!st.value||!en.value)return;let d=tm(en.value)-tm(st.value);if(d<=0)d+=1440;du.value=d}
  else if(i==='xh-d'&&st.value&&+du.value>0)en.value=hm(tm(st.value)+ +du.value);
@@ -1287,7 +1287,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-act^="xg_
   save();closeS();refresh();break}
  case'xg_dela':if(confirm('Delete this area and all its habits?')){D.areas=D.areas.filter(x=>x.id!==d.xa);if(flt===d.xa)flt='all';open=null;save();closeS();refresh()}break}});
 function note(t,b){toast('Reminder: '+t);try{if(Notification.permission==='granted')new Notification(b,{body:t})}catch(e){}}
-setInterval(()=>{const n=nowM(),k=dk(new Date());D.areas.forEach(a=>a.habits.forEach(h=>{const id=h.id+k;if(h.start==null||h.rem===''||h.done[k]||F[id]||!sch(h,new Date()))return;if(n===h.start-h.rem){F[id]=1;note(h.name+' · '+f12(h.start),a.name)}}))},15000);
+setInterval(()=>{const n=nowM(),k=dk(new Date());D.areas.forEach(a=>a.habits.forEach(h=>{const id=h.id+k;if(h.start==null||h.rem===''||h.done[k]||F[id]||!sch(h,new Date()))return;if(n===h.start-h.rem){F[id]=1;note(h.name+' Â· '+f12(h.start),a.name)}}))},15000);
 /* ---- Today tab: planned habits join the to-do list, ordered by time ---- */
 const todayList=()=>{const t=new Date();return D.areas.flatMap(a=>a.habits.filter(h=>sch(h,t)).map(h=>({a,h})))};
 window.xgToday=todayList;
@@ -1313,7 +1313,7 @@ var EX=[['Study','#5b5bf0',[['Read a chapter','8:00 AM'],['Practice problems','4
 function close(){var e=document.getElementById('hfx');if(e)e.remove()}
 function open(){
   close();
-  var h=EX.map(function(a){return '<div class="hfx-a" style="--c:'+a[1]+'"><b>'+a[0]+'<span style="color:'+a[1]+'">'+a[3]+'%</span></b>'+a[2].map(function(x){return '<i>'+x[1]+' · '+x[0]+'</i>'}).join('')+'<div class="hfx-bar"><s style="width:'+a[3]+'%"></s></div></div>'}).join('');
+  var h=EX.map(function(a){return '<div class="hfx-a" style="--c:'+a[1]+'"><b>'+a[0]+'<span style="color:'+a[1]+'">'+a[3]+'%</span></b>'+a[2].map(function(x){return '<i>'+x[1]+' Â· '+x[0]+'</i>'}).join('')+'<div class="hfx-bar"><s style="width:'+a[3]+'%"></s></div></div>'}).join('');
   var d=document.createElement('div');d.id='hfx';d.className='hfx';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');
   d.innerHTML='<div class="hfx-c"><h2>How Areas work</h2><p>A quick example. Nothing here is saved to your account.</p>'+h+
   '<ol class="hfx-s" id="hfx-s"><li>Create an Area for a part of your life.</li><li>Add habits to it and give each one a time.</li><li>Check habits off each day and watch the progress fill.</li><li>Everything you add is saved to your account.</li></ol>'+
@@ -1378,32 +1378,32 @@ try{var q=new URLSearchParams(location.search).get('r');if(q){var p=q.split('|')
 })();
 </script>
 <script>
-/* Real-name requirement: blocks the app until an allowed name is entered */
+/* Name choice: shown ONLY to one specific user, who must pick one of two names to continue */
 (function(){
-var BAD=/^\s*(ceo|admin|administrator|owner|boss|founder|president|moderator)\s*$/i;
-function bad(n,flag){return !!flag||!n||n.trim().length<2||BAD.test(n)}
-function gate(old,sug){
+var UID='fa61a440-d411-4c0f-a939-6710717daf67';
+var OPTS=['Ibadurahman','Haiballah'];
+function gate(){
  if(document.getElementById('hfName'))return;
- var st=document.createElement('style');st.textContent='#hfName{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:#0b0d12;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}#hfName h2{margin:0;font-size:26px}#hfName p{margin:0;max-width:340px;opacity:.85;line-height:1.45}#hfName input{width:min(320px,86%);padding:15px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-size:17px;text-align:center}#hfName button{width:min(320px,86%);padding:15px;border-radius:14px;border:0;background:#fff;color:#0b1220;font-size:17px;font-weight:600;cursor:pointer}#hfName .er{color:#ff9f9f;min-height:20px;font-size:14px}';
+ var st=document.createElement('style');st.textContent='#hfName{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:#0b0d12;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}#hfName h2{margin:0;font-size:26px}#hfName p{margin:0;max-width:340px;opacity:.85;line-height:1.45}#hfName button{width:min(320px,86%);padding:15px;border-radius:14px;border:0;background:#fff;color:#0b1220;font-size:17px;font-weight:600;cursor:pointer}#hfName button:disabled{opacity:.6}#hfName .er{color:#ff9f9f;min-height:20px;font-size:14px}';
  document.head.appendChild(st);
- var o=document.createElement('div');o.id='hfName';o.setAttribute('role','alertdialog');o.setAttribute('aria-label','Enter your real name');
- o.innerHTML='<h2>Please enter your real name</h2><p class="m"></p><input id="hfNameIn" type="text" maxlength="40" autocomplete="name" placeholder="Your real name"><div class="er" id="hfNameEr"></div><button id="hfNameBtn">Save and continue</button>';
- o.querySelector('.m').textContent=(old&&BAD.test(old)?'The name \u201C'+old.trim()+'\u201D is not allowed in HabitFlow. ':'A real name is required in HabitFlow. ')+'Enter your real name to continue using the app.';
+ var o=document.createElement('div');o.id='hfName';o.setAttribute('role','alertdialog');o.setAttribute('aria-label','Choose your name');
+ o.innerHTML='<h2>Choose your name</h2><p>Pick one of these two names to continue using the app.</p><div class="er" id="hfNameEr"></div>';
  document.body.appendChild(o);
- if(sug&&sug.length){var w=document.createElement('div');w.style.cssText='display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:340px';var lb=document.createElement('div');lb.style.cssText='width:100%;opacity:.7;font-size:14px';lb.textContent='Suggested:';w.appendChild(lb);sug.slice(0,4).forEach(function(s){var c=document.createElement('button');c.type='button';c.textContent=s;c.style.cssText='width:auto;padding:10px 16px;border-radius:20px;background:rgba(255,255,255,.14);color:#fff;font-size:16px';c.onclick=function(){document.getElementById('hfNameIn').value=s};w.appendChild(c)});o.insertBefore(w,document.getElementById('hfNameIn'))}
- var inp=document.getElementById('hfNameIn'),er=document.getElementById('hfNameEr'),btn=document.getElementById('hfNameBtn');
- btn.onclick=async function(){
-  var n=inp.value.trim().replace(/\s+/g,' ');
-  if(n.length<2||BAD.test(n)||!/^[\p{L}][\p{L}\s.'-]*$/u.test(n)){er.textContent='Please enter your real name (letters only, at least 2).';return}
-  btn.disabled=true;er.textContent='';
-  try{
-   var tk=await HF.api.token();
-   var r=await fetch(HF.api.url+'/auth/v1/user',{method:'PUT',headers:{apikey:HF.api.key,Authorization:'Bearer '+tk,'Content-Type':'application/json'},body:JSON.stringify({data:{name:n,name_required:false}})});
-   if(!r.ok)throw 0;
-   try{var s=JSON.parse(localStorage.getItem('habitflow.session')||'{}');s.name=n;localStorage.setItem('habitflow.session',JSON.stringify(s))}catch(e){}
-   location.reload();
-  }catch(e){er.textContent='Could not save. Check your connection and try again.';btn.disabled=false}
- };
+ var er=document.getElementById('hfNameEr');
+ function pick(n,all){
+  all.forEach(function(b){b.disabled=true});er.textContent='';
+  (async function(){
+   try{
+    var tk=await HF.api.token();
+    var r=await fetch(HF.api.url+'/auth/v1/user',{method:'PUT',headers:{apikey:HF.api.key,Authorization:'Bearer '+tk,'Content-Type':'application/json'},body:JSON.stringify({data:{name:n,name_required:false}})});
+    if(!r.ok)throw 0;
+    try{var s=JSON.parse(localStorage.getItem('habitflow.session')||'{}');s.name=n;localStorage.setItem('habitflow.session',JSON.stringify(s))}catch(e){}
+    location.reload();
+   }catch(e){er.textContent='Could not save. Check your connection and try again.';all.forEach(function(b){b.disabled=false})}
+  })();
+ }
+ var btns=[];
+ OPTS.forEach(function(n){var b=document.createElement('button');b.type='button';b.textContent=n;b.onclick=function(){pick(n,btns)};btns.push(b);o.insertBefore(b,er)});
 }
 async function check(){
  try{
@@ -1411,10 +1411,10 @@ async function check(){
   var tk=await HF.api.token();if(!tk)return;
   var r=await fetch(HF.api.url+'/auth/v1/user',{headers:{apikey:HF.api.key,Authorization:'Bearer '+tk}});
   if(!r.ok)return;
-  var u=await r.json(),m=u.user_metadata||{};
-  var sg=Array.isArray(m.name_suggest)&&m.name_suggest.length?m.name_suggest:null;
-  if(!sg&&u.email){var lp=String(u.email).split('@')[0].replace(/[^A-Za-z]/g,'');if(lp.length>=2)sg=[lp.charAt(0).toUpperCase()+lp.slice(1).toLowerCase()]}
-  if(bad(m.name,m.name_required))gate(m.name,sg);
+  var u=await r.json();
+  if(u.id!==UID)return;
+  var m=u.user_metadata||{};
+  if(OPTS.indexOf(m.name)===-1)gate();
  }catch(e){}
 }
 setTimeout(check,1500);
