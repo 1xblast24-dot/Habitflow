@@ -31,11 +31,28 @@ tr:last-child td{border-bottom:0}
 .pill.warn{background:rgba(251,191,36,.15);color:var(--warn)}
 .msg{padding:40px 16px;text-align:center;color:var(--mut)}
 .err{color:#ff9f9f}
+.big{font-size:15px;color:var(--txt)}
+tbody tr{cursor:pointer}tbody tr:hover{background:rgba(255,255,255,.04)}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;justify-content:center;align-items:flex-start;overflow-y:auto;padding:24px 12px}
+.pn{background:var(--card);border:1px solid var(--line);border-radius:16px;width:100%;max-width:720px;padding:18px}
+.pn h2{margin:0 0 2px;font-size:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:14px 0}
+.kv{background:rgba(255,255,255,.04);border-radius:10px;padding:10px}
+.kv span{display:block;color:var(--mut);font-size:12px;margin-bottom:2px}
+.kv b{font-size:14px;font-weight:600;word-break:break-all}
+.cnt{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin:12px 0}
+.cnt div{background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center}
+.cnt b{display:block;font-size:22px}.cnt span{font-size:12px;color:var(--mut)}
+.sec{margin:16px 0 6px;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.lst{margin:0;padding-left:18px;font-size:14px;line-height:1.6}
+pre{background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;max-height:320px;font-size:12px;white-space:pre-wrap;word-break:break-word}
+details summary{cursor:pointer;color:var(--acc);font-size:14px;margin-top:14px}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
 </head>
 <body>
 <header>
-  <div><h1>HabitFlow Admin</h1><div class="sub" id="who">Checking access…</div></div>
+  <div><h1>HabitFlow Admin</h1><div class="sub" id="who">Checking access…</div><div class="big" id="total"></div></div>
   <div style="display:flex;gap:8px"><button id="ref">Refresh</button><button id="csv">Export CSV</button><button id="back">Back to app</button></div>
 </header>
 <div id="main"><div class="msg">Loading…</div></div>
@@ -56,9 +73,9 @@ async function token(){
   }
   return s.token;
 }
-async function rpc(fn){
+async function rpc(fn,args){
   var t=await token();
-  return fetch(URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+t,'Content-Type':'application/json'},body:'{}'});
+  return fetch(URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(args||{})});
 }
 function msg(text,cls){main.innerHTML='';var d=document.createElement('div');d.className='msg '+(cls||'');d.textContent=text;main.appendChild(d)}
 function fmt(d){if(!d)return '—';var x=new Date(d);return isNaN(x)?'—':x.toLocaleString([], {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
@@ -71,7 +88,7 @@ async function load(){
     if(r.status===403||r.status===401||r.status===404){who.textContent='Not authorized';msg('You do not have access to this page.','err');return}
     if(!r.ok)throw 0;
     rows=await r.json();
-    var s=S();who.textContent='Signed in as '+(s&&s.name?s.name:'admin');
+    var s=S();who.textContent='Signed in as '+(s&&s.name?s.name:'admin');document.getElementById('total').textContent=rows.length+' total users';
     render();
   }catch(e){if(e==='noauth')return;msg('Could not load users. Check your connection and try again.','err')}
 }
@@ -103,7 +120,7 @@ function render(){
     var f=rows.filter(function(u){var s=((u.name||'')+' '+(u.email||'')).toLowerCase();return s.indexOf(q.toLowerCase())>-1});
     f.sort(function(a,b){var x=a[sortKey],y=b[sortKey];if(x==null)x='';if(y==null)y='';return (x>y?1:x<y?-1:0)*sortDir});
     f.forEach(function(u){
-      var r=document.createElement('tr');
+      var r=document.createElement('tr');r.title='Click for details';r.onclick=function(){openDetail(u)};
       function td(t){var c=document.createElement('td');c.textContent=t;r.appendChild(c);return c}
       td(u.name||'—');td(u.email||'—');td(fmt(u.created_at));
       td(u.last_sign_in_at?fmt(u.last_sign_in_at)+' ('+ago(u.last_sign_in_at)+')':'never');
@@ -114,6 +131,49 @@ function render(){
     cnt.textContent=f.length+' of '+rows.length+' users shown';
   }
   body();
+}
+
+function arr(x){return Array.isArray(x)?x:(x&&typeof x==='object'?Object.values(x):[])}
+function lab(o){if(o==null)return '—';if(typeof o!=='object')return String(o);var v=o.name||o.title||o.text||o.label||o.desc||o.id;return v?String(v):JSON.stringify(o).slice(0,80)}
+function kv(k,v){var d=document.createElement('div');d.className='kv';var s=document.createElement('span');s.textContent=k;var b=document.createElement('b');b.textContent=v==null||v===''?'—':v;d.appendChild(s);d.appendChild(b);return d}
+function sec(p,t){var h=document.createElement('div');h.className='sec';h.textContent=t;p.appendChild(h)}
+function list(p,items){if(!items.length){var e=document.createElement('div');e.className='sub';e.textContent='None';p.appendChild(e);return}var ul=document.createElement('ul');ul.className='lst';items.slice(0,60).forEach(function(i){var li=document.createElement('li');li.textContent=lab(i);ul.appendChild(li)});if(items.length>60){var li=document.createElement('li');li.textContent='… and '+(items.length-60)+' more';ul.appendChild(li)}p.appendChild(ul)}
+async function openDetail(u){
+  var ov=document.createElement('div');ov.className='ov';
+  var pn=document.createElement('div');pn.className='pn';ov.appendChild(pn);
+  function close(){document.removeEventListener('keydown',esc);ov.remove()}
+  function esc(e){if(e.key==='Escape')close()}
+  ov.onclick=function(e){if(e.target===ov)close()};document.addEventListener('keydown',esc);
+  document.body.appendChild(ov);
+  var top=document.createElement('div');top.className='top';
+  var tt=document.createElement('div');var h=document.createElement('h2');h.textContent=u.name||u.email||'User';var em=document.createElement('div');em.className='sub';em.textContent=u.email||'';tt.appendChild(h);tt.appendChild(em);top.appendChild(tt);
+  var x=document.createElement('button');x.textContent='Close';x.onclick=close;top.appendChild(x);pn.appendChild(top);
+  var body=document.createElement('div');body.className='msg';body.textContent='Loading…';pn.appendChild(body);
+  try{
+    var r=await rpc('admin_user_detail',{p_user_id:u.id});
+    if(!r.ok)throw 0;
+    var d=await r.json();
+    if(!d){body.textContent='User not found.';return}
+    body.className='';body.textContent='';
+    var a=d.account||{},p=d.planner||{},ar=d.areas||{};
+    var g=document.createElement('div');g.className='grid';
+    g.appendChild(kv('Name',a.name));g.appendChild(kv('Email',a.email));g.appendChild(kv('Login',a.provider));
+    g.appendChild(kv('Joined',fmt(a.created_at)));g.appendChild(kv('Last sign-in',a.last_sign_in_at?fmt(a.last_sign_in_at)+' ('+ago(a.last_sign_in_at)+')':'never'));
+    g.appendChild(kv('Email confirmed',a.email_confirmed_at?'Yes':'No'));g.appendChild(kv('Data last saved',fmt(d.data_updated_at)));g.appendChild(kv('Onboarded',p.onboarded?'Yes':'No'));g.appendChild(kv('User ID',a.id));
+    body.appendChild(g);
+    var areas=arr(ar.areas).length?arr(ar.areas):arr(p.areas);
+    var c=document.createElement('div');c.className='cnt';
+    [['Habits',arr(p.habits).length],['Goals',arr(p.goals).length],['Routines',arr(p.routines).length],['Items',arr(p.items).length],['Areas',areas.length],['Days logged',Object.keys(p.logs||{}).length],['Routine days',Object.keys(p.rlogs||{}).length]].forEach(function(x){var d=document.createElement('div');var b=document.createElement('b');b.textContent=x[1];var s=document.createElement('span');s.textContent=x[0];d.appendChild(b);d.appendChild(s);c.appendChild(d)});
+    body.appendChild(c);
+    sec(body,'Habits');list(body,arr(p.habits));
+    sec(body,'Goals');list(body,arr(p.goals));
+    sec(body,'Routines');list(body,arr(p.routines));
+    sec(body,'Areas');list(body,areas);
+    sec(body,'Push devices');
+    if((d.push||[]).length){var ul=document.createElement('ul');ul.className='lst';d.push.forEach(function(s){var li=document.createElement('li');li.textContent=(s.tz||'UTC')+' · added '+fmt(s.created_at);ul.appendChild(li)});body.appendChild(ul)}else{var e=document.createElement('div');e.className='sub';e.textContent='None';body.appendChild(e)}
+    var dt=document.createElement('details');var sm=document.createElement('summary');sm.textContent='Show raw data';dt.appendChild(sm);
+    var pre=document.createElement('pre');pre.textContent=JSON.stringify({planner:p,areas:ar},null,2);dt.appendChild(pre);body.appendChild(dt);
+  }catch(e){body.className='msg err';body.textContent='Could not load details.'}
 }
 function csv(){
   var h=['name','email','provider','created_at','last_sign_in_at','has_data','push_devices'];
