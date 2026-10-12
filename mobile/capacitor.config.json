@@ -5,6 +5,15 @@
   "server": {
     "url": "https://habitsflows.vercel.app/login",
     "cleartext": false,
-    "allowNavigation": ["habitsflows.vercel.app", "*.supabase.co"]
+    "allowNavigation": [
+      "habitsflows.vercel.app",
+      "*.supabase.co"
+    ]
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat",
+      "iconColor": "#388FCA"
+    }
   }
 }

@@ -51,6 +51,15 @@ jobs:
           done
           printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n  <color name="ic_launcher_background">#388FCA</color>\n</resources>\n' > "$RES/values/ic_launcher_background.xml"
 
+      - name: Notification icon and permissions
+        working-directory: mobile
+        run: |
+          RES=android/app/src/main/res
+          M=android/app/src/main/AndroidManifest.xml
+          mkdir -p "$RES/drawable"
+          convert ../icons/badge-96.png -resize 96x96 "$RES/drawable/ic_stat.png"
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n</manifest>#' "$M"
+
       - name: Build APK
         working-directory: mobile/android
         run: |
