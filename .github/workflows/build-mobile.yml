@@ -37,6 +37,9 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Install ImageMagick
+        run: sudo apt-get update -y && sudo apt-get install -y imagemagick
+
       - name: Apply HabitFlow app icon
         working-directory: mobile
         run: |
