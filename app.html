@@ -1429,4 +1429,55 @@ document.addEventListener('keydown',function(e){
  if(/^[1-9]$/.test(e.key)){var b=document.querySelectorAll('.dock button')[+e.key-1];if(b){b.click();e.preventDefault()}}
 });
 </script>
+<script>
+/* Native Android reminders (Capacitor Local Notifications). Runs only inside the Android app. */
+(function(){
+var C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return;
+var LN;try{LN=C.registerPlugin('LocalNotifications')}catch(e){return}
+var busy=false,last='';
+function hid(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h)%2147483000+1}
+function mn(s){var a=String(s||'0:0').split(':');return +a[0]*60+ +a[1]}
+function quiet(at){var q=(D.settings&&D.settings.quiet)||['22:00','07:00'],q0=mn(q[0]),q1=mn(q[1]),m=at.getHours()*60+at.getMinutes();return q0>q1?(m>=q0||m<q1):(m>=q0&&m<q1)}
+function plan(){var out=[],t=todayK(),now=Date.now()+5000;
+ function add(k,id,d,at,title){if(!at)return;var w=new Date(d+'T'+at+':00');if(+w<=now||quiet(w))return;out.push({k:k,id:id,d:d,at:w,title:title})}
+ for(var n=0;n<7;n++){var d=Engine.addDays(t,n);
+  Engine.dayProgress(D.habits,d,t,D.logs).items.forEach(function(x){if(x.s!=='COMPLETED'&&x.h.reminder)add('h',x.h.id,d,x.h.reminder,x.h.name)});
+  (D.routines||[]).forEach(function(r){if(r.remind&&r.time&&r.steps.length&&rOn(r,d)&&!rFull(r,d))add('r',r.id,d,r.time,r.name)});
+  occ(d).forEach(function(o){var i=o.i;if(i.sch&&i.sch.time&&o.st!=='completed'&&o.st!=='skipped')add('i',i.id,d,i.sch.time,i.title||'Plan')});
+ }
+ return out.sort(function(a,b){return a.at-b.at}).slice(0,60)}
+function mk(x,extra,at){return{id:hid(x.k+x.id+x.d+(extra||'')),title:'HabitFlow',body:x.title||x.t||'Reminder',channelId:'reminders',smallIcon:'ic_stat',actionTypeId:'HF_ACT',extra:{k:x.k,id:x.id,d:x.d,t:x.title||x.t,snz:extra?1:0},schedule:{at:at||x.at,allowWhileIdle:true}}}
+async function sync(){
+ if(busy)return;busy=true;
+ try{
+  var items=(D.settings&&D.settings.notify===false)?[]:plan(),sig=items.map(function(x){return x.k+x.id+x.d+x.at.getTime()}).join('|');
+  if(sig===last)return;
+  var p=await LN.getPending();
+  var cancel=(p.notifications||[]).filter(function(x){return !(x.extra&&x.extra.snz)}).map(function(x){return{id:x.id}});
+  if(cancel.length)await LN.cancel({notifications:cancel});
+  if(items.length)await LN.schedule({notifications:items.map(function(x){return mk(x)})});
+  last=sig;
+ }catch(e){}finally{busy=false}
+}
+function mark(x){var d=x.d;
+ if(x.k==='h'){var h=D.habits.find(function(q){return q.id===x.id});if(!h)return;D.logs[h.id]=D.logs[h.id]||{};D.logs[h.id][d]={v:Math.max(+h.target||1,1),note:'',skip:false}}
+ else if(x.k==='r'){var r=D.routines.find(function(q){return q.id===x.id});if(!r)return;D.rlogs=D.rlogs||{};D.rlogs[r.id]=D.rlogs[r.id]||{};D.rlogs[r.id][d]=r.steps.map(function(s){return s.id})}
+ else if(x.k==='i'){D.al=D.al||{};D.al[x.id]=D.al[x.id]||{};D.al[x.id][d]={s:'done',at:Date.now()}}
+ commit();last='';sync()}
+LN.addListener('localNotificationActionPerformed',function(ev){
+ var x=(ev.notification&&ev.notification.extra)||{};
+ if(ev.actionId==='done'&&x.id)mark(x);
+ else if(ev.actionId==='snooze')LN.schedule({notifications:[mk(x,'z'+Date.now(),new Date(Date.now()+600000))]});
+ else if(window.hfShowReminder)hfShowReminder('HabitFlow',x.t||'');
+});
+(async function(){try{
+ await LN.requestPermissions();
+ await LN.createChannel({id:'reminders',name:'Reminders',description:'Habit, routine and plan reminders',importance:5,visibility:1,vibration:true,lights:true});
+ await LN.registerActionTypes({types:[{id:'HF_ACT',actions:[{id:'done',title:'Done'},{id:'snooze',title:'Snooze 10 min'}]}]});
+ try{var ex=await LN.checkExactNotificationSetting();if(ex.exact_alarm!=='granted'&&!localStorage.getItem('hfExactAsked')){localStorage.setItem('hfExactAsked','1');if(confirm('For on-time reminders, allow "Alarms & reminders" for HabitFlow on the next screen.'))await LN.changeExactNotificationSetting()}}catch(e){}
+ sync();setInterval(sync,300000);
+ document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')sync()});
+}catch(e){}})();
+})();
+</script>
 </body></html>
