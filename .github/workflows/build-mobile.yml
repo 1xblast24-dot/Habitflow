@@ -63,6 +63,12 @@ jobs:
           convert ../icons/badge-96.png -resize 96x96 "$RES/drawable/ic_stat.png"
           sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n</manifest>#' "$M"
 
+      - name: Add native Focus plugin
+        working-directory: mobile
+        run: |
+          cp native/*.java android/app/src/main/java/com/habitflow/app/
+          python3 native/patch_manifest.py
+
       - name: Build APK
         working-directory: mobile/android
         run: |
