@@ -37,6 +37,20 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Apply HabitFlow app icon
+        working-directory: mobile
+        run: |
+          RES=android/app/src/main/res
+          SRC=../icons/icon-512.png
+          for spec in mdpi:48:108 hdpi:72:162 xhdpi:96:216 xxhdpi:144:324 xxxhdpi:192:432; do
+            IFS=: read d s f <<< "$spec"
+            inner=$((f * 66 / 100))
+            convert "$SRC" -resize ${s}x${s} "$RES/mipmap-$d/ic_launcher.png"
+            convert "$SRC" -resize ${s}x${s} "$RES/mipmap-$d/ic_launcher_round.png"
+            convert "$SRC" -resize ${inner}x${inner} -background none -gravity center -extent ${f}x${f} "$RES/mipmap-$d/ic_launcher_foreground.png"
+          done
+          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n  <color name="ic_launcher_background">#388FCA</color>\n</resources>\n' > "$RES/values/ic_launcher_background.xml"
+
       - name: Build APK
         working-directory: mobile/android
         run: |
