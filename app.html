@@ -685,6 +685,7 @@ function vProfile(){
  <div class="gf">Reminders only fire while HabitFlow is open in a tab; there's no background push. Status: ${np}.</div>
  <h2>Data</h2><div class="row"><button class="btn g" data-act="arch2">Archived habits (${arch})</button><button class="btn g" data-act="export">Export JSON</button></div>
  <div style="margin-top:12px"><button class="btn d" data-act="wipe">Delete all data</button></div>
+ <div class="gl">Focus</div><div class="grp"><div class="rw" data-act="focus" style="cursor:pointer"><span class="ico" style="background:#388FCA">F</span><span class="sp">Focus mode &amp; screen time</span><span class="mute">&rsaquo;</span></div></div>
  <div class="gl">Sync</div><div class="grp"><div class="rw"><span class="ico" style="background:#34c759">&#8635;</span><span class="sp">Status</span><span class="mute" id="syncSt">${window.HF&&HF.statusText?HF.statusText():'This device only'}</span></div></div><div class="gf">Changes are saved on this device first and uploaded when you have a connection.</div>
  <div class="gl">About</div><div class="grp"><div class="rw"><span class="ico" style="background:linear-gradient(135deg,#14c8a8,#5b5bf0)">H</span><span class="sp">HabitFlow</span><span class="mute">v1.0</span></div><div class="rw"><span class="ico" style="background:#ff9f0a">&#9829;</span><span class="sp">Built by</span><span class="mute">Amin</span></div></div><div class="gf">Designed and built by Amin.</div>`;
 }
@@ -817,6 +818,7 @@ document.addEventListener('click',e=>{
  case'mo':{const[y,m]=V.month.split('-').map(Number),d=new Date(y,m-1+(+v),1);V.month=`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;render();break}
  case'signout':HF.signout();break;
   case'avatar':document.getElementById('avIn').click();break;
+  case'focus':if(window.hfFocus)hfFocus();break;
   case'avrm':delete D.settings.avatar;commit();break;
  case'theme':D.settings.theme=v;commit();break;
  case'notify':toggleNotify();break;
@@ -1478,6 +1480,74 @@ LN.addListener('localNotificationActionPerformed',function(ev){
  sync();setInterval(sync,300000);
  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')sync()});
 }catch(e){}})();
+})();
+</script>
+<script>
+/* Focus mode and screen time (full features in the Android app) */
+(function(){
+var C=window.Capacitor,native=!!(C&&C.isNativePlatform&&C.isNativePlatform()),F=null;
+if(native){try{F=C.registerPlugin('Focus')}catch(e){}}
+var K='hf.focus.apps',S='hf.focus.session',L='hf.focus.log';
+var st=null,apps=[],usage=null,days=1,sel=ld(K,[]),dur=45,q='',iv=null;
+function ld(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function X(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function fm(ms){var m=Math.round(ms/60000);return m>=60?Math.floor(m/60)+'h '+(m%60)+'m':m+'m'}
+function finalize(){var s=ld(S,null);if(!s||(st&&st.active))return;var full=s.start+s.min*60000,end=Math.min(s.stop||full,full);var l=ld(L,[]);l.push({at:s.start,min:Math.max(1,Math.round((end-s.start)/60000))});sv(L,l.slice(-200));localStorage.removeItem(S)}
+function appRows(){var f=q.toLowerCase();return apps.filter(function(a){return !f||a.label.toLowerCase().indexOf(f)>-1}).slice(0,150).map(function(a){return '<label class="ff-r"><input type="checkbox" data-f="app" data-v="'+X(a.package)+'"'+(sel.indexOf(a.package)>-1?' checked':'')+'><span>'+X(a.label)+'</span></label>'}).join('')||'<div class="mu">No apps found.</div>'}
+function usageHtml(){
+ var h='<div class="ff-h">Screen time</div><div class="ff-c"><div class="ff-r" style="gap:8px"><button class="ff-b'+(days===1?'':' ff-g')+'" data-f="days" data-v="1">Today</button><button class="ff-b'+(days===7?'':' ff-g')+'" data-f="days" data-v="7">7 days</button></div>';
+ if(!usage)return h+'<div class="mu">No data yet.</div></div>';
+ var mx=usage.apps.length?usage.apps[0].ms:1;
+ h+='<div style="font-size:30px;font-weight:700;margin:6px 0">'+fm(usage.totalMs)+'</div>';
+ usage.apps.slice(0,8).forEach(function(a){h+='<div class="ff-r" style="display:block"><div style="display:flex;justify-content:space-between"><span>'+X(a.label)+'</span><span class="mu">'+fm(a.ms)+'</span></div><div class="ff-bar"><i style="width:'+Math.max(3,Math.round(a.ms/mx*100))+'%"></i></div></div>'});
+ var l=ld(L,[]),wk=Date.now()-7*864e5,tot=0,n=0;l.forEach(function(e){if(e.at>wk){tot+=e.min;n++}});
+ return h+'</div><div class="ff-h">Focus this week</div><div class="ff-c"><div style="font-size:30px;font-weight:700">'+fm(tot*60000)+'</div><div class="mu">'+n+' session'+(n===1?'':'s')+'</div></div>';
+}
+function render(){
+ var o=document.getElementById('hfFocus');if(!o)return;
+ var h='<div class="ff-top"><b>Focus</b><button class="ff-x" data-f="close">Done</button></div><div class="ff-body">';
+ if(!native||!F){o.innerHTML=h+'<div class="ff-c">Focus mode and screen time run in the HabitFlow Android app. Download it from the home page, then open this screen again.</div></div>';return}
+ if(!st){o.innerHTML=h+'<div class="ff-c">Loading...</div></div>';return}
+ var ok=st.usage&&st.overlay;
+ if(!ok)h+='<div class="ff-h">Set up</div><div class="ff-c"><div class="ff-r"><span style="flex:1">Usage access<br><small class="mu">Lets HabitFlow see which app is open</small></span>'+(st.usage?'<b>On</b>':'<button class="ff-b" data-f="usage">Turn on</button>')+'</div><div class="ff-r"><span style="flex:1">Display over other apps<br><small class="mu">Lets HabitFlow show the focus screen</small></span>'+(st.overlay?'<b>On</b>':'<button class="ff-b" data-f="overlay">Turn on</button>')+'</div></div>';
+ if(st.active)h+='<div class="ff-h">Focus is on</div><div class="ff-c"><div style="font-size:34px;font-weight:700" id="ffT"></div><div class="mu">Blocked apps stay closed until the timer ends.</div><p><button class="ff-b ff-g" data-f="stop">End session</button></p></div>';
+ else if(ok)h+='<div class="ff-h">Start a session</div><div class="ff-c"><div class="ff-r" style="gap:8px">'+[25,45,60,90].map(function(m){return '<button class="ff-b'+(m===dur?'':' ff-g')+'" data-f="dur" data-v="'+m+'">'+m+' min</button>'}).join('')+'</div><input class="ff-q" data-f="q" placeholder="Search apps to block" value="'+X(q)+'"><div id="ffApps" style="max-height:300px;overflow-y:auto">'+appRows()+'</div><p><button class="ff-b" style="width:100%" data-f="start"'+(sel.length?'':' disabled')+'>Start focus ('+sel.length+' blocked)</button></p></div>';
+ if(st.usage)h+=usageHtml();
+ o.innerHTML=h+'</div>';tickT();
+}
+function tickT(){var el=document.getElementById('ffT');if(!el||!st||!st.active)return;var r=Math.max(0,Math.round((st.endsAt-Date.now())/1000));el.textContent=Math.floor(r/60)+':'+('0'+(r%60)).slice(-2);if(r<=0)load()}
+async function load(){
+ if(!F)return;
+ try{
+  st=await F.status();finalize();
+  usage=st.usage?await F.usage({days:days}).catch(function(){return null}):null;
+  if(!apps.length&&st.usage)apps=(await F.listApps()).apps||[];
+ }catch(e){}
+ render();
+}
+function close(){var o=document.getElementById('hfFocus');if(o)o.remove();clearInterval(iv)}
+function open(){
+ if(document.getElementById('hfFocus'))return;
+ if(!document.getElementById('hfFocusCss')){var s=document.createElement('style');s.id='hfFocusCss';s.textContent='#hfFocus{position:fixed;inset:0;z-index:99990;background:var(--bg);color:var(--text);overflow-y:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}#hfFocus .ff-top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;position:sticky;top:0;background:var(--bg);font-size:20px;z-index:2}#hfFocus .ff-x{border:0;background:none;color:var(--acc);font-size:16px;font-weight:600;cursor:pointer}#hfFocus .ff-body{max-width:560px;margin:0 auto;padding:0 16px 40px}#hfFocus .ff-c{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 14px}#hfFocus .ff-h{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:18px 4px 8px}#hfFocus .ff-r{display:flex;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid var(--line)}#hfFocus .ff-r:first-child{border-top:0}#hfFocus .ff-b{border:0;border-radius:10px;padding:10px 16px;background:var(--acc);color:#fff;font-weight:600;font-size:15px;cursor:pointer}#hfFocus .ff-b[disabled]{opacity:.4}#hfFocus .ff-g{background:transparent;border:1px solid var(--line);color:var(--text)}#hfFocus .ff-q{width:100%;margin:10px 0;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px}#hfFocus .mu{color:var(--mute);font-size:13px}#hfFocus .ff-bar{height:6px;border-radius:3px;background:var(--line);margin-top:6px}#hfFocus .ff-bar i{display:block;height:100%;border-radius:3px;background:var(--acc)}';document.head.appendChild(s)}
+ var o=document.createElement('div');o.id='hfFocus';document.body.appendChild(o);render();
+ iv=setInterval(tickT,1000);load();
+}
+document.addEventListener('click',function(e){
+ var t=e.target.closest&&e.target.closest('#hfFocus [data-f]');if(!t||!F&&t.dataset.f!=='close')return;
+ var f=t.dataset.f,v=t.dataset.v;
+ if(f==='close')close();
+ else if(f==='usage')F.openUsageSettings();
+ else if(f==='overlay')F.openOverlaySettings();
+ else if(f==='dur'){dur=+v;render()}
+ else if(f==='days'){days=+v;load()}
+ else if(f==='stop'){var s=ld(S,null);if(s){s.stop=Date.now();sv(S,s)}F.stopFocus().then(load)}
+ else if(f==='start'&&sel.length){F.startFocus({packages:sel,minutes:dur}).then(function(){sv(S,{start:Date.now(),min:dur,apps:sel});sv(K,sel);load()}).catch(function(er){alert('Could not start focus: '+((er&&er.message)||er))})}
+});
+document.addEventListener('change',function(e){var t=e.target;if(t.dataset&&t.dataset.f==='app'){var p=t.dataset.v,i=sel.indexOf(p);if(t.checked&&i<0)sel.push(p);else if(!t.checked&&i>=0)sel.splice(i,1);sv(K,sel);var b=document.querySelector('#hfFocus [data-f=start]');if(b){b.disabled=!sel.length;b.textContent='Start focus ('+sel.length+' blocked)'}}});
+document.addEventListener('input',function(e){var t=e.target;if(t.dataset&&t.dataset.f==='q'){q=t.value;var a=document.getElementById('ffApps');if(a)a.innerHTML=appRows()}});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&document.getElementById('hfFocus'))load()});
+window.hfFocus=open;
 })();
 </script>
 </body></html>
