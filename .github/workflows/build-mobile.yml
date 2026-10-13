@@ -10,6 +10,8 @@ on:
   push:
     paths:
       - 'mobile/**'
+      - 'app.html'
+      - 'login.html'
       - '.github/workflows/build-mobile.yml'
 
 permissions:
@@ -29,6 +31,12 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+
+      - name: Bundle the web app into the APK
+        working-directory: mobile
+        run: |
+          rm -rf www
+          python3 native/bundle.py
 
       - name: Install and generate Android project
         working-directory: mobile

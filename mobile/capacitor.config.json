@@ -3,12 +3,7 @@
   "appName": "HabitFlow",
   "webDir": "www",
   "server": {
-    "url": "https://habitsflows.vercel.app/login",
-    "cleartext": false,
-    "allowNavigation": [
-      "habitsflows.vercel.app",
-      "*.supabase.co"
-    ]
+    "androidScheme": "https"
   },
   "plugins": {
     "LocalNotifications": {
