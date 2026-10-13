@@ -1437,7 +1437,7 @@ document.addEventListener('keydown',function(e){
 /* Native Android reminders (Capacitor Local Notifications). Runs only inside the Android app. */
 (function(){
 var C=window.Capacitor;if(!C||!(C.isNativePlatform?C.isNativePlatform():!!(window.androidBridge||(C.getPlatform&&C.getPlatform()!=='web'))))return;
-var LN=(C.Plugins&&C.Plugins.LocalNotifications)||(C.registerPlugin&&C.registerPlugin('LocalNotifications'));if(!LN)return;
+var LN=C.registerPlugin?C.registerPlugin('LocalNotifications'):(C.Plugins&&C.Plugins.LocalNotifications);if(!LN)return;
 var busy=false,last='';
 function hid(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h)%2147483000+1}
 function mn(s){var a=String(s||'0:0').split(':');return +a[0]*60+ +a[1]}
@@ -1488,7 +1488,7 @@ LN.addListener('localNotificationActionPerformed',function(ev){
 /* Focus mode and screen time (full features in the Android app) */
 (function(){
 var C=window.Capacitor,native=!!(C&&(C.isNativePlatform?C.isNativePlatform():!!(window.androidBridge||(C.getPlatform&&C.getPlatform()!=='web')))),F=null;
-if(native){F=(C.Plugins&&C.Plugins.Focus)||(C.registerPlugin?C.registerPlugin('Focus'):null)}
+if(native){F=C.registerPlugin?C.registerPlugin('Focus'):((C.Plugins&&C.Plugins.Focus)||null)}
 var K='hf.focus.apps',S='hf.focus.session',L='hf.focus.log';
 var st=null,apps=[],usage=null,guard=null,days=1,sel=ld(K,[]),dur=45,q='',iv=null;
 function ld(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
@@ -1572,15 +1572,15 @@ window.hfTestNotif=async function(){
  var C=window.Capacitor;
  if(!C||!(C.isNativePlatform?C.isNativePlatform():!!(window.androidBridge||(C.getPlatform&&C.getPlatform()!=='web')))){alert('This page is not running inside the HabitFlow Android app. Details: Capacitor='+(C?'yes':'no')+', platform='+(C&&C.getPlatform?C.getPlatform():'n/a')+', bridge='+(window.androidBridge?'yes':'no'));return}
  try{
-  var LN=(C.Plugins&&C.Plugins.LocalNotifications)||C.registerPlugin('LocalNotifications');
-  var p=await LN.requestPermissions();
+  var LN=C.registerPlugin?C.registerPlugin('LocalNotifications'):C.Plugins.LocalNotifications;
+  var step='permission';var p=await LN.requestPermissions();
   if(p.display!=='granted'){alert('Notifications are off for HabitFlow. Open Android Settings > Apps > HabitFlow > Notifications and allow them.');return}
-  await LN.createChannel({id:'reminders',name:'Reminders',description:'Habit, routine and plan reminders',importance:5,visibility:1,vibration:true,lights:true});
-  await LN.registerActionTypes({types:[{id:'HF_ACT',actions:[{id:'done',title:'Done'},{id:'snooze',title:'Snooze 10 min'}]}]});
-  await LN.schedule({notifications:[{id:987654,title:'HabitFlow',body:'Test reminder. Tap Done or Snooze.',channelId:'reminders',smallIcon:'ic_stat',largeIcon:'ic_large',actionTypeId:'HF_ACT',extra:{k:'t'},schedule:{at:new Date(Date.now()+3000),allowWhileIdle:true}}]});
-  var pend=await LN.getPending();
+  step='channel';await LN.createChannel({id:'reminders',name:'Reminders',description:'Habit, routine and plan reminders',importance:5,visibility:1,vibration:true,lights:true});
+  step='actions';await LN.registerActionTypes({types:[{id:'HF_ACT',actions:[{id:'done',title:'Done'},{id:'snooze',title:'Snooze 10 min'}]}]});
+  step='schedule';await LN.schedule({notifications:[{id:987654,title:'HabitFlow',body:'Test reminder. Tap Done or Snooze.',channelId:'reminders',smallIcon:'ic_stat',largeIcon:'ic_large',actionTypeId:'HF_ACT',extra:{k:'t'},schedule:{at:new Date(Date.now()+3000),allowWhileIdle:true}}]});
+  step='pending';var pend=await LN.getPending();
   alert('Test sent. It appears in about 3 seconds. Reminders queued: '+((pend.notifications||[]).length));
- }catch(e){alert('Notification error: '+((e&&e.message)||e))}
+ }catch(e){alert('Notification error at step "'+(typeof step!=='undefined'?step:'start')+'": '+((e&&e.message)||JSON.stringify(e)))}
 };
 </script>
 </body></html>
