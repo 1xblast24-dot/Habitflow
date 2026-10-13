@@ -17,6 +17,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: build-mobile
+  cancel-in-progress: true
+
 jobs:
   android:
     runs-on: ubuntu-latest
@@ -96,8 +100,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add downloads/habitflow.apk
           git commit -m "chore: update Android APK [skip ci]" || echo "No changes"
-          git pull --rebase origin main || true
-          git push
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && break
+            sleep 6
+          done
 
   ios:
     if: ${{ inputs.build_ios }}
