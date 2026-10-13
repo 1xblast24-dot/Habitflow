@@ -32,16 +32,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Bundle the web app into the APK
-        working-directory: mobile
-        run: |
-          rm -rf www
-          python3 native/bundle.py
-
       - name: Install and generate Android project
         working-directory: mobile
         run: |
           npm install
+          rm -rf www
+          python3 native/bundle.py
           npx cap add android
           npx cap sync android
 
