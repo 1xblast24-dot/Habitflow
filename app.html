@@ -1436,8 +1436,8 @@ document.addEventListener('keydown',function(e){
 <script>
 /* Native Android reminders (Capacitor Local Notifications). Runs only inside the Android app. */
 (function(){
-var C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return;
-var LN;try{LN=C.registerPlugin('LocalNotifications')}catch(e){return}
+var C=window.Capacitor;if(!C||!(C.isNativePlatform?C.isNativePlatform():!!(window.androidBridge||(C.getPlatform&&C.getPlatform()!=='web'))))return;
+var LN=(C.Plugins&&C.Plugins.LocalNotifications)||(C.registerPlugin&&C.registerPlugin('LocalNotifications'));if(!LN)return;
 var busy=false,last='';
 function hid(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h)%2147483000+1}
 function mn(s){var a=String(s||'0:0').split(':');return +a[0]*60+ +a[1]}
@@ -1487,8 +1487,8 @@ LN.addListener('localNotificationActionPerformed',function(ev){
 <script>
 /* Focus mode and screen time (full features in the Android app) */
 (function(){
-var C=window.Capacitor,native=!!(C&&C.isNativePlatform&&C.isNativePlatform()),F=null;
-if(native){try{F=C.registerPlugin('Focus')}catch(e){}}
+var C=window.Capacitor,native=!!(C&&(C.isNativePlatform?C.isNativePlatform():!!(window.androidBridge||(C.getPlatform&&C.getPlatform()!=='web')))),F=null;
+if(native){F=(C.Plugins&&C.Plugins.Focus)||(C.registerPlugin?C.registerPlugin('Focus'):null)}
 var K='hf.focus.apps',S='hf.focus.session',L='hf.focus.log';
 var st=null,apps=[],usage=null,guard=null,days=1,sel=ld(K,[]),dur=45,q='',iv=null;
 function ld(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
@@ -1570,9 +1570,9 @@ window.hfFocus=open;
 /* Test notification (Android app) */
 window.hfTestNotif=async function(){
  var C=window.Capacitor;
- if(!C||!C.isNativePlatform||!C.isNativePlatform()){alert('Test notifications work inside the HabitFlow Android app. This looks like the website.');return}
+ if(!C||!(C.isNativePlatform?C.isNativePlatform():!!(window.androidBridge||(C.getPlatform&&C.getPlatform()!=='web')))){alert('This page is not running inside the HabitFlow Android app. Details: Capacitor='+(C?'yes':'no')+', platform='+(C&&C.getPlatform?C.getPlatform():'n/a')+', bridge='+(window.androidBridge?'yes':'no'));return}
  try{
-  var LN=C.registerPlugin('LocalNotifications');
+  var LN=(C.Plugins&&C.Plugins.LocalNotifications)||C.registerPlugin('LocalNotifications');
   var p=await LN.requestPermissions();
   if(p.display!=='granted'){alert('Notifications are off for HabitFlow. Open Android Settings > Apps > HabitFlow > Notifications and allow them.');return}
   await LN.createChannel({id:'reminders',name:'Reminders',description:'Habit, routine and plan reminders',importance:5,visibility:1,vibration:true,lights:true});
