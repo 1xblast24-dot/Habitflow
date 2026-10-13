@@ -82,6 +82,7 @@ public class FocusPlugin extends Plugin {
       JSObject o = new JSObject();
       o.put("package", s[0]);
       o.put("label", s[1]);
+      o.put("icon", Guard.icon(getContext(), s[0]));
       arr.put(o);
     }
     JSObject res = new JSObject();
@@ -123,6 +124,7 @@ public class FocusPlugin extends Plugin {
       JSObject o = new JSObject();
       o.put("package", (String) r[0]);
       o.put("label", (String) r[1]);
+      o.put("icon", Guard.icon(getContext(), (String) r[0]));
       o.put("ms", ((Long) r[2]).longValue());
       arr.put(o);
     }
@@ -174,6 +176,7 @@ public class FocusPlugin extends Plugin {
       JSObject a = new JSObject();
       a.put("package", (String) r[0]);
       a.put("label", (String) r[1]);
+      a.put("icon", Guard.icon(getContext(), (String) r[0]));
       a.put("ms", ((Long) r[2]).longValue());
       apps.put(a);
     }
@@ -200,5 +203,28 @@ public class FocusPlugin extends Plugin {
       if (Build.VERSION.SDK_INT >= 26) getContext().startForegroundService(i); else getContext().startService(i);
     }
     call.resolve();
+  }
+
+  @PluginMethod
+  public void week(PluginCall call) {
+    if (!hasUsage()) { call.reject("no_usage_access"); return; }
+    long mid = Guard.midnight();
+    long now = System.currentTimeMillis();
+    JSArray arr = new JSArray();
+    for (int i = 6; i >= 0; i--) {
+      Calendar c = Calendar.getInstance();
+      c.setTimeInMillis(mid);
+      c.add(Calendar.DAY_OF_YEAR, -i);
+      long s = c.getTimeInMillis();
+      c.add(Calendar.DAY_OF_YEAR, 1);
+      long e = Math.min(c.getTimeInMillis(), now);
+      JSObject o = new JSObject();
+      o.put("t", s);
+      o.put("ms", e > s ? Guard.rangeMs(getContext(), s, e) : 0L);
+      arr.put(o);
+    }
+    JSObject res = new JSObject();
+    res.put("days", arr);
+    call.resolve(res);
   }
 }
