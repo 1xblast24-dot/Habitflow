@@ -61,6 +61,7 @@ jobs:
           M=android/app/src/main/AndroidManifest.xml
           mkdir -p "$RES/drawable"
           convert ../icons/badge-96.png -resize 96x96 "$RES/drawable/ic_stat.png"
+          convert ../icons/icon-192.png -resize 192x192 "$RES/drawable/ic_large.png"
           sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n</manifest>#' "$M"
 
       - name: Add native Focus plugin

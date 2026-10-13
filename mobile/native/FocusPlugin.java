@@ -5,6 +5,7 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -153,7 +154,51 @@ public class FocusPlugin extends Plugin {
   @PluginMethod
   public void stopFocus(PluginCall call) {
     getContext().getSharedPreferences("focus", 0).edit().putLong("endsAt", 0).apply();
-    getContext().stopService(new Intent(getContext(), FocusService.class));
+    call.resolve();
+  }
+
+  @PluginMethod
+  public void guardInfo(PluginCall call) {
+    if (!hasUsage()) { call.reject("no_usage_access"); return; }
+    SharedPreferences p = getContext().getSharedPreferences("focus", 0);
+    Set<String> allow = p.getStringSet("allow", new HashSet<String>());
+    int limitMin = p.getInt("limitMin", 180);
+    long today = Guard.todayMs(getContext());
+    JSObject o = new JSObject();
+    o.put("enabled", p.getBoolean("guard", false));
+    o.put("limitMin", limitMin);
+    o.put("todayMs", today);
+    o.put("active", p.getBoolean("guard", false) && today >= limitMin * 60000L);
+    JSArray apps = new JSArray();
+    for (Object[] r : Guard.candidates(getContext())) {
+      JSObject a = new JSObject();
+      a.put("package", (String) r[0]);
+      a.put("label", (String) r[1]);
+      a.put("ms", ((Long) r[2]).longValue());
+      apps.put(a);
+    }
+    JSArray al = new JSArray();
+    for (String s : allow) al.put(s);
+    o.put("apps", apps);
+    o.put("allow", al);
+    call.resolve(o);
+  }
+
+  @PluginMethod
+  public void setGuard(PluginCall call) {
+    boolean en = Boolean.TRUE.equals(call.getBoolean("enabled", false));
+    int limitMin = call.getInt("limitMin", 180);
+    JSArray al = call.getArray("allow");
+    Set<String> allow = new HashSet<>();
+    try {
+      if (al != null) for (int i = 0; i < al.length(); i++) allow.add(al.getString(i));
+    } catch (Exception e) { }
+    if (en && (!Settings.canDrawOverlays(getContext()) || !hasUsage())) { call.reject("permissions"); return; }
+    getContext().getSharedPreferences("focus", 0).edit().putBoolean("guard", en).putInt("limitMin", limitMin).putStringSet("allow", allow).apply();
+    if (en) {
+      Intent i = new Intent(getContext(), FocusService.class);
+      if (Build.VERSION.SDK_INT >= 26) getContext().startForegroundService(i); else getContext().startService(i);
+    }
     call.resolve();
   }
 }

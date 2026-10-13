@@ -63,19 +63,19 @@ public class BlockActivity extends Activity {
     root.setGravity(Gravity.CENTER);
     root.setBackgroundColor(Color.parseColor("#0B0D12"));
     root.setPadding(dp(28), dp(28), dp(28), dp(28));
-    root.addView(text("Stay focused", 34, 1f, true));
+    boolean limit = getIntent().getBooleanExtra("limit", false);
+    root.addView(text(limit ? "Daily limit reached" : "Stay focused", 34, 1f, true));
     root.addView(text(label + " is blocked", 18, 0.85f, false));
-    root.addView(text(mins + " min left in your focus session", 15, 0.6f, false));
+    root.addView(text(limit ? "Distracting apps unlock tomorrow" : mins + " min left in your focus session", 15, 0.6f, false));
     Button home = button("Back to home", "#FFFFFF", "#0B0D12");
     home.setOnClickListener(v -> goHome());
     Button stop = button("End focus session", "#1F2430", "#FFFFFF");
     stop.setOnClickListener(v -> {
       getSharedPreferences("focus", 0).edit().putLong("endsAt", 0).apply();
-      stopService(new Intent(this, FocusService.class));
       finish();
     });
     root.addView(home);
-    root.addView(stop);
+    if (!limit) root.addView(stop);
     setContentView(root);
   }
 
