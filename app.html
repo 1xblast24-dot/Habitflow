@@ -685,6 +685,7 @@ function vProfile(){
  <div class="gf">Reminders only fire while HabitFlow is open in a tab; there's no background push. Status: ${np}.</div>
  <h2>Data</h2><div class="row"><button class="btn g" data-act="arch2">Archived habits (${arch})</button><button class="btn g" data-act="export">Export JSON</button></div>
  <div style="margin-top:12px"><button class="btn d" data-act="wipe">Delete all data</button></div>
+ <div class="gl">Notifications</div><div class="grp"><div class="rw" data-act="ntest" style="cursor:pointer"><span class="ico" style="background:#ff9f0a">N</span><span class="sp">Send a test notification</span><span class="mute">&rsaquo;</span></div></div>
  <div class="gl">Focus</div><div class="grp"><div class="rw" data-act="focus" style="cursor:pointer"><span class="ico" style="background:#388FCA">F</span><span class="sp">Focus mode &amp; screen time</span><span class="mute">&rsaquo;</span></div></div>
  <div class="gl">Sync</div><div class="grp"><div class="rw"><span class="ico" style="background:#34c759">&#8635;</span><span class="sp">Status</span><span class="mute" id="syncSt">${window.HF&&HF.statusText?HF.statusText():'This device only'}</span></div></div><div class="gf">Changes are saved on this device first and uploaded when you have a connection.</div>
  <div class="gl">About</div><div class="grp"><div class="rw"><span class="ico" style="background:linear-gradient(135deg,#14c8a8,#5b5bf0)">H</span><span class="sp">HabitFlow</span><span class="mute">v1.0</span></div><div class="rw"><span class="ico" style="background:#ff9f0a">&#9829;</span><span class="sp">Built by</span><span class="mute">Amin</span></div></div><div class="gf">Designed and built by Amin.</div>`;
@@ -819,6 +820,7 @@ document.addEventListener('click',e=>{
  case'signout':HF.signout();break;
   case'avatar':document.getElementById('avIn').click();break;
   case'focus':if(window.hfFocus)hfFocus();break;
+  case'ntest':if(window.hfTestNotif)hfTestNotif();break;
   case'avrm':delete D.settings.avatar;commit();break;
  case'theme':D.settings.theme=v;commit();break;
  case'notify':toggleNotify();break;
@@ -1441,18 +1443,18 @@ function hid(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;re
 function mn(s){var a=String(s||'0:0').split(':');return +a[0]*60+ +a[1]}
 function quiet(at){var q=(D.settings&&D.settings.quiet)||['22:00','07:00'],q0=mn(q[0]),q1=mn(q[1]),m=at.getHours()*60+at.getMinutes();return q0>q1?(m>=q0||m<q1):(m>=q0&&m<q1)}
 function plan(){var out=[],t=todayK(),now=Date.now()+5000;
- function add(k,id,d,at,title){if(!at)return;var w=new Date(d+'T'+at+':00');if(+w<=now||quiet(w))return;out.push({k:k,id:id,d:d,at:w,title:title})}
+ function add(k,id,d,at,title){if(!at)return;var w=new Date(d+'T'+at+':00');if(+w<=now)return;out.push({k:k,id:id,d:d,at:w,title:title})}
  for(var n=0;n<7;n++){var d=Engine.addDays(t,n);
   Engine.dayProgress(D.habits,d,t,D.logs).items.forEach(function(x){if(x.s!=='COMPLETED'&&x.h.reminder)add('h',x.h.id,d,x.h.reminder,x.h.name)});
   (D.routines||[]).forEach(function(r){if(r.remind&&r.time&&r.steps.length&&rOn(r,d)&&!rFull(r,d))add('r',r.id,d,r.time,r.name)});
   occ(d).forEach(function(o){var i=o.i;if(i.sch&&i.sch.time&&o.st!=='completed'&&o.st!=='skipped')add('i',i.id,d,i.sch.time,i.title||'Plan')});
  }
  return out.sort(function(a,b){return a.at-b.at}).slice(0,60)}
-function mk(x,extra,at){return{id:hid(x.k+x.id+x.d+(extra||'')),title:'HabitFlow',body:x.title||x.t||'Reminder',channelId:'reminders',smallIcon:'ic_stat',actionTypeId:'HF_ACT',extra:{k:x.k,id:x.id,d:x.d,t:x.title||x.t,snz:extra?1:0},schedule:{at:at||x.at,allowWhileIdle:true}}}
+function mk(x,extra,at){return{id:hid(x.k+x.id+x.d+(extra||'')),title:'HabitFlow',body:x.title||x.t||'Reminder',channelId:'reminders',smallIcon:'ic_stat',largeIcon:'ic_large',actionTypeId:'HF_ACT',extra:{k:x.k,id:x.id,d:x.d,t:x.title||x.t,snz:extra?1:0},schedule:{at:at||x.at,allowWhileIdle:true}}}
 async function sync(){
  if(busy)return;busy=true;
  try{
-  var items=(D.settings&&D.settings.notify===false)?[]:plan(),sig=items.map(function(x){return x.k+x.id+x.d+x.at.getTime()}).join('|');
+  var items=plan(),sig=items.map(function(x){return x.k+x.id+x.d+x.at.getTime()}).join('|');
   if(sig===last)return;
   var p=await LN.getPending();
   var cancel=(p.notifications||[]).filter(function(x){return !(x.extra&&x.extra.snz)}).map(function(x){return{id:x.id}});
@@ -1488,7 +1490,7 @@ LN.addListener('localNotificationActionPerformed',function(ev){
 var C=window.Capacitor,native=!!(C&&C.isNativePlatform&&C.isNativePlatform()),F=null;
 if(native){try{F=C.registerPlugin('Focus')}catch(e){}}
 var K='hf.focus.apps',S='hf.focus.session',L='hf.focus.log';
-var st=null,apps=[],usage=null,days=1,sel=ld(K,[]),dur=45,q='',iv=null;
+var st=null,apps=[],usage=null,guard=null,days=1,sel=ld(K,[]),dur=45,q='',iv=null;
 function ld(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function X(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -1504,6 +1506,17 @@ function usageHtml(){
  var l=ld(L,[]),wk=Date.now()-7*864e5,tot=0,n=0;l.forEach(function(e){if(e.at>wk){tot+=e.min;n++}});
  return h+'</div><div class="ff-h">Focus this week</div><div class="ff-c"><div style="font-size:30px;font-weight:700">'+fm(tot*60000)+'</div><div class="mu">'+n+' session'+(n===1?'':'s')+'</div></div>';
 }
+function guardHtml(){
+ var g=guard;if(!g)return '';
+ var pct=g.limitMin?Math.min(100,Math.round(g.todayMs/(g.limitMin*60000)*100)):0;
+ var h='<div class="ff-h">Daily screen-time goal</div><div class="ff-c"><div class="ff-r" style="gap:8px"><span style="flex:1"><b>Auto-block distracting apps</b><br><small class="mu">When you pass your limit, HabitFlow blocks them for the rest of the day.</small></span><button class="ff-b'+(g.enabled?'':' ff-g')+'" data-f="gtoggle">'+(g.enabled?'On':'Off')+'</button></div>'
+ +'<div class="ff-r" style="gap:8px;flex-wrap:wrap">'+[60,120,180,240,300].map(function(m){return '<button class="ff-b'+(m===g.limitMin?'':' ff-g')+'" data-f="glimit" data-v="'+m+'">'+(m/60)+'h</button>'}).join('')+'</div>'
+ +'<div style="margin-top:8px"><div style="display:flex;justify-content:space-between"><span>Today</span><span class="mu">'+fm(g.todayMs)+' of '+fm(g.limitMin*60000)+'</span></div><div class="ff-bar"><i style="width:'+pct+'%'+(pct>=100?';background:#ff453a':'')+'"></i></div></div>';
+ if(g.active)h+='<p class="mu"><b>Limit reached.</b> Distracting apps are blocked until tomorrow.</p>';
+ if(g.apps.length)h+='<div class="ff-h" style="margin-top:14px">Detected from your usage (untick to allow)</div>'+g.apps.map(function(a){return '<label class="ff-r"><input type="checkbox" data-f="gallow" data-v="'+X(a.package)+'"'+(g.allow.indexOf(a.package)>-1?'':' checked')+'><span style="flex:1">'+X(a.label)+'</span><span class="mu">'+fm(a.ms)+'</span></label>'}).join('');
+ else h+='<p class="mu">Use your phone for a day or two and HabitFlow will learn which social, video, game and news apps distract you.</p>';
+ return h+'</div>';
+}
 function render(){
  var o=document.getElementById('hfFocus');if(!o)return;
  var h='<div class="ff-top"><b>Focus</b><button class="ff-x" data-f="close">Done</button></div><div class="ff-body">';
@@ -1513,7 +1526,7 @@ function render(){
  if(!ok)h+='<div class="ff-h">Set up</div><div class="ff-c"><div class="ff-r"><span style="flex:1">Usage access<br><small class="mu">Lets HabitFlow see which app is open</small></span>'+(st.usage?'<b>On</b>':'<button class="ff-b" data-f="usage">Turn on</button>')+'</div><div class="ff-r"><span style="flex:1">Display over other apps<br><small class="mu">Lets HabitFlow show the focus screen</small></span>'+(st.overlay?'<b>On</b>':'<button class="ff-b" data-f="overlay">Turn on</button>')+'</div></div>';
  if(st.active)h+='<div class="ff-h">Focus is on</div><div class="ff-c"><div style="font-size:34px;font-weight:700" id="ffT"></div><div class="mu">Blocked apps stay closed until the timer ends.</div><p><button class="ff-b ff-g" data-f="stop">End session</button></p></div>';
  else if(ok)h+='<div class="ff-h">Start a session</div><div class="ff-c"><div class="ff-r" style="gap:8px">'+[25,45,60,90].map(function(m){return '<button class="ff-b'+(m===dur?'':' ff-g')+'" data-f="dur" data-v="'+m+'">'+m+' min</button>'}).join('')+'</div><input class="ff-q" data-f="q" placeholder="Search apps to block" value="'+X(q)+'"><div id="ffApps" style="max-height:300px;overflow-y:auto">'+appRows()+'</div><p><button class="ff-b" style="width:100%" data-f="start"'+(sel.length?'':' disabled')+'>Start focus ('+sel.length+' blocked)</button></p></div>';
- if(st.usage)h+=usageHtml();
+ if(st.usage)h+=guardHtml()+usageHtml();
  o.innerHTML=h+'</div>';tickT();
 }
 function tickT(){var el=document.getElementById('ffT');if(!el||!st||!st.active)return;var r=Math.max(0,Math.round((st.endsAt-Date.now())/1000));el.textContent=Math.floor(r/60)+':'+('0'+(r%60)).slice(-2);if(r<=0)load()}
@@ -1522,6 +1535,7 @@ async function load(){
  try{
   st=await F.status();finalize();
   usage=st.usage?await F.usage({days:days}).catch(function(){return null}):null;
+  guard=st.usage?await F.guardInfo().catch(function(){return null}):null;
   if(!apps.length&&st.usage)apps=(await F.listApps()).apps||[];
  }catch(e){}
  render();
@@ -1542,12 +1556,31 @@ document.addEventListener('click',function(e){
  else if(f==='dur'){dur=+v;render()}
  else if(f==='days'){days=+v;load()}
  else if(f==='stop'){var s=ld(S,null);if(s){s.stop=Date.now();sv(S,s)}F.stopFocus().then(load)}
+ else if(f==='gtoggle'&&guard){F.setGuard({enabled:!guard.enabled,limitMin:guard.limitMin,allow:guard.allow}).then(load).catch(function(er){alert('Turn on both permissions first.')})}
+ else if(f==='glimit'&&guard){F.setGuard({enabled:guard.enabled,limitMin:+v,allow:guard.allow}).then(load)}
  else if(f==='start'&&sel.length){F.startFocus({packages:sel,minutes:dur}).then(function(){sv(S,{start:Date.now(),min:dur,apps:sel});sv(K,sel);load()}).catch(function(er){alert('Could not start focus: '+((er&&er.message)||er))})}
 });
-document.addEventListener('change',function(e){var t=e.target;if(t.dataset&&t.dataset.f==='app'){var p=t.dataset.v,i=sel.indexOf(p);if(t.checked&&i<0)sel.push(p);else if(!t.checked&&i>=0)sel.splice(i,1);sv(K,sel);var b=document.querySelector('#hfFocus [data-f=start]');if(b){b.disabled=!sel.length;b.textContent='Start focus ('+sel.length+' blocked)'}}});
+document.addEventListener('change',function(e){var t=e.target;if(t.dataset&&t.dataset.f==='gallow'&&guard){var pp=t.dataset.v,j=guard.allow.indexOf(pp);if(t.checked&&j>-1)guard.allow.splice(j,1);else if(!t.checked&&j<0)guard.allow.push(pp);F.setGuard({enabled:guard.enabled,limitMin:guard.limitMin,allow:guard.allow});return}if(t.dataset&&t.dataset.f==='app'){var p=t.dataset.v,i=sel.indexOf(p);if(t.checked&&i<0)sel.push(p);else if(!t.checked&&i>=0)sel.splice(i,1);sv(K,sel);var b=document.querySelector('#hfFocus [data-f=start]');if(b){b.disabled=!sel.length;b.textContent='Start focus ('+sel.length+' blocked)'}}});
 document.addEventListener('input',function(e){var t=e.target;if(t.dataset&&t.dataset.f==='q'){q=t.value;var a=document.getElementById('ffApps');if(a)a.innerHTML=appRows()}});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&document.getElementById('hfFocus'))load()});
 window.hfFocus=open;
 })();
+</script>
+<script>
+/* Test notification (Android app) */
+window.hfTestNotif=async function(){
+ var C=window.Capacitor;
+ if(!C||!C.isNativePlatform||!C.isNativePlatform()){alert('Test notifications work inside the HabitFlow Android app. This looks like the website.');return}
+ try{
+  var LN=C.registerPlugin('LocalNotifications');
+  var p=await LN.requestPermissions();
+  if(p.display!=='granted'){alert('Notifications are off for HabitFlow. Open Android Settings > Apps > HabitFlow > Notifications and allow them.');return}
+  await LN.createChannel({id:'reminders',name:'Reminders',description:'Habit, routine and plan reminders',importance:5,visibility:1,vibration:true,lights:true});
+  await LN.registerActionTypes({types:[{id:'HF_ACT',actions:[{id:'done',title:'Done'},{id:'snooze',title:'Snooze 10 min'}]}]});
+  await LN.schedule({notifications:[{id:987654,title:'HabitFlow',body:'Test reminder. Tap Done or Snooze.',channelId:'reminders',smallIcon:'ic_stat',largeIcon:'ic_large',actionTypeId:'HF_ACT',extra:{k:'t'},schedule:{at:new Date(Date.now()+3000),allowWhileIdle:true}}]});
+  var pend=await LN.getPending();
+  alert('Test sent. It appears in about 3 seconds. Reminders queued: '+((pend.notifications||[]).length));
+ }catch(e){alert('Notification error: '+((e&&e.message)||e))}
+};
 </script>
 </body></html>
