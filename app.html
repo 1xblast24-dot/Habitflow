@@ -359,6 +359,7 @@ h2{font-size:11px;letter-spacing:.08em}
 @keyframes gdspin{from{--ang:0deg}to{--ang:360deg}}
 @media (prefers-reduced-motion:reduce){#dock,#dock *{animation:none!important;transition-duration:.01s!important}}
 }
+.fp-page{padding-bottom:120px}.fp-page .fp-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}.fp-page .fp-tile{background:var(--surf);border-radius:14px;padding:14px 8px;text-align:center}.fp-page .fp-tile .v{font-size:22px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.fp-page .fp-tile .l{font-size:12px;color:var(--mute);margin-top:2px}.fp-page .fp-step{display:flex;align-items:center;justify-content:center;gap:18px;margin:2px 0 10px}.fp-page .fp-round{width:46px;height:46px;border-radius:50%;border:0;background:var(--surf);color:var(--acc);font-size:26px;font-weight:500;line-height:1;cursor:pointer;transition:transform .15s,background .2s}.fp-page .fp-round:active{transform:scale(.9)}.fp-page .fp-hero .fg{stroke-dashoffset:0}.fp-page .fp-sh{padding:8px 16px 6px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);background:color-mix(in srgb,var(--text) 4%,transparent)}.fp-page .fp-r:active{background:color-mix(in srgb,var(--text) 5%,transparent)}.fp-page .fp-seg.two{grid-template-columns:1fr 1fr}.fp-page .fp-seg.two i{width:calc((100% - 4px)/2)}.fp-page .fp-seg.two.t2 i{transform:translateX(100%)}.fp-page .fp-acts{display:flex;justify-content:space-between;padding:0 6px 10px}.fp-page .fp-acts .fp-link{font-size:15px}
 </style><script>
 /* HabitFlow account guard + cloud sync (Supabase). Habits stay in localStorage and are mirrored to the user's account. */
 (function(){
@@ -537,7 +538,7 @@ const uid=()=>Math.random().toString(36).slice(2,10);
 
 /* ===== UI ===== */
 let V={tab:'today',range:7,month:todayK().slice(0,7),sel:todayK(),habit:null,showArch:false};
-const TABS=[['today','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>','Today'],['plan','<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11.5l-2.3 4 2.3 4H5"/></svg>','Plan'],['habits','<svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>','Habits'],['focus','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>','Focus'],['insights','<svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>','Insights'],['calendar','<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>','Calendar'],['profile','<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c1-4 4-5.5 7.5-5.5s6.5 1.5 7.5 5.5"/></svg>','Profile']];
+const TABS=[['today','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>','Today'],['plan','<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11.5l-2.3 4 2.3 4H5"/></svg>','Plan'],['habits','<svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>','Habits'],['insights','<svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>','Insights'],['calendar','<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>','Calendar'],['focus','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>','Focus'],['profile','<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c1-4 4-5.5 7.5-5.5s6.5 1.5 7.5 5.5"/></svg>','Profile']];
 const COLORS=['#5b5bf0','#14c8a8','#ff7a45','#ff4d8d','#f5a623','#2ea0ff'];
 const ICONS=['book','dumbbell','drop','moon','leaf','pen','heart','target','apple','bolt'];
 const svg=(p,c='',w=2.6,z=22)=>`<svg class="${c}" width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
@@ -1567,26 +1568,43 @@ var INTENTS=[['trading','Trading or investing'],['study','Studying'],['work','Of
 function intentHtml(first){
  return '<div class="fp-h">'+(first?'Tell us how you use your phone':'How you use your phone')+'</div><div class="fp-g"><div class="fp-r p16" style="display:block"><div class="fp-s" style="margin-bottom:10px">HabitFlow sorts your apps into <b>focus</b>, <b>neutral</b> and <b>distracting</b>. Messaging apps like Telegram stay neutral, feeds like Instagram and TikTok count as distractions, and trading or work apps count as focus. Tell us what applies to you so it gets it right.</div><div class="fp-chips" style="justify-content:flex-start">'+INTENTS.map(function(i){return '<button class="fp-chip'+(intent.indexOf(i[0])>-1?' on':'')+'" data-f="intent" data-v="'+i[0]+'">'+i[1]+'</button>'}).join('')+'</div>'+(first?'<p style="margin:12px 0 0"><button class="fp-btn" data-f="onb">Continue</button></p>':'')+'</div></div>';
 }
-function startList(){var list=apps.slice().sort(function(a,b){var x=cl(a)==='d'?0:1,y=cl(b)==='d'?0:1;return x-y||a.label.localeCompare(b.label)});var f=q.toLowerCase();return list.filter(function(a){return !f||a.label.toLowerCase().indexOf(f)>-1}).slice(0,250)}
-function appRows(){var l=startList();if(!l.length)return '<div class="fp-r p16"><div class="fp-s">No apps found</div></div>';return l.map(function(a){return '<div class="fp-r">'+ic(a)+'<div class="fp-n">'+X(a.label)+'</div>'+sw('data-f="app" data-v="'+X(a.package)+'"',sel.indexOf(a.package)>-1)+'</div>'}).join('')}
-function startLabel(){return 'Start Focus'+(sel.length?' \u00b7 '+sel.length+(sel.length===1?' app':' apps'):'')}
+function byL(x,y){return x.label.localeCompare(y.label)}
+function appRow(a){return '<div class="fp-r">'+ic(a)+'<div class="fp-n">'+X(a.label)+'</div>'+sw('data-f="app" data-v="'+X(a.package)+'"',sel.indexOf(a.package)>-1)+'</div>'}
+function appRows(){
+ var f=q.toLowerCase(),list=apps.filter(function(a){return !f||a.label.toLowerCase().indexOf(f)>-1});
+ if(!list.length)return '<div class="fp-r p16"><div class="fp-s">No apps found</div></div>';
+ var d=list.filter(function(a){return cl(a)==='d'}).sort(byL),o=list.filter(function(a){return cl(a)!=='d'}).sort(byL).slice(0,250);
+ return (d.length?'<div class="fp-sh">Distracting \u00b7 '+d.length+'</div>'+d.map(appRow).join(''):'')+(o.length?'<div class="fp-sh">Other apps \u00b7 '+o.length+'</div>'+o.map(appRow).join(''):'');
+}
+function startLabel(){return 'Start Focus'+(sel&&sel.length?' \u00b7 '+sel.length+(sel.length===1?' app':' apps'):'')}
+function refreshList(){var a=document.getElementById('fpApps');if(a)a.innerHTML=appRows();var b=document.getElementById('fpStart');if(b){b.disabled=!(sel&&sel.length);b.textContent=startLabel()}}
 function ticks(){var h='';for(var i=0;i<60;i++){var a=i*Math.PI/30,r1=i%5?138:134,r2=146,s=Math.sin(a),c=Math.cos(a);h+='<line x1="'+(150+r1*s).toFixed(1)+'" y1="'+(150-r1*c).toFixed(1)+'" x2="'+(150+r2*s).toFixed(1)+'" y2="'+(150-r2*c).toFixed(1)+'" stroke="'+(i%5?'var(--line)':'var(--mute)')+'" stroke-width="'+(i%5?1.5:2.5)+'" stroke-linecap="round"/>'}return h}
+function statsHtml(){
+ var tot=u1?u1.totalMs:0,l=ld(L,[]),t0=new Date();t0.setHours(0,0,0,0);var ft=0;l.forEach(function(e){if(e.at>=t0.getTime())ft+=e.min});var p=prod();
+ function tile(v,l2,c){return '<div class="fp-tile"><div class="v"'+(c?' style="color:'+c+'"':'')+'>'+v+'</div><div class="l">'+l2+'</div></div>'}
+ return '<div class="fp-tiles">'+tile(fm(tot),'Screen time')+tile(fm(ft*60000),'Focused today','#34c759')+tile(p.score==null?'\u2014':p.score+'%','Productivity')+'</div>';
+}
+function ringSvg(offset,id){
+ return '<svg viewBox="0 0 300 300"><defs><linearGradient id="fpg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#388FCA"/><stop offset="1" stop-color="#14c8a8"/></linearGradient></defs>'+ticks()+'<circle class="bg" cx="150" cy="150" r="118"/><circle class="fg"'+(id?' id="'+id+'"':'')+' cx="150" cy="150" r="118" stroke="url(#fpg)" stroke-dasharray="'+R.toFixed(2)+'" stroke-dashoffset="'+offset+'"/></svg>';
+}
 function focusHtml(){
  var ok=st.usage&&st.overlay,h='';
  if(!ok)h+=setupHtml();
  if(st.active){
   var s=ld(S,null),total=s?s.min*60000:Math.max(1,st.endsAt-Date.now()),r=Math.max(0,st.endsAt-Date.now()),pk=(s&&s.apps)||sel||[];
-  h+='<div class="fp-ring"><svg viewBox="0 0 300 300"><defs><linearGradient id="fpg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#388FCA"/><stop offset="1" stop-color="#14c8a8"/></linearGradient></defs>'+ticks()+'<circle class="bg" cx="150" cy="150" r="118"/><circle class="fg" id="fpRing" cx="150" cy="150" r="118" stroke="url(#fpg)" stroke-dasharray="'+R.toFixed(2)+'" stroke-dashoffset="'+(R*(1-r/total)).toFixed(2)+'"/></svg><div><div class="fp-sub" style="letter-spacing:.14em;text-transform:uppercase;font-size:12px">Deep focus</div><div class="fp-big" id="fpT" style="font-size:58px;margin:0">'+tm(r)+'</div><div class="fp-sub">Ends at '+hhmm(st.endsAt)+'</div></div></div>';
+  h+='<div class="fp-ring">'+ringSvg((R*(1-r/total)).toFixed(2),'fpRing')+'<div><div class="fp-sub" style="letter-spacing:.14em;text-transform:uppercase;font-size:12px">Deep focus</div><div class="fp-big" id="fpT" style="font-size:58px;margin:0">'+tm(r)+'</div><div class="fp-sub">Ends at '+hhmm(st.endsAt)+'</div></div></div>';
   h+='<div class="fp-stack">'+pk.slice(0,7).map(function(p){return ic(byPkg(p))}).join('')+'</div><div class="fp-sub">'+pk.length+(pk.length===1?' app is':' apps are')+' blocked</div>';
   h+=(s&&s.strict)?'<p class="fp-sub" style="margin-top:16px"><b>Strict mode</b> is on. You can\'t end this session early.</p>':'<p style="text-align:center;margin-top:16px"><button class="fp-link fp-red" data-f="stop">End Session</button></p>';
  }else if(ok){
   if(!onb)h+=intentHtml(true);
   else{
-   h+='<div class="fp-big"><span id="fpDur">'+dur+'</span><span style="font-size:22px;font-weight:600"> min</span></div><div class="fp-sub">Choose how long to stay focused</div><div class="fp-chips" style="margin-top:12px">'+[15,25,45,60,90].map(function(m){return '<button class="fp-chip'+(m===dur?' on':'')+'" data-f="dur" data-v="'+m+'">'+m+'</button>'}).join('')+'</div>';
+   h+=statsHtml();
+   h+='<div class="fp-ring fp-hero">'+ringSvg('0')+'<div><div class="fp-sub" style="letter-spacing:.14em;text-transform:uppercase;font-size:12px">Focus for</div><div class="fp-big" style="font-size:68px;margin:0"><span id="fpDur">'+dur+'</span></div><div class="fp-sub">minutes</div></div></div>';
+   h+='<div class="fp-step"><button class="fp-round" data-f="dstep" data-v="-5" aria-label="Less time">&minus;</button><div class="fp-chips" style="margin:0">'+[15,25,45,60,90].map(function(m){return '<button class="fp-chip'+(m===dur?' on':'')+'" data-f="dur" data-v="'+m+'">'+m+'</button>'}).join('')+'</div><button class="fp-round" data-f="dstep" data-v="5" aria-label="More time">+</button></div>';
    h+='<div class="fp-h">Options</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Strict mode<div class="fp-s">You can\'t end the session early</div></div>'+sw('data-f="strict"',strict)+'</div></div>';
    var fa=apps.filter(function(a){return cl(a)==='f'}).slice(0,8);
    if(fa.length)h+='<div class="fp-h">Your focus apps (never blocked)</div><div class="fp-g"><div class="fp-r p16" style="display:block"><div class="fp-stack" style="justify-content:flex-start;margin:0;padding-left:8px">'+fa.map(ic).join('')+'</div></div></div>';
-   h+='<div class="fp-h">Apps to block</div><input class="fp-q" data-f="q" placeholder="Search apps" value="'+X(q)+'" style="width:100%;border:0;border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text);font-size:17px;margin:0 0 12px;box-sizing:border-box"><div class="fp-g" id="fpApps">'+appRows()+'</div>';
+   h+='<div class="fp-h">Apps to block</div><div class="fp-acts"><button class="fp-link" data-f="selD">Select distracting</button><button class="fp-link" data-f="selN">Clear</button></div><input class="fp-q" data-f="q" placeholder="Search apps" value="'+X(q)+'" style="width:100%;border:0;border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text);font-size:17px;margin:0 0 12px;box-sizing:border-box"><div class="fp-g" id="fpApps">'+appRows()+'</div>';
   }
  }
  return h;
@@ -1619,8 +1637,7 @@ function guardHtml(){
 }
 function timeHtml(){
  if(!st.usage)return setupHtml();
- var ud=days===1?u1:u7,tot=ud?ud.totalMs:0,h='<div class="fp-big">'+fm(tot)+'</div><div class="fp-sub">'+(days===1?'Screen time today':'Screen time, last 7 days')+'</div>'+chartHtml();
- h+='<div class="fp-chips" style="margin-top:10px"><button class="fp-chip'+(days===1?' on':'')+'" data-f="days" data-v="1">Today</button><button class="fp-chip'+(days===7?' on':'')+'" data-f="days" data-v="7">7 Days</button></div>';
+ var ud=days===1?u1:u7,tot=ud?ud.totalMs:0,h='<div class="fp-seg two'+(days===7?' t2':'')+'" id="fpSeg2"><i></i><button data-f="days" data-v="1">Today</button><button data-f="days" data-v="7">7 Days</button></div><div class="fp-big">'+fm(tot)+'</div><div class="fp-sub">'+(days===1?'Screen time today':'Screen time, last 7 days')+'</div>'+chartHtml();
  h+=prodHtml();
  var l=ld(L,[]),wk=Date.now()-7*864e5,tt=0,n=0;l.forEach(function(e){if(e.at>wk){tt+=e.min;n++}});
  h+='<div class="fp-h">Focus sessions</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Focused time this week</div><b>'+fm(tt*60000)+'</b></div><div class="fp-r p16"><div class="fp-n">Sessions</div><b>'+n+'</b></div>'+l.slice(-5).reverse().map(function(e){return '<div class="fp-r p16"><div class="fp-n">Started '+X(new Date(e.at).toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit'}))+'</div><span class="fp-s">'+e.min+' min</span></div>'}).join('')+'</div>';
@@ -1701,7 +1718,10 @@ document.addEventListener('click',function(e){
  else if(f==='overlay')F.openOverlaySettings();
  else if(f==='tab'){tab=+v;var sg=document.getElementById('fpSeg');if(sg)sg.className='fp-seg'+(tab===2?' t2':tab===3?' t3':'');fill(true)}
  else if(f==='dur'){dur=+v;document.querySelectorAll('.fp-page .fp-chip[data-f=dur]').forEach(function(b){b.classList.toggle('on',+b.dataset.v===dur)});var d=document.getElementById('fpDur');if(d)d.textContent=dur}
- else if(f==='days'){days=+v;fill(false)}
+ else if(f==='days'){days=+v;var g2=document.getElementById('fpSeg2');if(g2)g2.className='fp-seg two'+(days===7?' t2':'');setTimeout(function(){fill(false)},240)}
+ else if(f==='dstep'){dur=Math.max(5,Math.min(180,dur+ +v));var dd=document.getElementById('fpDur');if(dd)dd.textContent=dur;document.querySelectorAll('.fp-page .fp-chip[data-f=dur]').forEach(function(b2){b2.classList.toggle('on',+b2.dataset.v===dur)})}
+ else if(f==='selD'){sel=dpk();sv(K,sel);refreshList()}
+ else if(f==='selN'){sel=[];sv(K,sel);refreshList()}
  else if(f==='cls'){var a=byPkg(v),c=cl(a),nx=c==='n'?'d':c==='d'?'f':'n';cls[v]=nx;sv(CL,cls);t.className='cc '+nx;t.textContent=nx==='f'?'Focus':nx==='d'?'Distracting':'Neutral';syncGuard()}
  else if(f==='stop'){var s=ld(S,null);if(s){s.stop=Date.now();sv(S,s)}F.stopFocus().then(function(){anim=true;load()}).catch(function(){alert('Strict mode is on. This session cannot be ended early.')})}
  else if(f==='start'&&sel&&sel.length){F.startFocus({packages:sel,minutes:dur,strict:strict}).then(function(){sv(S,{start:Date.now(),min:dur,apps:sel.slice(),strict:strict});sv(K,sel);anim=true;load()}).catch(function(er){alert('Could not start focus: '+((er&&er.message)||er))})}
