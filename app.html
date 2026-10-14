@@ -323,6 +323,8 @@ h2{font-size:11px;letter-spacing:.08em}
 }
 :focus-visible{outline:2px solid color-mix(in srgb,var(--acc) 70%,transparent);outline-offset:2px}
 @media (hover:hover){::-webkit-scrollbar{width:12px}::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--text) 22%,transparent);border-radius:10px;border:3px solid transparent;background-clip:content-box}::-webkit-scrollbar-track{background:transparent}}
+.dock{overflow:hidden}.dock .dscroll{overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-radius:999px}.dock .dscroll::-webkit-scrollbar{display:none}.dock .dtrack{position:relative;display:flex;width:calc(var(--n,5)*20%);min-width:100%}.dock .dtrack button{flex:0 0 calc(100%/var(--n,5));scroll-snap-align:start;min-width:0}.dock .ind{left:0;top:0;bottom:0;width:calc(100%/var(--n,5));transform:translateX(calc(var(--i,0)*100%))}
+@media (min-width:900px){.dock{overflow:visible}.dock .dscroll{overflow:visible;scroll-snap-type:none}.dock .dtrack{flex-direction:column;width:100%;gap:2px}.dock .dtrack button{flex:none}.dock .ind{display:none}}
 </style><script>
 /* HabitFlow account guard + cloud sync (Supabase). Habits stay in localStorage and are mirrored to the user's account. */
 (function(){
@@ -501,7 +503,7 @@ const uid=()=>Math.random().toString(36).slice(2,10);
 
 /* ===== UI ===== */
 let V={tab:'today',range:7,month:todayK().slice(0,7),sel:todayK(),habit:null,showArch:false};
-const TABS=[['today','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>','Today'],['plan','<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11.5l-2.3 4 2.3 4H5"/></svg>','Plan'],['habits','<svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>','Habits'],['insights','<svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>','Insights'],['calendar','<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>','Calendar'],['profile','<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c1-4 4-5.5 7.5-5.5s6.5 1.5 7.5 5.5"/></svg>','Profile']];
+const TABS=[['today','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>','Today'],['plan','<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11.5l-2.3 4 2.3 4H5"/></svg>','Plan'],['habits','<svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>','Habits'],['focus','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>','Focus'],['insights','<svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>','Insights'],['calendar','<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>','Calendar'],['profile','<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c1-4 4-5.5 7.5-5.5s6.5 1.5 7.5 5.5"/></svg>','Profile']];
 const COLORS=['#5b5bf0','#14c8a8','#ff7a45','#ff4d8d','#f5a623','#2ea0ff'];
 const ICONS=['book','dumbbell','drop','moon','leaf','pen','heart','target','apple','bolt'];
 const svg=(p,c='',w=2.6,z=22)=>`<svg class="${c}" width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
@@ -693,15 +695,16 @@ function vProfile(){
 
 function render(){
  const enter=V.last!==V.tab,ni=TABS.findIndex(x=>x[0]===V.tab),dir=enter&&V.li!=null?(ni>V.li?'dr':'dl'):'';V.li=ni;V.last=V.tab;if(enter&&V.tab==='today')V.ringPct=0;
- const y=SCR.scrollTop,f={today:vToday,plan:vPlan,habits:vHabits,insights:vInsights,calendar:vCalendar,profile:vProfile}[V.tab];
+ const y=SCR.scrollTop,f={today:vToday,plan:vPlan,habits:vHabits,focus:vFocus,insights:vInsights,calendar:vCalendar,profile:vProfile}[V.tab];
  document.getElementById('app').innerHTML=`<section class="${enter?'enter '+dir:''}">${f()}</section>`;V.fresh=null;
  document.querySelectorAll('[data-off]').forEach(e=>requestAnimationFrame(()=>requestAnimationFrame(()=>e.style.strokeDashoffset=e.dataset.off)));
  const dk=document.getElementById('dock');dk.style.setProperty('--i',ni);if(enter){const ind=dk.querySelector('.ind');ind.classList.remove('move');void ind.offsetWidth;ind.classList.add('move')}
  dk.querySelectorAll('button').forEach(b=>b.dataset.id===V.tab?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
+ {const sc=document.getElementById('dscroll');if(sc&&enter)sc.scrollTo({left:Math.max(0,Math.min(ni-2,TABS.length-5))*sc.clientWidth/5,behavior:'smooth'})}
  SCR.scrollTop=enter?0:y;applyTheme();
 }
 function buildDock(){const n=document.createElement('nav');n.className='dock';n.id='dock';n.setAttribute('aria-label','Main');
- n.innerHTML='<i class="ind"></i>'+TABS.map(([id,i,l])=>`<button data-act="tab" data-id="${id}" aria-label="${l}"><span>${i}</span>${l}</button>`).join('');
+ n.style.setProperty('--n',TABS.length);n.innerHTML='<div class="dscroll" id="dscroll"><div class="dtrack"><i class="ind"></i>'+TABS.map(([id,i,l])=>`<button data-act="tab" data-id="${id}" aria-label="${l}"><span>${i}</span>${l}</button>`).join('')+'</div></div>';
  const f=document.createElement('div');f.className='dockfade';document.body.append(f,n)}
 
 /* sheets */
@@ -1485,34 +1488,73 @@ LN.addListener('localNotificationActionPerformed',function(ev){
 })();
 </script>
 <script>
-/* Focus page: iOS-style full-screen page (Android app) */
+/* Focus tab: focus sessions, screen time, app intent and estimated sleep (Android app) */
 (function(){
 var C=window.Capacitor,native=!!(C&&(C.isNativePlatform?C.isNativePlatform():!!(window.androidBridge||(C.getPlatform&&C.getPlatform()!=='web')))),F=null;
 if(native){F=C.registerPlugin?C.registerPlugin('Focus'):((C.Plugins&&C.Plugins.Focus)||null)}
-var K='hf.focus.apps',S='hf.focus.session',L='hf.focus.log',CIRC=653.45;
-var st=null,apps=[],usage=null,guard=null,week=null,days=1,sel=ld(K,[]),dur=25,q='',tab=1,iv=null,anim=true,busy=false,A=true;
-function ld(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+var K='hf.focus.apps',S='hf.focus.session',L='hf.focus.log',CL='hf.focus.cls',IN='hf.focus.intent',OB='hf.focus.onb',SC='hf.sleep.sched';
+var R=2*Math.PI*118;
+var st=null,apps=[],u1=null,u7=null,guard=null,week=null,sleep=null,days=1,tab=1,dur=25,strict=false,q='',anim=true,busy=false,A=true;
+var sel=ld(K,null),cls=ld(CL,{}),intent=ld(IN,[]),onb=ld(OB,false),sched=ld(SC,{bed:'23:00',wake:'07:00'});
+function ld(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v===null||v===undefined?d:v}catch(e){return d}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function X(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function fm(ms){var m=Math.round(ms/60000);if(m<1)return ms>0?'<1m':'0m';return m>=60?Math.floor(m/60)+'h '+(m%60)+'m':m+'m'}
 function tm(ms){var s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;return(h?h+':'+('0'+m).slice(-2):m)+':'+('0'+r).slice(-2)}
+function hhmm(ts){return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
 function ic(a){return a&&a.icon?'<img class="fp-ic" alt="" src="'+a.icon+'">':'<div class="fp-ic ph">'+X(((a&&a.label)||'?').charAt(0).toUpperCase())+'</div>'}
 function byPkg(p){for(var i=0;i<apps.length;i++)if(apps[i].package===p)return apps[i];return null}
+/* ----- app intent: focus (f), neutral (n), distracting (d) ----- */
+var KF=/tradingview|metatrader|metaquotes|binance|bybit|okx|coinbase|robinhood|webull|thinkorswim|investing|etoro|ibkr|schwab|notion|obsidian|todoist|ticktick|docs|sheets|slides|excel|office|powerpoint|onenote|anki|duolingo|coursera|udemy|khanacademy|kindle|figma|github|termux|slack|zoom|teams|trello|asana|linkedin/i;
+var KN=/telegram|whatsapp|signal|messag|orca|mms|dialer|phone|contacts|maps|camera|clock|calculator|settings|wallet|bank|uber|bolt|translate|gallery|photos|files|chrome|browser|music|spotify|podcast|gmail|outlook|mail|launcher/i;
+var KD=/instagram|tiktok|musically|facebook|snapchat|twitter|reddit|pinterest|tumblr|threads|youtube|netflix|twitch|likee|kwai|tinder|bumble|9gag|vk\./i;
+var KS=/instagram|tiktok|musically|facebook|snapchat|twitter|threads|pinterest|youtube|linkedin/i;
+function cl(a){
+ var o=cls[a.package];if(o)return o;
+ var p=a.package;
+ if(intent.indexOf('content')>-1&&KS.test(p))return 'f';
+ if(intent.indexOf('gaming')>-1&&a.cat===0)return 'f';
+ if(KF.test(p))return 'f';
+ if(KN.test(p))return 'n';
+ if(KD.test(p))return 'd';
+ if(a.cat===0||a.cat===2||a.cat===4)return 'd';
+ if(a.cat===7)return 'f';
+ return 'n';
+}
+function dpk(){return apps.filter(function(a){return cl(a)==='d'}).map(function(a){return a.package})}
+function syncGuard(){if(F&&guard&&guard.enabled)F.setGuard({enabled:true,limitMin:guard.limitMin,allow:[],packages:dpk()}).catch(function(){})}
+function useOf(map,p){return (map&&map[p])||0}
+function umap(u){var m={};if(u&&u.apps)u.apps.forEach(function(a){m[a.package]=a.ms});return m}
+function prod(){var m=umap(u7),f=0,d=0,n=0;apps.forEach(function(a){var ms=m[a.package]||0,c=cl(a);if(c==='f')f+=ms;else if(c==='d')d+=ms;else n+=ms});return{f:f,d:d,n:n,score:(f+d)?Math.round(f/(f+d)*100):null}}
 function finalize(){var s=ld(S,null);if(!s||(st&&st.active))return;var full=s.start+s.min*60000,end=Math.min(s.stop||full,full);var l=ld(L,[]);l.push({at:s.start,min:Math.max(1,Math.round((end-s.start)/60000))});sv(L,l.slice(-200));localStorage.removeItem(S)}
 function sw(attrs,on){return '<label class="sw"><input type="checkbox" '+attrs+(on?' checked':'')+'><span></span></label>'}
 function prow(t,s,f,on){return '<div class="fp-r p16"><div class="fp-n">'+t+'<div class="fp-s">'+s+'</div></div>'+(on?'<span style="color:#34c759;font-weight:700;font-size:20px">&#10003;</span>':'<button class="fp-link" data-f="'+f+'">Allow</button>')+'</div>'}
 function setupHtml(){return '<div class="fp-h">Permissions needed</div><div class="fp-g">'+prow('Usage Access','Lets HabitFlow see which app is open','usage',st.usage)+prow('Display Over Other Apps','Lets HabitFlow show the focus screen','overlay',st.overlay)+'</div>'}
-function appRows(){var f=q.toLowerCase();var list=apps.filter(function(a){return !f||a.label.toLowerCase().indexOf(f)>-1}).slice(0,200);if(!list.length)return '<div class="fp-r p16"><div class="fp-s">No apps found</div></div>';return list.map(function(a){return '<div class="fp-r">'+ic(a)+'<div class="fp-n">'+X(a.label)+'</div>'+sw('data-f="app" data-v="'+X(a.package)+'"',sel.indexOf(a.package)>-1)+'</div>'}).join('')}
+var INTENTS=[['trading','Trading or investing'],['study','Studying'],['work','Office or remote work'],['content','I work with social media'],['gaming','Gaming is part of my work']];
+function intentHtml(first){
+ return '<div class="fp-h">'+(first?'Tell us how you use your phone':'How you use your phone')+'</div><div class="fp-g"><div class="fp-r p16" style="display:block"><div class="fp-s" style="margin-bottom:10px">HabitFlow sorts your apps into <b>focus</b>, <b>neutral</b> and <b>distracting</b>. Messaging apps like Telegram stay neutral, feeds like Instagram and TikTok count as distractions, and trading or work apps count as focus. Tell us what applies to you so it gets it right.</div><div class="fp-chips" style="justify-content:flex-start">'+INTENTS.map(function(i){return '<button class="fp-chip'+(intent.indexOf(i[0])>-1?' on':'')+'" data-f="intent" data-v="'+i[0]+'">'+i[1]+'</button>'}).join('')+'</div>'+(first?'<p style="margin:12px 0 0"><button class="fp-btn" data-f="onb">Continue</button></p>':'')+'</div></div>';
+}
+function startList(){var list=apps.slice().sort(function(a,b){var x=cl(a)==='d'?0:1,y=cl(b)==='d'?0:1;return x-y||a.label.localeCompare(b.label)});var f=q.toLowerCase();return list.filter(function(a){return !f||a.label.toLowerCase().indexOf(f)>-1}).slice(0,250)}
+function appRows(){var l=startList();if(!l.length)return '<div class="fp-r p16"><div class="fp-s">No apps found</div></div>';return l.map(function(a){return '<div class="fp-r">'+ic(a)+'<div class="fp-n">'+X(a.label)+'</div>'+sw('data-f="app" data-v="'+X(a.package)+'"',sel.indexOf(a.package)>-1)+'</div>'}).join('')}
 function startLabel(){return 'Start Focus'+(sel.length?' \u00b7 '+sel.length+(sel.length===1?' app':' apps'):'')}
+function ticks(){var h='';for(var i=0;i<60;i++){var a=i*Math.PI/30,r1=i%5?138:134,r2=146,s=Math.sin(a),c=Math.cos(a);h+='<line x1="'+(150+r1*s).toFixed(1)+'" y1="'+(150-r1*c).toFixed(1)+'" x2="'+(150+r2*s).toFixed(1)+'" y2="'+(150-r2*c).toFixed(1)+'" stroke="'+(i%5?'var(--line)':'var(--mute)')+'" stroke-width="'+(i%5?1.5:2.5)+'" stroke-linecap="round"/>'}return h}
 function focusHtml(){
  var ok=st.usage&&st.overlay,h='';
  if(!ok)h+=setupHtml();
  if(st.active){
-  var s=ld(S,null),total=s?s.min*60000:Math.max(1,st.endsAt-Date.now()),r=Math.max(0,st.endsAt-Date.now());
-  h+='<div class="fp-ring"><svg viewBox="0 0 240 240"><circle class="bg" cx="120" cy="120" r="104"/><circle class="fg" id="fpRing" cx="120" cy="120" r="104" stroke-dasharray="'+CIRC+'" stroke-dashoffset="'+(CIRC*(1-r/total))+'"/></svg><div><div class="fp-big" id="fpT" style="font-size:46px;margin:0">'+tm(r)+'</div><div class="fp-sub">remaining</div></div></div>';
-  var pk=(s&&s.apps)||sel;h+='<div class="fp-stack">'+pk.slice(0,6).map(function(p){return ic(byPkg(p))}).join('')+'</div><div class="fp-sub">'+pk.length+(pk.length===1?' app is':' apps are')+' blocked</div><p style="text-align:center;margin-top:18px"><button class="fp-link fp-red" data-f="stop">End Session</button></p>';
+  var s=ld(S,null),total=s?s.min*60000:Math.max(1,st.endsAt-Date.now()),r=Math.max(0,st.endsAt-Date.now()),pk=(s&&s.apps)||sel||[];
+  h+='<div class="fp-ring"><svg viewBox="0 0 300 300"><defs><linearGradient id="fpg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#388FCA"/><stop offset="1" stop-color="#14c8a8"/></linearGradient></defs>'+ticks()+'<circle class="bg" cx="150" cy="150" r="118"/><circle class="fg" id="fpRing" cx="150" cy="150" r="118" stroke="url(#fpg)" stroke-dasharray="'+R.toFixed(2)+'" stroke-dashoffset="'+(R*(1-r/total)).toFixed(2)+'"/></svg><div><div class="fp-sub" style="letter-spacing:.14em;text-transform:uppercase;font-size:12px">Deep focus</div><div class="fp-big" id="fpT" style="font-size:58px;margin:0">'+tm(r)+'</div><div class="fp-sub">Ends at '+hhmm(st.endsAt)+'</div></div></div>';
+  h+='<div class="fp-stack">'+pk.slice(0,7).map(function(p){return ic(byPkg(p))}).join('')+'</div><div class="fp-sub">'+pk.length+(pk.length===1?' app is':' apps are')+' blocked</div>';
+  h+=(s&&s.strict)?'<p class="fp-sub" style="margin-top:16px"><b>Strict mode</b> is on. You can\'t end this session early.</p>':'<p style="text-align:center;margin-top:16px"><button class="fp-link fp-red" data-f="stop">End Session</button></p>';
  }else if(ok){
-  h+='<div class="fp-big"><span id="fpDur">'+dur+'</span><span style="font-size:22px;font-weight:600"> min</span></div><div class="fp-sub">Choose how long to stay focused</div><div class="fp-chips" style="margin-top:12px">'+[15,25,45,60,90].map(function(m){return '<button class="fp-chip'+(m===dur?' on':'')+'" data-f="dur" data-v="'+m+'">'+m+'</button>'}).join('')+'</div><div class="fp-h">Apps to block</div><input class="fp-q" data-f="q" placeholder="Search apps" value="'+X(q)+'"><div class="fp-g" id="fpApps">'+appRows()+'</div>';
+  if(!onb)h+=intentHtml(true);
+  else{
+   h+='<div class="fp-big"><span id="fpDur">'+dur+'</span><span style="font-size:22px;font-weight:600"> min</span></div><div class="fp-sub">Choose how long to stay focused</div><div class="fp-chips" style="margin-top:12px">'+[15,25,45,60,90].map(function(m){return '<button class="fp-chip'+(m===dur?' on':'')+'" data-f="dur" data-v="'+m+'">'+m+'</button>'}).join('')+'</div>';
+   h+='<div class="fp-h">Options</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Strict mode<div class="fp-s">You can\'t end the session early</div></div>'+sw('data-f="strict"',strict)+'</div></div>';
+   var fa=apps.filter(function(a){return cl(a)==='f'}).slice(0,8);
+   if(fa.length)h+='<div class="fp-h">Your focus apps (never blocked)</div><div class="fp-g"><div class="fp-r p16" style="display:block"><div class="fp-stack" style="justify-content:flex-start;margin:0;padding-left:8px">'+fa.map(ic).join('')+'</div></div></div>';
+   h+='<div class="fp-h">Apps to block</div><input class="fp-q" data-f="q" placeholder="Search apps" value="'+X(q)+'" style="width:100%;border:0;border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text);font-size:17px;margin:0 0 12px;box-sizing:border-box"><div class="fp-g" id="fpApps">'+appRows()+'</div>';
+  }
  }
  return h;
 }
@@ -1521,97 +1563,126 @@ function chartHtml(){
  var mx=1;week.forEach(function(d){if(d.ms>mx)mx=d.ms});
  return '<div class="fp-chart">'+week.map(function(d,i){var p=Math.max(3,Math.round(d.ms/mx*100));return '<div'+(i===week.length-1?' class="today"':'')+'><i'+(A?' data-h="'+p+'%"':' style="height:'+p+'%"')+'></i><small>'+X(new Date(d.t).toLocaleDateString(undefined,{weekday:'narrow'}))+'</small></div>'}).join('')+'</div>';
 }
+function prodHtml(){
+ var p=prod();
+ if(p.score==null)return '<div class="fp-h">Productivity this week</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Not enough data yet<div class="fp-s">Use your phone for a day and this fills in.</div></div></div></div>';
+ var t=p.f+p.d+p.n||1;
+ function line(l,ms,c){return '<div style="margin-top:8px"><div style="display:flex;justify-content:space-between"><span class="fp-s">'+l+'</span><span class="fp-s">'+fm(ms)+'</span></div><div class="fp-bar"><i style="width:'+Math.round(ms/t*100)+'%;background:'+c+'"></i></div></div>'}
+ return '<div class="fp-h">Productivity this week</div><div class="fp-g"><div class="fp-prod"><div class="fp-score" style="--p:'+p.score+'"><b>'+p.score+'%</b></div><div style="flex:1">'+'<div style="font-weight:600;font-size:17px">'+(p.score>=70?'Strong focus':p.score>=40?'Room to improve':'Mostly distracted')+'</div><div class="fp-s" style="font-size:13px">Time in focus apps compared with distracting apps</div></div></div><div style="padding:0 16px 16px">'+line('Focus apps',p.f,'#34c759')+line('Neutral',p.n,'var(--mute)')+line('Distracting',p.d,'#ff453a')+'</div></div>';
+}
+function allApps(ud){
+ var m=umap(ud),l=apps.map(function(a){return{a:a,ms:m[a.package]||0}});
+ l.sort(function(x,y){return y.ms-x.ms||x.a.label.localeCompare(y.a.label)});
+ var mx=l.length&&l[0].ms||1;
+ return '<div class="fp-h">All apps on this phone</div><div class="fp-g">'+l.slice(0,300).map(function(r){var c=cl(r.a),p=Math.max(r.ms?3:0,Math.round(r.ms/mx*100));return '<div class="fp-r">'+ic(r.a)+'<div class="fp-n" style="overflow:visible"><div style="display:flex;justify-content:space-between;gap:8px"><span style="overflow:hidden;text-overflow:ellipsis">'+X(r.a.label)+'</span><span class="fp-s">'+fm(r.ms)+'</span></div><div class="fp-bar"><i'+(A?' data-w="'+p+'%"':' style="width:'+p+'%"')+'></i></div></div><button class="cc '+c+'" data-f="cls" data-v="'+X(r.a.package)+'">'+(c==='f'?'Focus':c==='d'?'Distracting':'Neutral')+'</button></div>'}).join('')+'</div><p class="fp-sub" style="margin-top:8px;font-size:13px">Tap a label to change it: Neutral, Distracting, Focus.</p>';
+}
 function guardHtml(){
  var g=guard;if(!g)return '';
- var pct=g.limitMin?Math.min(100,Math.round(g.todayMs/(g.limitMin*60000)*100)):0;
- var h='<div class="fp-h">Daily limit</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Auto-block distracting apps<div class="fp-s">After your limit, they stay closed until tomorrow</div></div>'+sw('data-f="gtoggle"',g.enabled)+'</div><div class="fp-r p16"><div class="fp-n">Limit</div><button class="fp-chip" data-f="gminus">&minus;</button><b id="fpLim" style="min-width:56px;text-align:center">'+fm(g.limitMin*60000)+'</b><button class="fp-chip" data-f="gplus">+</button></div><div class="fp-r p16" style="display:block"><div style="display:flex;justify-content:space-between"><span class="fp-s">Used today</span><span class="fp-s" id="fpUsed">'+fm(g.todayMs)+'</span></div><div class="fp-bar"><i id="fpGBar"'+(A?' data-w="'+pct+'%"':' style="width:'+pct+'%"')+(pct>=100?';background:#ff453a':'')+'></i></div></div></div>';
+ var pct=g.limitMin?Math.min(100,Math.round(g.todayMs/(g.limitMin*60000)*100)):0,d=apps.filter(function(a){return cl(a)==='d'});
+ var h='<div class="fp-h">Daily limit</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Auto-block distracting apps<div class="fp-s">After your limit, they stay closed until tomorrow</div></div>'+sw('data-f="gtoggle"',g.enabled)+'</div><div class="fp-r p16"><div class="fp-n">Limit</div><button class="fp-chip" data-f="gminus">&minus;</button><b id="fpLim" style="min-width:56px;text-align:center">'+fm(g.limitMin*60000)+'</b><button class="fp-chip" data-f="gplus">+</button></div><div class="fp-r p16" style="display:block"><div style="display:flex;justify-content:space-between"><span class="fp-s">Used today</span><span class="fp-s">'+fm(g.todayMs)+'</span></div><div class="fp-bar"><i id="fpGBar"'+(A?' data-w="'+pct+'%"':' style="width:'+pct+'%"')+(pct>=100?';background:#ff453a':'')+'></i></div></div></div>';
  if(g.active)h+='<p class="fp-sub" style="margin-top:10px"><b>Limit reached.</b> Distracting apps are blocked until tomorrow.</p>';
- if(g.apps.length)h+='<div class="fp-h">Blocked after the limit</div><div class="fp-g">'+g.apps.map(function(a){return '<div class="fp-r">'+ic(a)+'<div class="fp-n">'+X(a.label)+'</div>'+sw('data-f="gallow" data-v="'+X(a.package)+'"',g.allow.indexOf(a.package)<0)+'</div>'}).join('')+'</div>';
- else h+='<p class="fp-sub" style="margin-top:12px">Use your phone for a day or two and HabitFlow will learn which social, video, game and news apps distract you.</p>';
+ h+='<p class="fp-sub" style="margin-top:10px;font-size:13px">'+d.length+' distracting '+(d.length===1?'app':'apps')+' will be blocked. You choose them in the list above.</p>';
  return h;
 }
 function timeHtml(){
  if(!st.usage)return setupHtml();
- var tot=usage?usage.totalMs:0,h='<div class="fp-big">'+fm(tot)+'</div><div class="fp-sub">'+(days===1?'Today':'Last 7 days')+'</div>'+chartHtml();
+ var ud=days===1?u1:u7,tot=ud?ud.totalMs:0,h='<div class="fp-big">'+fm(tot)+'</div><div class="fp-sub">'+(days===1?'Screen time today':'Screen time, last 7 days')+'</div>'+chartHtml();
  h+='<div class="fp-chips" style="margin-top:10px"><button class="fp-chip'+(days===1?' on':'')+'" data-f="days" data-v="1">Today</button><button class="fp-chip'+(days===7?' on':'')+'" data-f="days" data-v="7">7 Days</button></div>';
- if(usage&&usage.apps.length){var mx=usage.apps[0].ms||1;h+='<div class="fp-h">Most used</div><div class="fp-g">'+usage.apps.slice(0,10).map(function(a){var p=Math.max(3,Math.round(a.ms/mx*100));return '<div class="fp-r">'+ic(a)+'<div class="fp-n" style="overflow:visible"><div style="display:flex;justify-content:space-between;gap:8px"><span style="overflow:hidden;text-overflow:ellipsis">'+X(a.label)+'</span><span class="fp-s">'+fm(a.ms)+'</span></div><div class="fp-bar"><i'+(A?' data-w="'+p+'%"':' style="width:'+p+'%"')+'></i></div></div></div>'}).join('')+'</div>'}
+ h+=prodHtml();
  var l=ld(L,[]),wk=Date.now()-7*864e5,tt=0,n=0;l.forEach(function(e){if(e.at>wk){tt+=e.min;n++}});
- h+='<div class="fp-h">Focus this week</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Focused time</div><b>'+fm(tt*60000)+'</b></div><div class="fp-r p16"><div class="fp-n">Sessions</div><b>'+n+'</b></div></div>'+guardHtml();
+ h+='<div class="fp-h">Focus sessions</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Focused time this week</div><b>'+fm(tt*60000)+'</b></div><div class="fp-r p16"><div class="fp-n">Sessions</div><b>'+n+'</b></div>'+l.slice(-5).reverse().map(function(e){return '<div class="fp-r p16"><div class="fp-n">Started '+X(new Date(e.at).toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit'}))+'</div><span class="fp-s">'+e.min+' min</span></div>'}).join('')+'</div>';
+ h+=guardHtml()+allApps(ud)+intentHtml(false);
  return h;
 }
-function renderPane(a){
- var o=document.getElementById('hfFocus'),p=document.getElementById('fpPane'),f=document.getElementById('fpFoot');if(!o||!p)return;
- A=!!a;var y=o.scrollTop;
- if(!native||!F)p.innerHTML='<div class="fp-g"><div class="fp-r p16"><div class="fp-n">Available in the Android app<div class="fp-s">Focus mode and screen time need the HabitFlow Android app.</div></div></div></div>';
- else if(!st)p.innerHTML='<div class="fp-sub">Loading&hellip;</div>';
- else p.innerHTML=tab===1?focusHtml():timeHtml();
- p.className=a?'fp-in':'';
- var show=native&&F&&st&&tab===1&&st.usage&&st.overlay&&!st.active;
- f.innerHTML=show?'<div><button class="fp-btn" data-f="start" id="fpStart"'+(sel.length?'':' disabled')+'>'+startLabel()+'</button></div>':'';
+/* ----- sleep (estimated from when you stop using the phone) ----- */
+function bedMin(ts){var d=new Date(ts),m=d.getHours()*60+d.getMinutes();return m<720?m+1440:m}
+function tmin(s){var a=String(s).split(':');var m=+a[0]*60+ +a[1];return m<720?m+1440:m}
+function quality(ns){var avg=ns.reduce(function(s,n){return s+n.ms},0)/ns.length,dr=Math.min(1,avg/(8*3600000)),b=ns.map(function(n){return bedMin(n.bed)}),mean=b.reduce(function(s,x){return s+x},0)/b.length,sd=Math.sqrt(b.reduce(function(s,x){return s+(x-mean)*(x-mean)},0)/b.length),cons=1-Math.min(1,sd/90),wk=ns.reduce(function(s,n){return s+n.wakes},0)/ns.length,rest=1-Math.min(1,wk/5);return Math.round(100*(.55*dr+.3*cons+.15*rest))}
+function sleepHtml(){
+ if(!st.usage)return setupHtml();
+ if(!sleep)return '<div class="fp-sub">Loading&hellip;</div>';
+ var ns=sleep.filter(function(n){return !n.none}),h='';
+ var sch='<div class="fp-h">Sleep schedule</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Bedtime</div><input class="fp-time" type="time" data-f="sbed" value="'+X(sched.bed)+'"></div><div class="fp-r p16"><div class="fp-n">Wake up</div><input class="fp-time" type="time" data-f="swake" value="'+X(sched.wake)+'"></div></div>';
+ if(!ns.length)return '<div class="fp-g"><div class="fp-r p16"><div class="fp-n">Not enough data yet<div class="fp-s">HabitFlow estimates your sleep from when you stop using your phone at night. Check back after a night or two.</div></div></div></div>'+sch;
+ var avg=ns.reduce(function(s,n){return s+n.ms},0)/ns.length,qs=quality(ns),tb=tmin(sched.bed),on=ns.filter(function(n){return Math.abs(bedMin(n.bed)-tb)<=30}).length,mx=Math.max.apply(null,ns.map(function(n){return n.ms}));
+ h+='<div class="fp-big">'+fm(avg)+'</div><div class="fp-sub">Average sleep per night (estimated)</div>';
+ h+='<div class="fp-chart">'+sleep.map(function(n,i){var p=n.none?3:Math.max(3,Math.round(n.ms/mx*100));return '<div'+(i===sleep.length-1?' class="today"':'')+'><i'+(A?' data-h="'+p+'%"':' style="height:'+p+'%"')+'></i><small>'+X(new Date(n.t).toLocaleDateString(undefined,{weekday:'narrow'}))+'</small></div>'}).join('')+'</div>';
+ h+='<div class="fp-h">Sleep quality</div><div class="fp-g"><div class="fp-prod"><div class="fp-score" style="--p:'+qs+'"><b>'+qs+'</b></div><div style="flex:1"><div style="font-weight:600;font-size:17px">'+(qs>=80?'Excellent':qs>=65?'Good':qs>=50?'Fair':'Needs work')+'</div><div class="fp-s" style="font-size:13px">Based on length, how regular your bedtime is, and phone wake-ups</div></div></div></div>';
+ h+='<div class="fp-h">On schedule</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Nights within 30 min of your bedtime</div><b>'+on+' of '+ns.length+'</b></div></div>'+sch;
+ h+='<div class="fp-h">Nights</div><div class="fp-g">'+sleep.filter(function(n){return !n.none}).slice().reverse().map(function(n){return '<div class="fp-r p16"><div class="fp-n">'+X(new Date(n.t).toLocaleDateString(undefined,{weekday:'long'}))+'<div class="fp-s">'+hhmm(n.bed)+' \u2192 '+hhmm(n.wake)+(n.wakes?' \u00b7 '+n.wakes+' wake-up'+(n.wakes>1?'s':''):'')+'</div></div><b>'+fm(n.ms)+'</b></div>'}).join('')+'</div>';
+ h+='<p class="fp-sub" style="margin-top:12px;font-size:13px">This is an estimate from phone use. Real sleep, steps and workouts from Samsung Health or Google Fit come with the next upgrade.</p>';
+ return h;
+}
+function pane(){
+ if(!native||!F)return '<div class="fp-g"><div class="fp-r p16"><div class="fp-n">Available in the Android app<div class="fp-s">Focus mode, screen time and sleep tracking need the HabitFlow Android app.</div></div></div></div>';
+ if(!st)return '<div class="fp-sub">Loading&hellip;</div>';
+ return tab===1?focusHtml():tab===2?timeHtml():sleepHtml();
+}
+function fill(a){
+ var p=document.getElementById('fpPane'),f=document.getElementById('fpFoot');if(!p)return;
+ A=!!a;var y=document.documentElement.scrollTop;
+ p.innerHTML=pane();p.className=a?'fp-in':'';
+ var show=native&&F&&st&&tab===1&&st.usage&&st.overlay&&!st.active&&onb;
+ f.innerHTML=show?'<button class="fp-btn" data-f="start" id="fpStart"'+(sel&&sel.length?'':' disabled')+'>'+startLabel()+'</button>':'';
  f.style.display=show?'':'none';
- o.scrollTop=y;
  requestAnimationFrame(function(){requestAnimationFrame(function(){p.querySelectorAll('[data-h]').forEach(function(e){e.style.height=e.dataset.h});p.querySelectorAll('[data-w]').forEach(function(e){e.style.width=e.dataset.w})})});
  tickT();
 }
-function render(){
- var o=document.getElementById('hfFocus');if(!o)return;
- var h='<div class="fp-wrap"><button class="fp-back" data-f="close"><svg viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button><h1 class="fp-title">Focus</h1>';
- if(native&&F)h+='<div class="fp-seg'+(tab===2?' t2':'')+'" id="fpSeg"><i></i><button data-f="tab" data-v="1">Focus</button><button data-f="tab" data-v="2">Screen Time</button></div>';
- o.innerHTML=h+'<div id="fpPane"></div></div><div class="fp-foot" id="fpFoot" style="display:none"></div>';
- renderPane(true);
+function shell(){
+ var r=document.getElementById('fpRoot');if(!r)return;
+ r.innerHTML='<h1 class="fp-title">Focus</h1>'+((native&&F)?'<div class="fp-seg'+(tab===2?' t2':tab===3?' t3':'')+'" id="fpSeg"><i></i><button data-f="tab" data-v="1">Focus</button><button data-f="tab" data-v="2">Screen Time</button><button data-f="tab" data-v="3">Sleep</button></div>':'')+'<div id="fpPane"></div><div class="fp-foot" id="fpFoot" style="display:none"></div>';
+ fill(true);
 }
-function tickT(){var el=document.getElementById('fpT');if(!el||!st||!st.active)return;var s=ld(S,null),total=s?s.min*60000:0,r=Math.max(0,st.endsAt-Date.now());el.textContent=tm(r);var ring=document.getElementById('fpRing');if(ring&&total)ring.style.strokeDashoffset=(CIRC*(1-r/total));if(r<=0){st.active=false;load()}}
+function tickT(){var el=document.getElementById('fpT');if(!el||!st||!st.active)return;var s=ld(S,null),total=s?s.min*60000:0,r=Math.max(0,st.endsAt-Date.now());el.textContent=tm(r);var ring=document.getElementById('fpRing');if(ring&&total)ring.style.strokeDashoffset=(R*(1-r/total)).toFixed(2);if(r<=0){st.active=false;load()}}
 async function load(){
  if(!F||busy)return;busy=true;
  try{
   st=await F.status();finalize();
   if(st.usage){
    var nl=function(){return null};
-   var r=await Promise.all([F.usage({days:days}).catch(nl),F.guardInfo().catch(nl),F.week().catch(nl)]);
-   usage=r[0];guard=r[1];week=r[2]&&r[2].days;
+   var r=await Promise.all([F.usage({days:1,limit:600}).catch(nl),F.usage({days:7,limit:600}).catch(nl),F.guardInfo().catch(nl),F.week().catch(nl),F.sleep({days:7}).catch(nl)]);
+   u1=r[0];u7=r[1];guard=r[2];week=r[3]&&r[3].days;sleep=r[4]&&r[4].nights;
    if(!apps.length)apps=(await F.listApps()).apps||[];
+   if(sel===null){sel=dpk();sv(K,sel)}
+   syncGuard();
   }
  }catch(e){}
  busy=false;
- if(document.getElementById('fpPane')){renderPane(anim);anim=false}
+ if(document.getElementById('fpPane')){fill(anim);anim=false}
 }
-function open(){
- if(document.getElementById('hfFocus'))return;
- if(!document.getElementById('hfFocusCss')){var s=document.createElement('style');s.id='hfFocusCss';s.textContent="#hfFocus{position:fixed;inset:0;z-index:99990;background:var(--bg);color:var(--text);overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',system-ui,sans-serif;transform:translateX(100%);transition:transform .38s cubic-bezier(.32,.72,0,1);will-change:transform}#hfFocus.on{transform:none}#hfFocus .fp-wrap{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 8px) 18px calc(120px + env(safe-area-inset-bottom,0px))}#hfFocus .fp-back{border:0;background:none;color:var(--acc);font-size:17px;display:flex;align-items:center;gap:4px;padding:10px 0;cursor:pointer}#hfFocus .fp-back svg{width:12px;height:20px}#hfFocus .fp-title{font-size:34px;font-weight:700;letter-spacing:-.02em;margin:4px 0 14px}#hfFocus .fp-seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:color-mix(in srgb,var(--text) 8%,transparent);border-radius:10px;padding:2px;margin-bottom:18px}#hfFocus .fp-seg i{position:absolute;top:2px;bottom:2px;left:2px;width:calc(50% - 2px);background:var(--surf);border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.14);transition:transform .3s cubic-bezier(.32,.72,0,1)}#hfFocus .fp-seg.t2 i{transform:translateX(100%)}#hfFocus .fp-seg button{position:relative;z-index:1;border:0;background:none;padding:8px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer}#hfFocus .fp-h{font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:var(--mute);margin:24px 16px 7px}#hfFocus .fp-g{background:var(--surf);border-radius:12px;overflow:hidden}#hfFocus .fp-r{display:flex;align-items:center;gap:12px;padding:10px 16px;min-height:54px;position:relative}#hfFocus .fp-r+.fp-r::before{content:'';position:absolute;top:0;left:68px;right:0;height:1px;background:var(--line)}#hfFocus .fp-r.p16+.fp-r::before{left:16px}#hfFocus .fp-ic{width:40px;height:40px;border-radius:9px;flex:none;object-fit:cover;background:var(--line)}#hfFocus .fp-ic.ph{display:grid;place-items:center;font-weight:700;color:#fff;background:var(--acc)}#hfFocus .fp-n{flex:1;min-width:0;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#hfFocus .fp-n .fp-s{white-space:normal;font-size:13px;margin-top:2px}#hfFocus .fp-s{color:var(--mute);font-size:15px}#hfFocus .sw{position:relative;width:51px;height:31px;flex:none}#hfFocus .sw input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%;cursor:pointer;z-index:2}#hfFocus .sw span{position:absolute;inset:0;background:color-mix(in srgb,var(--text) 18%,transparent);border-radius:31px;transition:background .25s}#hfFocus .sw span::after{content:'';position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.25);transition:transform .28s cubic-bezier(.32,.72,0,1)}#hfFocus .sw input:checked+span{background:#34c759}#hfFocus .sw input:checked+span::after{transform:translateX(20px)}#hfFocus .fp-btn{border:0;border-radius:14px;padding:16px;font-size:17px;font-weight:600;background:var(--acc);color:#fff;width:100%;cursor:pointer;transition:transform .15s,opacity .2s}#hfFocus .fp-btn:active{transform:scale(.97)}#hfFocus .fp-btn[disabled]{opacity:.35}#hfFocus .fp-link{border:0;background:none;color:var(--acc);font-size:17px;cursor:pointer;padding:6px 0}#hfFocus .fp-red{color:#ff453a}#hfFocus .fp-foot{position:fixed;left:0;right:0;bottom:0;padding:14px 18px calc(14px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 80%,transparent);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);z-index:3}#hfFocus .fp-foot>div{max-width:560px;margin:0 auto}#hfFocus .fp-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;justify-content:center}#hfFocus .fp-chip{flex:none;border:0;border-radius:999px;padding:10px 18px;background:var(--surf);color:var(--text);font-size:16px;font-weight:600;cursor:pointer;transition:background .2s,color .2s,transform .2s}#hfFocus .fp-chip.on{background:var(--acc);color:#fff;transform:scale(1.05)}#hfFocus .fp-big{font-size:56px;font-weight:700;letter-spacing:-.03em;text-align:center;margin:6px 0}#hfFocus .fp-sub{text-align:center;color:var(--mute);font-size:15px}#hfFocus .fp-q{width:100%;border:0;border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text);font-size:17px;margin:0 0 12px;box-sizing:border-box}#hfFocus .fp-ring{position:relative;width:240px;height:240px;margin:10px auto 6px}#hfFocus .fp-ring svg{width:100%;height:100%;transform:rotate(-90deg)}#hfFocus .fp-ring circle{fill:none;stroke-width:12;stroke-linecap:round}#hfFocus .fp-ring .bg{stroke:var(--line)}#hfFocus .fp-ring .fg{stroke:var(--acc);transition:stroke-dashoffset 1s linear}#hfFocus .fp-ring>div{position:absolute;inset:0;display:grid;place-content:center;text-align:center}#hfFocus .fp-chart{display:flex;align-items:flex-end;gap:10px;height:150px;padding:8px 6px 0;margin-top:6px}#hfFocus .fp-chart>div{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}#hfFocus .fp-chart i{display:block;width:100%;max-width:34px;border-radius:7px 7px 3px 3px;background:color-mix(in srgb,var(--acc) 35%,transparent);height:0;transition:height .7s cubic-bezier(.2,.9,.3,1)}#hfFocus .fp-chart .today i{background:var(--acc)}#hfFocus .fp-chart small{font-size:11px;color:var(--mute)}#hfFocus .fp-bar{height:5px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}#hfFocus .fp-bar i{display:block;height:100%;width:0;background:var(--acc);border-radius:3px;transition:width .7s cubic-bezier(.2,.9,.3,1)}#hfFocus .fp-in>*{animation:fpup .5s cubic-bezier(.2,.8,.2,1) both}#hfFocus .fp-in>*:nth-child(2){animation-delay:.05s}#hfFocus .fp-in>*:nth-child(3){animation-delay:.1s}#hfFocus .fp-in>*:nth-child(4){animation-delay:.15s}#hfFocus .fp-in>*:nth-child(n+5){animation-delay:.2s}@keyframes fpup{from{opacity:0;transform:translateY(14px)}}#hfFocus .fp-stack{display:flex;justify-content:center;margin:12px 0 4px;padding-left:8px}#hfFocus .fp-stack .fp-ic{width:34px;height:34px;margin-left:-8px;border:2px solid var(--bg)}@media(prefers-reduced-motion:reduce){#hfFocus,#hfFocus .fp-in>*,#hfFocus .fp-seg i,#hfFocus .sw span::after{transition:none;animation:none}}";document.head.appendChild(s)}
- var o=document.createElement('div');o.id='hfFocus';o.setAttribute('role','dialog');o.setAttribute('aria-label','Focus');document.body.appendChild(o);
- anim=true;tab=1;render();
- try{history.pushState({hfFocus:1},'')}catch(e){}
- requestAnimationFrame(function(){requestAnimationFrame(function(){o.classList.add('on')})});
- iv=setInterval(tickT,1000);load();
-}
-function shut(){var o=document.getElementById('hfFocus');if(!o)return;o.classList.remove('on');clearInterval(iv);setTimeout(function(){o.remove()},400)}
-function back(){if(history.state&&history.state.hfFocus)history.back();else shut()}
-window.addEventListener('popstate',function(){if(document.getElementById('hfFocus'))shut()});
+window.vFocus=function(){return '<div class="fp-page" id="fpRoot"></div>'};
+window.hfFocusMount=function(){
+ if(!document.getElementById('hfFocusCss')){var s=document.createElement('style');s.id='hfFocusCss';s.textContent=".fp-page{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',system-ui,sans-serif;padding-bottom:24px}.fp-page .fp-title{font-size:34px;font-weight:700;letter-spacing:-.02em;margin:6px 0 14px}.fp-page .fp-seg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);background:color-mix(in srgb,var(--text) 8%,transparent);border-radius:10px;padding:2px;margin-bottom:18px}.fp-page .fp-seg i{position:absolute;top:2px;bottom:2px;left:2px;width:calc((100% - 4px)/3);background:var(--surf);border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.14);transition:transform .3s cubic-bezier(.32,.72,0,1)}.fp-page .fp-seg.t2 i{transform:translateX(100%)}.fp-page .fp-seg.t3 i{transform:translateX(200%)}.fp-page .fp-seg button{position:relative;z-index:1;border:0;background:none;padding:8px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer}.fp-page .fp-h{font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:var(--mute);margin:24px 16px 7px}.fp-page .fp-g{background:var(--surf);border-radius:12px;overflow:hidden}.fp-page .fp-r{display:flex;align-items:center;gap:12px;padding:10px 16px;min-height:54px;position:relative}.fp-page .fp-r+.fp-r::before{content:'';position:absolute;top:0;left:68px;right:0;height:1px;background:var(--line)}.fp-page .fp-r.p16+.fp-r::before{left:16px}.fp-page .fp-ic{width:40px;height:40px;border-radius:9px;flex:none;object-fit:cover;background:var(--line)}.fp-page .fp-ic.ph{display:grid;place-items:center;font-weight:700;color:#fff;background:var(--acc)}.fp-page .fp-n{flex:1;min-width:0;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fp-page .fp-n .fp-s{white-space:normal;font-size:13px;margin-top:2px}.fp-page .fp-s{color:var(--mute);font-size:15px}.fp-page .sw{position:relative;width:51px;height:31px;flex:none}.fp-page .sw input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%;cursor:pointer;z-index:2}.fp-page .sw span{position:absolute;inset:0;background:color-mix(in srgb,var(--text) 18%,transparent);border-radius:31px;transition:background .25s}.fp-page .sw span::after{content:'';position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.25);transition:transform .28s cubic-bezier(.32,.72,0,1)}.fp-page .sw input:checked+span{background:#34c759}.fp-page .sw input:checked+span::after{transform:translateX(20px)}.fp-page .fp-btn{border:0;border-radius:14px;padding:16px;font-size:17px;font-weight:600;background:var(--acc);color:#fff;width:100%;cursor:pointer;transition:transform .15s,opacity .2s}.fp-page .fp-btn:active{transform:scale(.97)}.fp-page .fp-btn[disabled]{opacity:.35}.fp-page .fp-link{border:0;background:none;color:var(--acc);font-size:17px;cursor:pointer;padding:6px 0}.fp-page .fp-red{color:#ff453a}.fp-page .fp-foot{position:sticky;bottom:96px;z-index:3;padding-top:14px}.fp-page .fp-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;justify-content:center;flex-wrap:wrap}.fp-page .fp-chip{flex:none;border:0;border-radius:999px;padding:10px 16px;background:var(--surf);color:var(--text);font-size:15px;font-weight:600;cursor:pointer;transition:background .2s,color .2s,transform .2s}.fp-page .fp-chip.on{background:var(--acc);color:#fff;transform:scale(1.04)}.fp-page .fp-big{font-size:56px;font-weight:700;letter-spacing:-.03em;text-align:center;margin:6px 0;font-variant-numeric:tabular-nums}.fp-page .fp-sub{text-align:center;color:var(--mute);font-size:15px}.fp-page .fp-ring{position:relative;width:min(300px,82vw);aspect-ratio:1;margin:8px auto;filter:drop-shadow(0 0 22px color-mix(in srgb,var(--acc) 38%,transparent))}.fp-page .fp-ring svg{width:100%;height:100%;transform:rotate(-90deg)}.fp-page .fp-ring circle{fill:none;stroke-width:12;stroke-linecap:round}.fp-page .fp-ring .bg{stroke:var(--line)}.fp-page .fp-ring .fg{transition:stroke-dashoffset 1s linear}.fp-page .fp-ring>div{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:2px}.fp-page .fp-chart{display:flex;align-items:flex-end;gap:10px;height:150px;padding:8px 6px 0;margin-top:6px}.fp-page .fp-chart>div{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}.fp-page .fp-chart i{display:block;width:100%;max-width:34px;border-radius:7px 7px 3px 3px;background:color-mix(in srgb,var(--acc) 35%,transparent);height:0;transition:height .7s cubic-bezier(.2,.9,.3,1)}.fp-page .fp-chart .today i{background:var(--acc)}.fp-page .fp-chart small{font-size:11px;color:var(--mute)}.fp-page .fp-bar{height:5px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}.fp-page .fp-bar i{display:block;height:100%;width:0;background:var(--acc);border-radius:3px;transition:width .7s cubic-bezier(.2,.9,.3,1)}.fp-page .fp-in>*{animation:fpup .5s cubic-bezier(.2,.8,.2,1) both}.fp-page .fp-in>*:nth-child(2){animation-delay:.05s}.fp-page .fp-in>*:nth-child(3){animation-delay:.1s}.fp-page .fp-in>*:nth-child(4){animation-delay:.15s}.fp-page .fp-in>*:nth-child(n+5){animation-delay:.2s}@keyframes fpup{from{opacity:0;transform:translateY(14px)}}.fp-page .fp-stack{display:flex;justify-content:center;margin:12px 0 4px;padding-left:8px}.fp-page .fp-stack .fp-ic{width:34px;height:34px;margin-left:-8px;border:2px solid var(--bg)}.fp-page .cc{flex:none;border:0;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--mute);background:color-mix(in srgb,var(--text) 8%,transparent)}.fp-page .cc.f{color:#1f9d55;background:color-mix(in srgb,#34c759 18%,transparent)}.fp-page .cc.d{color:#ff453a;background:color-mix(in srgb,#ff453a 16%,transparent)}.fp-page .fp-prod{display:flex;align-items:center;gap:16px;padding:16px}.fp-page .fp-score{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:700;flex:none;background:conic-gradient(var(--acc) calc(var(--p)*1%),var(--line) 0)}.fp-page .fp-score b{display:grid;place-items:center;width:74px;height:74px;border-radius:50%;background:var(--surf);font-variant-numeric:tabular-nums}.fp-page .fp-time{border:0;border-radius:8px;padding:8px 10px;background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text);font-size:16px}@media(prefers-reduced-motion:reduce){.fp-page .fp-in>*,.fp-page .fp-seg i,.fp-page .sw span::after,.fp-page .fp-ring .fg{transition:none;animation:none}}";document.head.appendChild(s)}
+ anim=true;shell();load();
+};
+window.hfFocus=function(){try{V.tab='focus';render()}catch(e){}};
+var _rn=render;render=function(){_rn();if(V.tab==='focus')hfFocusMount()};
+setInterval(tickT,1000);
 document.addEventListener('click',function(e){
- var t=e.target.closest&&e.target.closest('#hfFocus [data-f]');if(!t)return;
+ var t=e.target.closest&&e.target.closest('.fp-page [data-f]');if(!t)return;
  var f=t.dataset.f,v=t.dataset.v;
- if(f==='close'){back();return}
+ if(f==='intent'){var i=intent.indexOf(v);if(i>-1)intent.splice(i,1);else intent.push(v);sv(IN,intent);t.classList.toggle('on');if(onb){fill(false);syncGuard()}return}
+ if(f==='onb'){onb=true;sv(OB,true);fill(true);syncGuard();return}
  if(!F)return;
  if(f==='usage')F.openUsageSettings();
  else if(f==='overlay')F.openOverlaySettings();
- else if(f==='tab'){tab=+v;var sg=document.getElementById('fpSeg');if(sg)sg.classList.toggle('t2',tab===2);renderPane(true)}
- else if(f==='dur'){dur=+v;document.querySelectorAll('#hfFocus .fp-chip[data-f=dur]').forEach(function(b){b.classList.toggle('on',+b.dataset.v===dur)});var d=document.getElementById('fpDur');if(d)d.textContent=dur}
- else if(f==='days'){days=+v;anim=false;load()}
- else if(f==='stop'){var s=ld(S,null);if(s){s.stop=Date.now();sv(S,s)}F.stopFocus().then(function(){anim=true;load()})}
- else if(f==='start'&&sel.length){F.startFocus({packages:sel,minutes:dur}).then(function(){sv(S,{start:Date.now(),min:dur,apps:sel.slice()});sv(K,sel);anim=true;load()}).catch(function(er){alert('Could not start focus: '+((er&&er.message)||er))})}
- else if((f==='gminus'||f==='gplus')&&guard){var nl=Math.max(30,Math.min(720,guard.limitMin+(f==='gplus'?30:-30)));guard.limitMin=nl;var el=document.getElementById('fpLim');if(el)el.textContent=fm(nl*60000);var pc=Math.min(100,Math.round(guard.todayMs/(nl*60000)*100)),gb=document.getElementById('fpGBar');if(gb){gb.style.width=pc+'%';gb.style.background=pc>=100?'#ff453a':''}F.setGuard({enabled:guard.enabled,limitMin:nl,allow:guard.allow}).catch(function(){})}
+ else if(f==='tab'){tab=+v;var sg=document.getElementById('fpSeg');if(sg)sg.className='fp-seg'+(tab===2?' t2':tab===3?' t3':'');fill(true)}
+ else if(f==='dur'){dur=+v;document.querySelectorAll('.fp-page .fp-chip[data-f=dur]').forEach(function(b){b.classList.toggle('on',+b.dataset.v===dur)});var d=document.getElementById('fpDur');if(d)d.textContent=dur}
+ else if(f==='days'){days=+v;fill(false)}
+ else if(f==='cls'){var a=byPkg(v),c=cl(a),nx=c==='n'?'d':c==='d'?'f':'n';cls[v]=nx;sv(CL,cls);t.className='cc '+nx;t.textContent=nx==='f'?'Focus':nx==='d'?'Distracting':'Neutral';syncGuard()}
+ else if(f==='stop'){var s=ld(S,null);if(s){s.stop=Date.now();sv(S,s)}F.stopFocus().then(function(){anim=true;load()}).catch(function(){alert('Strict mode is on. This session cannot be ended early.')})}
+ else if(f==='start'&&sel&&sel.length){F.startFocus({packages:sel,minutes:dur,strict:strict}).then(function(){sv(S,{start:Date.now(),min:dur,apps:sel.slice(),strict:strict});sv(K,sel);anim=true;load()}).catch(function(er){alert('Could not start focus: '+((er&&er.message)||er))})}
+ else if((f==='gminus'||f==='gplus')&&guard){var nl=Math.max(30,Math.min(720,guard.limitMin+(f==='gplus'?30:-30)));guard.limitMin=nl;var el=document.getElementById('fpLim');if(el)el.textContent=fm(nl*60000);var pc=Math.min(100,Math.round(guard.todayMs/(nl*60000)*100)),gb=document.getElementById('fpGBar');if(gb){gb.style.width=pc+'%';gb.style.background=pc>=100?'#ff453a':''}F.setGuard({enabled:guard.enabled,limitMin:nl,allow:[],packages:dpk()}).catch(function(){})}
 });
 document.addEventListener('change',function(e){
- var t=e.target;if(!t.dataset||!t.closest||!t.closest('#hfFocus'))return;var f=t.dataset.f;
+ var t=e.target;if(!t.dataset||!t.closest||!t.closest('.fp-page'))return;var f=t.dataset.f;
  if(f==='app'){var p=t.dataset.v,i=sel.indexOf(p);if(t.checked&&i<0)sel.push(p);else if(!t.checked&&i>=0)sel.splice(i,1);sv(K,sel);var b=document.getElementById('fpStart');if(b){b.disabled=!sel.length;b.textContent=startLabel()}}
- else if(f==='gtoggle'&&guard){var on=t.checked;F.setGuard({enabled:on,limitMin:guard.limitMin,allow:guard.allow}).then(function(){guard.enabled=on}).catch(function(){t.checked=!on;alert('Turn on both permissions first.')})}
- else if(f==='gallow'&&guard){var pp=t.dataset.v,j=guard.allow.indexOf(pp);if(t.checked&&j>-1)guard.allow.splice(j,1);else if(!t.checked&&j<0)guard.allow.push(pp);F.setGuard({enabled:guard.enabled,limitMin:guard.limitMin,allow:guard.allow}).catch(function(){})}
+ else if(f==='strict')strict=t.checked;
+ else if(f==='gtoggle'&&guard){var on=t.checked;F.setGuard({enabled:on,limitMin:guard.limitMin,allow:[],packages:dpk()}).then(function(){guard.enabled=on}).catch(function(){t.checked=!on;alert('Turn on both permissions first.')})}
+ else if(f==='sbed'||f==='swake'){sched[f==='sbed'?'bed':'wake']=t.value;sv(SC,sched);fill(false)}
 });
-document.addEventListener('input',function(e){var t=e.target;if(t.dataset&&t.dataset.f==='q'&&t.closest&&t.closest('#hfFocus')){q=t.value;var a=document.getElementById('fpApps');if(a)a.innerHTML=appRows()}});
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&document.getElementById('hfFocus')){anim=false;load()}});
-function card(){if(!native)return '';return '<div class="card" data-act="focus" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px"><div style="width:42px;height:42px;border-radius:10px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px">F</div><div style="flex:1"><div style="font-weight:600">Focus</div><div class="mute">Block distracting apps and see your screen time</div></div><span class="mute">&rsaquo;</span></div>'}
-try{var _vt=vToday;vToday=function(){return _vt()+card()}}catch(e){}
-window.hfFocus=open;
+document.addEventListener('input',function(e){var t=e.target;if(t.dataset&&t.dataset.f==='q'&&t.closest&&t.closest('.fp-page')){q=t.value;var a=document.getElementById('fpApps');if(a)a.innerHTML=appRows()}});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&document.getElementById('fpRoot')){anim=false;load()}});
 })();
 </script>
 <script>
