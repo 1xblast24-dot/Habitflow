@@ -1,6 +1,7 @@
 package com.habitflow.app;
 
 import android.app.AppOpsManager;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -83,6 +84,7 @@ public class FocusPlugin extends Plugin {
       o.put("package", s[0]);
       o.put("label", s[1]);
       o.put("icon", Guard.icon(getContext(), s[0]));
+      o.put("cat", Guard.cat(getContext(), s[0]));
       arr.put(o);
     }
     JSObject res = new JSObject();
@@ -119,12 +121,14 @@ public class FocusPlugin extends Plugin {
     }
     Collections.sort(rows, (a, b) -> Long.compare((Long) b[2], (Long) a[2]));
     JSArray arr = new JSArray();
-    for (int i = 0; i < rows.size() && i < 25; i++) {
+    int lim = call.getInt("limit", 25);
+    for (int i = 0; i < rows.size() && i < lim; i++) {
       Object[] r = rows.get(i);
       JSObject o = new JSObject();
       o.put("package", (String) r[0]);
       o.put("label", (String) r[1]);
       o.put("icon", Guard.icon(getContext(), (String) r[0]));
+      o.put("cat", Guard.cat(getContext(), (String) r[0]));
       o.put("ms", ((Long) r[2]).longValue());
       arr.put(o);
     }
@@ -145,7 +149,7 @@ public class FocusPlugin extends Plugin {
       for (int i = 0; i < pk.length(); i++) set.add(pk.getString(i));
     } catch (Exception e) { call.reject("bad_packages"); return; }
     long end = System.currentTimeMillis() + minutes * 60000L;
-    getContext().getSharedPreferences("focus", 0).edit().putStringSet("blocked", set).putLong("endsAt", end).apply();
+    getContext().getSharedPreferences("focus", 0).edit().putStringSet("blocked", set).putLong("endsAt", end).putBoolean("strict", Boolean.TRUE.equals(call.getBoolean("strict", false))).apply();
     Intent i = new Intent(getContext(), FocusService.class);
     if (Build.VERSION.SDK_INT >= 26) getContext().startForegroundService(i); else getContext().startService(i);
     JSObject o = new JSObject();
@@ -155,7 +159,9 @@ public class FocusPlugin extends Plugin {
 
   @PluginMethod
   public void stopFocus(PluginCall call) {
-    getContext().getSharedPreferences("focus", 0).edit().putLong("endsAt", 0).apply();
+    SharedPreferences sp = getContext().getSharedPreferences("focus", 0);
+    if (sp.getBoolean("strict", false) && sp.getLong("endsAt", 0) > System.currentTimeMillis()) { call.reject("strict"); return; }
+    sp.edit().putLong("endsAt", 0).apply();
     call.resolve();
   }
 
@@ -197,7 +203,12 @@ public class FocusPlugin extends Plugin {
       if (al != null) for (int i = 0; i < al.length(); i++) allow.add(al.getString(i));
     } catch (Exception e) { }
     if (en && (!Settings.canDrawOverlays(getContext()) || !hasUsage())) { call.reject("permissions"); return; }
-    getContext().getSharedPreferences("focus", 0).edit().putBoolean("guard", en).putInt("limitMin", limitMin).putStringSet("allow", allow).apply();
+    JSArray pk = call.getArray("packages");
+    Set<String> gp = new HashSet<>();
+    try {
+      if (pk != null) for (int i = 0; i < pk.length(); i++) gp.add(pk.getString(i));
+    } catch (Exception e) { }
+    getContext().getSharedPreferences("focus", 0).edit().putBoolean("guard", en).putInt("limitMin", limitMin).putStringSet("allow", allow).putStringSet("guardApps", gp).apply();
     if (en) {
       Intent i = new Intent(getContext(), FocusService.class);
       if (Build.VERSION.SDK_INT >= 26) getContext().startForegroundService(i); else getContext().startService(i);
@@ -225,6 +236,61 @@ public class FocusPlugin extends Plugin {
     }
     JSObject res = new JSObject();
     res.put("days", arr);
+    call.resolve(res);
+  }
+
+  @PluginMethod
+  public void sleep(PluginCall call) {
+    if (!hasUsage()) { call.reject("no_usage_access"); return; }
+    int n = Math.min(Math.max(call.getInt("days", 7), 1), 14);
+    UsageStatsManager m = (UsageStatsManager) getContext().getSystemService(Context.USAGE_STATS_SERVICE);
+    long mid = Guard.midnight();
+    long now = System.currentTimeMillis();
+    JSArray arr = new JSArray();
+    for (int i = n - 1; i >= 0; i--) {
+      Calendar c = Calendar.getInstance();
+      c.setTimeInMillis(mid);
+      c.add(Calendar.DAY_OF_YEAR, -i);
+      long day = c.getTimeInMillis();
+      long ws = day - 10 * 3600000L;
+      long we = Math.min(day + 14 * 3600000L, now);
+      JSObject o = new JSObject();
+      o.put("t", day);
+      if (we - ws < 8 * 3600000L) { o.put("none", true); arr.put(o); continue; }
+      List<long[]> use = new ArrayList<>();
+      List<Long> shorts = new ArrayList<>();
+      UsageEvents ev = m.queryEvents(ws, we);
+      UsageEvents.Event e = new UsageEvents.Event();
+      long on = 0;
+      while (ev != null && ev.hasNextEvent()) {
+        ev.getNextEvent(e);
+        int ty = e.getEventType();
+        if (ty == 15) {
+          if (on == 0) on = e.getTimeStamp();
+        } else if (ty == 16 && on > 0) {
+          long d = e.getTimeStamp() - on;
+          if (d >= 180000L) use.add(new long[] { on, e.getTimeStamp() }); else shorts.add(Long.valueOf(on));
+          on = 0;
+        }
+      }
+      if (on > 0) use.add(new long[] { on, we });
+      long bs = 0, be = 0;
+      for (int k = 0; k + 1 < use.size(); k++) {
+        long gs = use.get(k)[1], ge = use.get(k + 1)[0];
+        if (gs < day - 6 * 3600000L || gs > day + 6 * 3600000L) continue;
+        if (ge - gs > be - bs) { bs = gs; be = ge; }
+      }
+      if (be - bs < 3 * 3600000L) { o.put("none", true); arr.put(o); continue; }
+      int wakes = 0;
+      for (Long s : shorts) if (s.longValue() > bs && s.longValue() < be) wakes++;
+      o.put("bed", bs);
+      o.put("wake", be);
+      o.put("ms", be - bs);
+      o.put("wakes", wakes);
+      arr.put(o);
+    }
+    JSObject res = new JSObject();
+    res.put("nights", arr);
     call.resolve(res);
   }
 }

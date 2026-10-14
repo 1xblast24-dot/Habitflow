@@ -115,4 +115,10 @@ public class Guard {
       return "";
     }
   }
+
+  /** Android's own category for the app (-1 when unknown). 0 game, 2 video, 4 social, 5 news, 7 productivity. */
+  static int cat(Context c, String pkg) {
+    if (Build.VERSION.SDK_INT < 26) return -1;
+    try { return c.getPackageManager().getApplicationInfo(pkg, 0).category; } catch (Exception e) { return -1; }
+  }
 }

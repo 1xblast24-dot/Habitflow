@@ -64,10 +64,12 @@ public class FocusService extends Service {
     if (Guard.todayMs(this) < limit) return;
     guardOn = true;
     Set<String> allow = new HashSet<>(p.getStringSet("allow", new HashSet<String>()));
-    guardSet = new HashSet<>();
-    for (Object[] r : Guard.candidates(this)) {
-      String pk = (String) r[0];
-      if (!allow.contains(pk)) guardSet.add(pk);
+    guardSet = new HashSet<>(p.getStringSet("guardApps", new HashSet<String>()));
+    if (guardSet.isEmpty()) {
+      for (Object[] r : Guard.candidates(this)) {
+        String pk = (String) r[0];
+        if (!allow.contains(pk)) guardSet.add(pk);
+      }
     }
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(78, builder("focus_alerts", "Screen-time limit reached", "Distracting apps are blocked until tomorrow.").setAutoCancel(true).build());

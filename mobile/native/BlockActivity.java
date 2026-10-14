@@ -75,7 +75,8 @@ public class BlockActivity extends Activity {
       finish();
     });
     root.addView(home);
-    if (!limit) root.addView(stop);
+    boolean strict = getSharedPreferences("focus", 0).getBoolean("strict", false) && end > System.currentTimeMillis();
+    if (!limit && !strict) root.addView(stop);
     setContentView(root);
   }
 
