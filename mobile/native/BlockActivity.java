@@ -71,7 +71,7 @@ public class BlockActivity extends Activity {
     home.setOnClickListener(v -> goHome());
     Button stop = button("End focus session", "#1F2430", "#FFFFFF");
     stop.setOnClickListener(v -> {
-      getSharedPreferences("focus", 0).edit().putLong("endsAt", 0).apply();
+      getSharedPreferences("focus", 0).edit().putLong("endsAt", 0).putLong("stoppedAt", System.currentTimeMillis()).apply();
       finish();
     });
     root.addView(home);

@@ -51,6 +51,15 @@ public class FocusPlugin extends Plugin {
     o.put("overlay", Settings.canDrawOverlays(getContext()));
     o.put("active", end > System.currentTimeMillis());
     o.put("endsAt", end);
+    SharedPreferences sp0 = getContext().getSharedPreferences("focus", 0);
+    o.put("start", sp0.getLong("startedAt", 0));
+    o.put("min", sp0.getInt("sessMin", 0));
+    o.put("name", sp0.getString("sessName", "Focus"));
+    o.put("strict", sp0.getBoolean("strict", false));
+    o.put("stop", sp0.getLong("stoppedAt", 0));
+    JSArray ap0 = new JSArray();
+    for (String s0 : sp0.getStringSet("blocked", new HashSet<String>())) ap0.put(s0);
+    o.put("apps", ap0);
     call.resolve(o);
   }
 
@@ -149,7 +158,7 @@ public class FocusPlugin extends Plugin {
       for (int i = 0; i < pk.length(); i++) set.add(pk.getString(i));
     } catch (Exception e) { call.reject("bad_packages"); return; }
     long end = System.currentTimeMillis() + minutes * 60000L;
-    getContext().getSharedPreferences("focus", 0).edit().putStringSet("blocked", set).putLong("endsAt", end).putBoolean("strict", Boolean.TRUE.equals(call.getBoolean("strict", false))).apply();
+    getContext().getSharedPreferences("focus", 0).edit().putStringSet("blocked", set).putLong("endsAt", end).putBoolean("strict", Boolean.TRUE.equals(call.getBoolean("strict", false))).putLong("startedAt", System.currentTimeMillis()).putInt("sessMin", minutes).putString("sessName", call.getString("name", "Focus")).putLong("stoppedAt", 0).apply();
     Intent i = new Intent(getContext(), FocusService.class);
     if (Build.VERSION.SDK_INT >= 26) getContext().startForegroundService(i); else getContext().startService(i);
     JSObject o = new JSObject();
@@ -161,7 +170,7 @@ public class FocusPlugin extends Plugin {
   public void stopFocus(PluginCall call) {
     SharedPreferences sp = getContext().getSharedPreferences("focus", 0);
     if (sp.getBoolean("strict", false) && sp.getLong("endsAt", 0) > System.currentTimeMillis()) { call.reject("strict"); return; }
-    sp.edit().putLong("endsAt", 0).apply();
+    sp.edit().putLong("endsAt", 0).putLong("stoppedAt", System.currentTimeMillis()).apply();
     call.resolve();
   }
 
@@ -292,5 +301,13 @@ public class FocusPlugin extends Plugin {
     JSObject res = new JSObject();
     res.put("nights", arr);
     call.resolve(res);
+  }
+
+  @PluginMethod
+  public void setSchedules(PluginCall call) {
+    JSArray items = call.getArray("items");
+    getContext().getSharedPreferences("focus", 0).edit().putString("schedules", items == null ? "[]" : items.toString()).apply();
+    Sched.rearm(getContext());
+    call.resolve();
   }
 }

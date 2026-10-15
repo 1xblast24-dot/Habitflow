@@ -9,6 +9,7 @@ import android.os.Build;
 public class BootReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context c, Intent i) {
+    Sched.rearm(c);
     SharedPreferences p = c.getSharedPreferences("focus", 0);
     if (p.getBoolean("guard", false) || p.getLong("endsAt", 0) > System.currentTimeMillis()) {
       Intent s = new Intent(c, FocusService.class);

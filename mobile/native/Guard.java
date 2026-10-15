@@ -121,4 +121,9 @@ public class Guard {
     if (Build.VERSION.SDK_INT < 26) return -1;
     try { return c.getPackageManager().getApplicationInfo(pkg, 0).category; } catch (Exception e) { return -1; }
   }
+
+  static boolean usageOk(Context c) {
+    android.app.AppOpsManager a = (android.app.AppOpsManager) c.getSystemService(Context.APP_OPS_SERVICE);
+    return a.checkOpNoThrow("android:get_usage_stats", android.os.Process.myUid(), c.getPackageName()) == android.app.AppOpsManager.MODE_ALLOWED;
+  }
 }

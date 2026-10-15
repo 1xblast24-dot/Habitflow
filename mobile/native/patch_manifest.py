@@ -17,6 +17,7 @@ comp = '''        <service android:name=".FocusService" android:exported="false"
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
+        <receiver android:name=".ScheduleReceiver" android:exported="false"/>
 '''
 perms = ''.join('    <uses-permission android:name="android.permission.%s"/>\n' % n for n in ['FOREGROUND_SERVICE', 'FOREGROUND_SERVICE_SPECIAL_USE', 'PACKAGE_USAGE_STATS', 'SYSTEM_ALERT_WINDOW'])
 assert '<application' in s and '</application>' in s
