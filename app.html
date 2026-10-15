@@ -360,6 +360,7 @@ h2{font-size:11px;letter-spacing:.08em}
 @media (prefers-reduced-motion:reduce){#dock,#dock *{animation:none!important;transition-duration:.01s!important}}
 }
 .fp-page{padding-bottom:120px}.fp-page .fp-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}.fp-page .fp-tile{background:var(--surf);border-radius:14px;padding:14px 8px;text-align:center}.fp-page .fp-tile .v{font-size:22px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.fp-page .fp-tile .l{font-size:12px;color:var(--mute);margin-top:2px}.fp-page .fp-step{display:flex;align-items:center;justify-content:center;gap:18px;margin:2px 0 10px}.fp-page .fp-round{width:46px;height:46px;border-radius:50%;border:0;background:var(--surf);color:var(--acc);font-size:26px;font-weight:500;line-height:1;cursor:pointer;transition:transform .15s,background .2s}.fp-page .fp-round:active{transform:scale(.9)}.fp-page .fp-hero .fg{stroke-dashoffset:0}.fp-page .fp-sh{padding:8px 16px 6px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);background:color-mix(in srgb,var(--text) 4%,transparent)}.fp-page .fp-r:active{background:color-mix(in srgb,var(--text) 5%,transparent)}.fp-page .fp-seg.two{grid-template-columns:1fr 1fr}.fp-page .fp-seg.two i{width:calc((100% - 4px)/2)}.fp-page .fp-seg.two.t2 i{transform:translateX(100%)}.fp-page .fp-acts{display:flex;justify-content:space-between;padding:0 6px 10px}.fp-page .fp-acts .fp-link{font-size:15px}
+.fp-page .fp-seg.four{grid-template-columns:repeat(4,1fr)}.fp-page .fp-seg.four i{width:calc((100% - 4px)/4)}.fp-page .fp-seg.four.t1 i{transform:none}.fp-page .fp-seg.four.t2 i{transform:translateX(100%)}.fp-page .fp-seg.four.t3 i{transform:translateX(200%)}.fp-page .fp-seg.four.t4 i{transform:translateX(300%)}.fp-page .fp-seg.four button{font-size:13px;padding:8px 2px}.fp-page .fp-pill{border:0;border-radius:999px;padding:8px 18px;background:var(--acc);color:#fff;font-weight:600;font-size:15px;cursor:pointer;transition:transform .15s}.fp-page .fp-pill:active{transform:scale(.94)}.fp-page .fp-in-t{width:100%;border:0;background:none;color:var(--text);font-size:17px;padding:6px 0;outline:none;font-family:inherit}
 </style><script>
 /* HabitFlow account guard + cloud sync (Supabase). Habits stay in localStorage and are mirrored to the user's account. */
 (function(){
@@ -1526,9 +1527,9 @@ LN.addListener('localNotificationActionPerformed',function(ev){
 (function(){
 var C=window.Capacitor,native=!!(C&&(C.isNativePlatform?C.isNativePlatform():!!(window.androidBridge||(C.getPlatform&&C.getPlatform()!=='web')))),F=null;
 if(native){F=C.registerPlugin?C.registerPlugin('Focus'):((C.Plugins&&C.Plugins.Focus)||null)}
-var K='hf.focus.apps',S='hf.focus.session',L='hf.focus.log',CL='hf.focus.cls',IN='hf.focus.intent',OB='hf.focus.onb',SC='hf.sleep.sched';
+var SS='hf.focus.sessions',K='hf.focus.apps',S='hf.focus.session',L='hf.focus.log',CL='hf.focus.cls',IN='hf.focus.intent',OB='hf.focus.onb',SC='hf.sleep.sched';
 var R=2*Math.PI*118;
-var st=null,apps=[],u1=null,u7=null,guard=null,week=null,sleep=null,days=1,tab=1,dur=25,strict=false,q='',anim=true,busy=false,A=true;
+var edit=null,st=null,apps=[],u1=null,u7=null,guard=null,week=null,sleep=null,days=1,tab=1,dur=25,strict=false,q='',anim=true,busy=false,A=true;
 var sel=ld(K,null),cls=ld(CL,{}),intent=ld(IN,[]),onb=ld(OB,false),sched=ld(SC,{bed:'23:00',wake:'07:00'});
 function ld(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v===null||v===undefined?d:v}catch(e){return d}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
@@ -1560,7 +1561,7 @@ function syncGuard(){if(F&&guard&&guard.enabled)F.setGuard({enabled:true,limitMi
 function useOf(map,p){return (map&&map[p])||0}
 function umap(u){var m={};if(u&&u.apps)u.apps.forEach(function(a){m[a.package]=a.ms});return m}
 function prod(){var m=umap(u7),f=0,d=0,n=0;apps.forEach(function(a){var ms=m[a.package]||0,c=cl(a);if(c==='f')f+=ms;else if(c==='d')d+=ms;else n+=ms});return{f:f,d:d,n:n,score:(f+d)?Math.round(f/(f+d)*100):null}}
-function finalize(){var s=ld(S,null);if(!s||(st&&st.active))return;var full=s.start+s.min*60000,end=Math.min(s.stop||full,full);var l=ld(L,[]);l.push({at:s.start,min:Math.max(1,Math.round((end-s.start)/60000))});sv(L,l.slice(-200));localStorage.removeItem(S)}
+function finalize(){var s=ld(S,null);if(!s||(st&&st.active))return;var full=s.start+s.min*60000,end=Math.min(s.stop||full,full);var l=ld(L,[]);l.push({at:s.start,min:Math.max(1,Math.round((end-s.start)/60000)),name:s.name||'Focus',early:!!(s.stop&&s.stop<full)});sv(L,l.slice(-200));localStorage.removeItem(S)}
 function sw(attrs,on){return '<label class="sw"><input type="checkbox" '+attrs+(on?' checked':'')+'><span></span></label>'}
 function prow(t,s,f,on){return '<div class="fp-r p16"><div class="fp-n">'+t+'<div class="fp-s">'+s+'</div></div>'+(on?'<span style="color:#34c759;font-weight:700;font-size:20px">&#10003;</span>':'<button class="fp-link" data-f="'+f+'">Allow</button>')+'</div>'}
 function setupHtml(){return '<div class="fp-h">Permissions needed</div><div class="fp-g">'+prow('Usage Access','Lets HabitFlow see which app is open','usage',st.usage)+prow('Display Over Other Apps','Lets HabitFlow show the focus screen','overlay',st.overlay)+'</div>'}
@@ -1663,10 +1664,35 @@ function sleepHtml(){
  h+='<p class="fp-sub" style="margin-top:12px;font-size:13px">This is an estimate from phone use. Real sleep, steps and workouts from Samsung Health or Google Fit come with the next upgrade.</p>';
  return h;
 }
+var PAL=['#388FCA','#14c8a8','#ff9f0a','#af52de','#ff453a','#34c759'];
+function sessions(){var l=ld(SS,null);if(!l){l=[{id:'deep',name:'Deep Work',min:50,auto:true,apps:[],strict:false},{id:'quick',name:'Quick Focus',min:25,auto:true,apps:[],strict:false},{id:'study',name:'Study',min:45,auto:true,apps:[],strict:true}];sv(SS,l)}return l}
+function subOf(s){return s.min+' min \u00b7 '+(s.auto?'Distracting apps':s.apps.length+(s.apps.length===1?' app':' apps'))+(s.strict?' \u00b7 Strict':'')}
+function sessionsHtml(){
+ if(edit)return editHtml();
+ var list=sessions(),h='<div class="fp-g">'+list.map(function(s,i){return '<div class="fp-r" data-f="sedit" data-v="'+X(s.id)+'" style="cursor:pointer"><div class="fp-ic ph" style="background:'+PAL[i%PAL.length]+'">'+X((s.name||'S').charAt(0).toUpperCase())+'</div><div class="fp-n">'+X(s.name)+'<div class="fp-s">'+subOf(s)+'</div></div><button class="fp-pill" data-f="sstart" data-v="'+X(s.id)+'">Start</button></div>'}).join('')+'<div class="fp-r p16" data-f="snew" style="cursor:pointer;color:var(--acc);font-weight:600">+ New session</div></div>';
+ var l=ld(L,[]).slice(-8).reverse();
+ if(l.length)h+='<div class="fp-h">History</div><div class="fp-g">'+l.map(function(e){return '<div class="fp-r p16"><div class="fp-n">'+X(e.name||'Focus')+'<div class="fp-s">'+X(new Date(e.at).toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit'}))+(e.early?' \u00b7 ended early':'')+'</div></div><b>'+e.min+' min</b></div>'}).join('')+'</div>';
+ return h;
+}
+function editHtml(){
+ var e=edit,h='<div class="fp-h" style="margin-top:0">Name</div><div class="fp-g"><div class="fp-r p16"><input class="fp-in-t" data-f="sname" maxlength="24" placeholder="Session name" value="'+X(e.name)+'"></div></div>';
+ h+='<div class="fp-h">Duration</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Minutes</div><button class="fp-round" style="width:38px;height:38px;font-size:22px" data-f="sdm">&minus;</button><b id="fpSMin" style="min-width:48px;text-align:center;font-size:19px">'+e.min+'</b><button class="fp-round" style="width:38px;height:38px;font-size:22px" data-f="sdp">+</button></div><div class="fp-r p16"><div class="fp-n">Strict mode<div class="fp-s">You can\'t end the session early</div></div>'+sw('data-f="sstrict"',e.strict)+'</div></div>';
+ h+='<div class="fp-h">Apps to block</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Use my distracting apps<div class="fp-s">'+dpk().length+' apps, updates when you change labels</div></div>'+sw('data-f="sauto"',e.auto)+'</div>'+(e.auto?'':apps.slice().sort(byL).slice(0,250).map(function(a){return '<div class="fp-r">'+ic(a)+'<div class="fp-n">'+X(a.label)+'</div>'+sw('data-f="sapp" data-v="'+X(a.package)+'"',e.apps.indexOf(a.package)>-1)+'</div>'}).join(''))+'</div>';
+ h+='<p style="margin-top:20px"><button class="fp-btn" data-f="ssave">Save session</button></p><p style="text-align:center"><button class="fp-link" data-f="scancel">Cancel</button>'+(e.isNew?'':' &nbsp; <button class="fp-link fp-red" data-f="sdel">Delete</button>')+'</p>';
+ return h;
+}
+function segSet(){var sg=document.getElementById('fpSeg');if(sg)sg.className='fp-seg four t'+tab}
+function startSess(s){
+ if(!F||!st||!(st.usage&&st.overlay)){alert('Turn on the two permissions in the Focus tab first.');tab=1;segSet();fill(true);return}
+ if(st.active){alert('A focus session is already running.');return}
+ var pk=s.auto?dpk():s.apps;
+ if(!pk.length){alert('This session has no apps to block. Edit it and choose some.');return}
+ F.startFocus({packages:pk,minutes:s.min,strict:!!s.strict}).then(function(){sv(S,{start:Date.now(),min:s.min,apps:pk.slice(),strict:!!s.strict,name:s.name});tab=1;segSet();anim=true;load()}).catch(function(er){alert('Could not start: '+((er&&er.message)||er))})
+}
 function pane(){
  if(!native||!F)return '<div class="fp-g"><div class="fp-r p16"><div class="fp-n">Available in the Android app<div class="fp-s">Focus mode, screen time and sleep tracking need the HabitFlow Android app.</div></div></div></div>';
  if(!st)return '<div class="fp-sub">Loading&hellip;</div>';
- return tab===1?focusHtml():tab===2?timeHtml():sleepHtml();
+ return tab===1?focusHtml():tab===2?sessionsHtml():tab===3?timeHtml():sleepHtml();
 }
 function fill(a){
  var p=document.getElementById('fpPane'),f=document.getElementById('fpFoot');if(!p)return;
@@ -1680,7 +1706,7 @@ function fill(a){
 }
 function shell(){
  var r=document.getElementById('fpRoot');if(!r)return;
- r.innerHTML='<h1 class="fp-title">Focus</h1>'+((native&&F)?'<div class="fp-seg'+(tab===2?' t2':tab===3?' t3':'')+'" id="fpSeg"><i></i><button data-f="tab" data-v="1">Focus</button><button data-f="tab" data-v="2">Screen Time</button><button data-f="tab" data-v="3">Sleep</button></div>':'')+'<div id="fpPane"></div><div class="fp-foot" id="fpFoot" style="display:none"></div>';
+ r.innerHTML='<h1 class="fp-title">Focus</h1>'+((native&&F)?'<div class="fp-seg four t'+tab+'" id="fpSeg"><i></i><button data-f="tab" data-v="1">Focus</button><button data-f="tab" data-v="2">Sessions</button><button data-f="tab" data-v="3">Usage</button><button data-f="tab" data-v="4">Sleep</button></div>':'')+'<div id="fpPane"></div><div class="fp-foot" id="fpFoot" style="display:none"></div>';
  fill(true);
 }
 function tickT(){var el=document.getElementById('fpT');if(!el||!st||!st.active)return;var s=ld(S,null),total=s?s.min*60000:0,r=Math.max(0,st.endsAt-Date.now());el.textContent=tm(r);var ring=document.getElementById('fpRing');if(ring&&total)ring.style.strokeDashoffset=(R*(1-r/total)).toFixed(2);if(r<=0){st.active=false;load()}}
@@ -1716,7 +1742,7 @@ document.addEventListener('click',function(e){
  if(!F)return;
  if(f==='usage')F.openUsageSettings();
  else if(f==='overlay')F.openOverlaySettings();
- else if(f==='tab'){tab=+v;var sg=document.getElementById('fpSeg');if(sg)sg.className='fp-seg'+(tab===2?' t2':tab===3?' t3':'');fill(true)}
+ else if(f==='tab'){tab=+v;var sg=document.getElementById('fpSeg');if(sg)sg.className='fp-seg four t'+tab;edit=null;fill(true)}
  else if(f==='dur'){dur=+v;document.querySelectorAll('.fp-page .fp-chip[data-f=dur]').forEach(function(b){b.classList.toggle('on',+b.dataset.v===dur)});var d=document.getElementById('fpDur');if(d)d.textContent=dur}
  else if(f==='days'){days=+v;var g2=document.getElementById('fpSeg2');if(g2)g2.className='fp-seg two'+(days===7?' t2':'');setTimeout(function(){fill(false)},240)}
  else if(f==='dstep'){dur=Math.max(5,Math.min(180,dur+ +v));var dd=document.getElementById('fpDur');if(dd)dd.textContent=dur;document.querySelectorAll('.fp-page .fp-chip[data-f=dur]').forEach(function(b2){b2.classList.toggle('on',+b2.dataset.v===dur)})}
@@ -1724,7 +1750,7 @@ document.addEventListener('click',function(e){
  else if(f==='selN'){sel=[];sv(K,sel);refreshList()}
  else if(f==='cls'){var a=byPkg(v),c=cl(a),nx=c==='n'?'d':c==='d'?'f':'n';cls[v]=nx;sv(CL,cls);t.className='cc '+nx;t.textContent=nx==='f'?'Focus':nx==='d'?'Distracting':'Neutral';syncGuard()}
  else if(f==='stop'){var s=ld(S,null);if(s){s.stop=Date.now();sv(S,s)}F.stopFocus().then(function(){anim=true;load()}).catch(function(){alert('Strict mode is on. This session cannot be ended early.')})}
- else if(f==='start'&&sel&&sel.length){F.startFocus({packages:sel,minutes:dur,strict:strict}).then(function(){sv(S,{start:Date.now(),min:dur,apps:sel.slice(),strict:strict});sv(K,sel);anim=true;load()}).catch(function(er){alert('Could not start focus: '+((er&&er.message)||er))})}
+ else if(f==='start'&&sel&&sel.length){F.startFocus({packages:sel,minutes:dur,strict:strict}).then(function(){sv(S,{start:Date.now(),min:dur,apps:sel.slice(),strict:strict,name:'Focus'});sv(K,sel);anim=true;load()}).catch(function(er){alert('Could not start focus: '+((er&&er.message)||er))})}
  else if((f==='gminus'||f==='gplus')&&guard){var nl=Math.max(30,Math.min(720,guard.limitMin+(f==='gplus'?30:-30)));guard.limitMin=nl;var el=document.getElementById('fpLim');if(el)el.textContent=fm(nl*60000);var pc=Math.min(100,Math.round(guard.todayMs/(nl*60000)*100)),gb=document.getElementById('fpGBar');if(gb){gb.style.width=pc+'%';gb.style.background=pc>=100?'#ff453a':''}F.setGuard({enabled:guard.enabled,limitMin:nl,allow:[],packages:dpk()}).catch(function(){})}
 });
 document.addEventListener('change',function(e){
@@ -1736,6 +1762,22 @@ document.addEventListener('change',function(e){
 });
 document.addEventListener('input',function(e){var t=e.target;if(t.dataset&&t.dataset.f==='q'&&t.closest&&t.closest('.fp-page')){q=t.value;var a=document.getElementById('fpApps');if(a)a.innerHTML=appRows()}});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&document.getElementById('fpRoot')){anim=false;load()}});
+document.addEventListener('click',function(e){
+ var t=e.target.closest&&e.target.closest('.fp-page [data-f]');if(!t)return;var f=t.dataset.f,v=t.dataset.v,l;
+ if(f==='snew'){edit={id:'s'+Date.now().toString(36),name:'',min:25,auto:true,apps:[],strict:false,isNew:true};fill(true)}
+ else if(f==='sedit'){l=sessions().filter(function(s){return s.id===v})[0];if(l){edit=JSON.parse(JSON.stringify(l));edit.isNew=false;fill(true)}}
+ else if(f==='sstart'){l=sessions().filter(function(s){return s.id===v})[0];if(l)startSess(l)}
+ else if(f==='ssave'&&edit){edit.name=(edit.name||'').trim()||'Session';l=sessions();var k=-1;l.forEach(function(s,i){if(s.id===edit.id)k=i});var o={id:edit.id,name:edit.name,min:edit.min,auto:edit.auto,apps:edit.apps,strict:edit.strict};if(k>-1)l[k]=o;else l.push(o);sv(SS,l);edit=null;fill(true)}
+ else if(f==='scancel'){edit=null;fill(true)}
+ else if(f==='sdel'&&edit){sv(SS,sessions().filter(function(s){return s.id!==edit.id}));edit=null;fill(true)}
+ else if((f==='sdm'||f==='sdp')&&edit){edit.min=Math.max(5,Math.min(240,edit.min+(f==='sdp'?5:-5)));var m=document.getElementById('fpSMin');if(m)m.textContent=edit.min}
+});
+document.addEventListener('change',function(e){var t=e.target;if(!edit||!t.dataset||!t.closest||!t.closest('.fp-page'))return;var f=t.dataset.f;
+ if(f==='sstrict')edit.strict=t.checked;
+ else if(f==='sauto'){edit.auto=t.checked;fill(false)}
+ else if(f==='sapp'){var p=t.dataset.v,i=edit.apps.indexOf(p);if(t.checked&&i<0)edit.apps.push(p);else if(!t.checked&&i>-1)edit.apps.splice(i,1)}
+});
+document.addEventListener('input',function(e){var t=e.target;if(edit&&t.dataset&&t.dataset.f==='sname')edit.name=t.value});
 })();
 </script>
 <script>
