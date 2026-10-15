@@ -1561,7 +1561,7 @@ function syncGuard(){if(F&&guard&&guard.enabled)F.setGuard({enabled:true,limitMi
 function useOf(map,p){return (map&&map[p])||0}
 function umap(u){var m={};if(u&&u.apps)u.apps.forEach(function(a){m[a.package]=a.ms});return m}
 function prod(){var m=umap(u7),f=0,d=0,n=0;apps.forEach(function(a){var ms=m[a.package]||0,c=cl(a);if(c==='f')f+=ms;else if(c==='d')d+=ms;else n+=ms});return{f:f,d:d,n:n,score:(f+d)?Math.round(f/(f+d)*100):null}}
-function finalize(){var s=ld(S,null);if(!s||(st&&st.active))return;var full=s.start+s.min*60000,end=Math.min(s.stop||full,full);var l=ld(L,[]);l.push({at:s.start,min:Math.max(1,Math.round((end-s.start)/60000)),name:s.name||'Focus',early:!!(s.stop&&s.stop<full)});sv(L,l.slice(-200));localStorage.removeItem(S)}
+function finalize(){var s=ld(S,null);if(!s||(st&&st.active))return;var full=s.start+s.min*60000,end=Math.min(s.stop||full,full);var l=ld(L,[]);l.push({at:s.start,min:Math.max(1,Math.round((end-s.start)/60000)),name:s.name||'Focus',early:!!(s.stop&&s.stop<full)});sv(L,l.slice(-200));sv('hf.focus.last',s.start);localStorage.removeItem(S)}
 function sw(attrs,on){return '<label class="sw"><input type="checkbox" '+attrs+(on?' checked':'')+'><span></span></label>'}
 function prow(t,s,f,on){return '<div class="fp-r p16"><div class="fp-n">'+t+'<div class="fp-s">'+s+'</div></div>'+(on?'<span style="color:#34c759;font-weight:700;font-size:20px">&#10003;</span>':'<button class="fp-link" data-f="'+f+'">Allow</button>')+'</div>'}
 function setupHtml(){return '<div class="fp-h">Permissions needed</div><div class="fp-g">'+prow('Usage Access','Lets HabitFlow see which app is open','usage',st.usage)+prow('Display Over Other Apps','Lets HabitFlow show the focus screen','overlay',st.overlay)+'</div>'}
@@ -1666,7 +1666,25 @@ function sleepHtml(){
 }
 var PAL=['#388FCA','#14c8a8','#ff9f0a','#af52de','#ff453a','#34c759'];
 function sessions(){var l=ld(SS,null);if(!l){l=[{id:'deep',name:'Deep Work',min:50,auto:true,apps:[],strict:false},{id:'quick',name:'Quick Focus',min:25,auto:true,apps:[],strict:false},{id:'study',name:'Study',min:45,auto:true,apps:[],strict:true}];sv(SS,l)}return l}
-function subOf(s){return s.min+' min \u00b7 '+(s.auto?'Distracting apps':s.apps.length+(s.apps.length===1?' app':' apps'))+(s.strict?' \u00b7 Strict':'')}
+function dayTxt(d){var N=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];if(d.length===7)return 'Daily';if(d.length===5&&[1,2,3,4,5].every(function(x){return d.indexOf(x)>-1}))return 'Weekdays';return d.slice().sort().map(function(x){return N[x]}).join(' ')}
+function subOf(s){return s.min+' min \u00b7 '+(s.auto?'Distracting apps':s.apps.length+(s.apps.length===1?' app':' apps'))+(s.strict?' \u00b7 Strict':'')+(s.sch&&s.sch.on?' \u00b7 '+dayTxt(s.sch.days)+' '+s.sch.time:'')}
+function schHtml(e){
+ var sc=e.sch||{on:false,days:[1,2,3,4,5],time:'09:00'},DN=['S','M','T','W','T','F','S'];
+ var h='<div class="fp-h">Schedule</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Start automatically<div class="fp-s">HabitFlow starts and blocks apps by itself</div></div>'+sw('data-f="sson"',sc.on)+'</div>';
+ if(sc.on)h+='<div class="fp-r p16" style="display:block"><div class="fp-chips" style="justify-content:space-between;flex-wrap:nowrap">'+DN.map(function(d,i){return '<button class="fp-chip'+(sc.days.indexOf(i)>-1?' on':'')+'" style="width:40px;height:40px;padding:0" data-f="sday" data-v="'+i+'">'+d+'</button>'}).join('')+'</div></div><div class="fp-r p16"><div class="fp-n">Start at</div><input class="fp-time" type="time" data-f="sstime" value="'+X(sc.time)+'"></div>';
+ return h+'</div>';
+}
+function syncSchedules(){
+ if(!F||!apps.length)return;
+ var items=[];sessions().forEach(function(s){if(s.sch&&s.sch.on&&s.sch.days.length){var t=String(s.sch.time||'09:00').split(':'),pk=s.auto?dpk():s.apps;if(pk.length)items.push({id:s.id,name:s.name,days:s.sch.days,h:+t[0],m:+t[1],min:s.min,strict:!!s.strict,apps:pk})}});
+ F.setSchedules({items:items}).catch(function(){})
+}
+function nativeSync(){if(!st||!st.start||!st.active)return;var s=ld(S,null);if(!s||s.start!==st.start)sv(S,{start:st.start,min:st.min,apps:st.apps||[],strict:!!st.strict,name:st.name||'Focus'})}
+function catchUp(){
+ if(!st||!st.start||st.active)return;var last=ld('hf.focus.last',0);if(st.start<=last)return;
+ var full=st.start+st.min*60000,end=st.stop>st.start?Math.min(st.stop,full):full,l=ld(L,[]);
+ l.push({at:st.start,min:Math.max(1,Math.round((end-st.start)/60000)),name:st.name||'Focus',early:end<full});sv(L,l.slice(-200));sv('hf.focus.last',st.start)
+}
 function sessionsHtml(){
  if(edit)return editHtml();
  var list=sessions(),h='<div class="fp-g">'+list.map(function(s,i){return '<div class="fp-r" data-f="sedit" data-v="'+X(s.id)+'" style="cursor:pointer"><div class="fp-ic ph" style="background:'+PAL[i%PAL.length]+'">'+X((s.name||'S').charAt(0).toUpperCase())+'</div><div class="fp-n">'+X(s.name)+'<div class="fp-s">'+subOf(s)+'</div></div><button class="fp-pill" data-f="sstart" data-v="'+X(s.id)+'">Start</button></div>'}).join('')+'<div class="fp-r p16" data-f="snew" style="cursor:pointer;color:var(--acc);font-weight:600">+ New session</div></div>';
@@ -1678,7 +1696,7 @@ function editHtml(){
  var e=edit,h='<div class="fp-h" style="margin-top:0">Name</div><div class="fp-g"><div class="fp-r p16"><input class="fp-in-t" data-f="sname" maxlength="24" placeholder="Session name" value="'+X(e.name)+'"></div></div>';
  h+='<div class="fp-h">Duration</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Minutes</div><button class="fp-round" style="width:38px;height:38px;font-size:22px" data-f="sdm">&minus;</button><b id="fpSMin" style="min-width:48px;text-align:center;font-size:19px">'+e.min+'</b><button class="fp-round" style="width:38px;height:38px;font-size:22px" data-f="sdp">+</button></div><div class="fp-r p16"><div class="fp-n">Strict mode<div class="fp-s">You can\'t end the session early</div></div>'+sw('data-f="sstrict"',e.strict)+'</div></div>';
  h+='<div class="fp-h">Apps to block</div><div class="fp-g"><div class="fp-r p16"><div class="fp-n">Use my distracting apps<div class="fp-s">'+dpk().length+' apps, updates when you change labels</div></div>'+sw('data-f="sauto"',e.auto)+'</div>'+(e.auto?'':apps.slice().sort(byL).slice(0,250).map(function(a){return '<div class="fp-r">'+ic(a)+'<div class="fp-n">'+X(a.label)+'</div>'+sw('data-f="sapp" data-v="'+X(a.package)+'"',e.apps.indexOf(a.package)>-1)+'</div>'}).join(''))+'</div>';
- h+='<p style="margin-top:20px"><button class="fp-btn" data-f="ssave">Save session</button></p><p style="text-align:center"><button class="fp-link" data-f="scancel">Cancel</button>'+(e.isNew?'':' &nbsp; <button class="fp-link fp-red" data-f="sdel">Delete</button>')+'</p>';
+ h+=schHtml(e);h+='<p style="margin-top:20px"><button class="fp-btn" data-f="ssave">Save session</button></p><p style="text-align:center"><button class="fp-link" data-f="scancel">Cancel</button>'+(e.isNew?'':' &nbsp; <button class="fp-link fp-red" data-f="sdel">Delete</button>')+'</p>';
  return h;
 }
 function segSet(){var sg=document.getElementById('fpSeg');if(sg)sg.className='fp-seg four t'+tab}
@@ -1687,7 +1705,7 @@ function startSess(s){
  if(st.active){alert('A focus session is already running.');return}
  var pk=s.auto?dpk():s.apps;
  if(!pk.length){alert('This session has no apps to block. Edit it and choose some.');return}
- F.startFocus({packages:pk,minutes:s.min,strict:!!s.strict}).then(function(){sv(S,{start:Date.now(),min:s.min,apps:pk.slice(),strict:!!s.strict,name:s.name});tab=1;segSet();anim=true;load()}).catch(function(er){alert('Could not start: '+((er&&er.message)||er))})
+ F.startFocus({packages:pk,minutes:s.min,strict:!!s.strict,name:s.name}).then(function(){sv(S,{start:Date.now(),min:s.min,apps:pk.slice(),strict:!!s.strict,name:s.name});tab=1;segSet();anim=true;load()}).catch(function(er){alert('Could not start: '+((er&&er.message)||er))})
 }
 function pane(){
  if(!native||!F)return '<div class="fp-g"><div class="fp-r p16"><div class="fp-n">Available in the Android app<div class="fp-s">Focus mode, screen time and sleep tracking need the HabitFlow Android app.</div></div></div></div>';
@@ -1713,14 +1731,14 @@ function tickT(){var el=document.getElementById('fpT');if(!el||!st||!st.active)r
 async function load(){
  if(!F||busy)return;busy=true;
  try{
-  st=await F.status();finalize();
+  st=await F.status();nativeSync();finalize();catchUp();
   if(st.usage){
    var nl=function(){return null};
    var r=await Promise.all([F.usage({days:1,limit:600}).catch(nl),F.usage({days:7,limit:600}).catch(nl),F.guardInfo().catch(nl),F.week().catch(nl),F.sleep({days:7}).catch(nl)]);
    u1=r[0];u7=r[1];guard=r[2];week=r[3]&&r[3].days;sleep=r[4]&&r[4].nights;
    if(!apps.length)apps=(await F.listApps()).apps||[];
    if(sel===null){sel=dpk();sv(K,sel)}
-   syncGuard();
+   syncGuard();syncSchedules();
   }
  }catch(e){}
  busy=false;
@@ -1738,7 +1756,7 @@ document.addEventListener('click',function(e){
  var t=e.target.closest&&e.target.closest('.fp-page [data-f]');if(!t)return;
  var f=t.dataset.f,v=t.dataset.v;
  if(f==='intent'){var i=intent.indexOf(v);if(i>-1)intent.splice(i,1);else intent.push(v);sv(IN,intent);t.classList.toggle('on');if(onb){fill(false);syncGuard()}return}
- if(f==='onb'){onb=true;sv(OB,true);fill(true);syncGuard();return}
+ if(f==='onb'){onb=true;sv(OB,true);fill(true);syncGuard();syncSchedules();return}
  if(!F)return;
  if(f==='usage')F.openUsageSettings();
  else if(f==='overlay')F.openOverlaySettings();
@@ -1750,7 +1768,7 @@ document.addEventListener('click',function(e){
  else if(f==='selN'){sel=[];sv(K,sel);refreshList()}
  else if(f==='cls'){var a=byPkg(v),c=cl(a),nx=c==='n'?'d':c==='d'?'f':'n';cls[v]=nx;sv(CL,cls);t.className='cc '+nx;t.textContent=nx==='f'?'Focus':nx==='d'?'Distracting':'Neutral';syncGuard()}
  else if(f==='stop'){var s=ld(S,null);if(s){s.stop=Date.now();sv(S,s)}F.stopFocus().then(function(){anim=true;load()}).catch(function(){alert('Strict mode is on. This session cannot be ended early.')})}
- else if(f==='start'&&sel&&sel.length){F.startFocus({packages:sel,minutes:dur,strict:strict}).then(function(){sv(S,{start:Date.now(),min:dur,apps:sel.slice(),strict:strict,name:'Focus'});sv(K,sel);anim=true;load()}).catch(function(er){alert('Could not start focus: '+((er&&er.message)||er))})}
+ else if(f==='start'&&sel&&sel.length){F.startFocus({packages:sel,minutes:dur,strict:strict,name:'Focus'}).then(function(){sv(S,{start:Date.now(),min:dur,apps:sel.slice(),strict:strict,name:'Focus'});sv(K,sel);anim=true;load()}).catch(function(er){alert('Could not start focus: '+((er&&er.message)||er))})}
  else if((f==='gminus'||f==='gplus')&&guard){var nl=Math.max(30,Math.min(720,guard.limitMin+(f==='gplus'?30:-30)));guard.limitMin=nl;var el=document.getElementById('fpLim');if(el)el.textContent=fm(nl*60000);var pc=Math.min(100,Math.round(guard.todayMs/(nl*60000)*100)),gb=document.getElementById('fpGBar');if(gb){gb.style.width=pc+'%';gb.style.background=pc>=100?'#ff453a':''}F.setGuard({enabled:guard.enabled,limitMin:nl,allow:[],packages:dpk()}).catch(function(){})}
 });
 document.addEventListener('change',function(e){
@@ -1764,20 +1782,24 @@ document.addEventListener('input',function(e){var t=e.target;if(t.dataset&&t.dat
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&document.getElementById('fpRoot')){anim=false;load()}});
 document.addEventListener('click',function(e){
  var t=e.target.closest&&e.target.closest('.fp-page [data-f]');if(!t)return;var f=t.dataset.f,v=t.dataset.v,l;
- if(f==='snew'){edit={id:'s'+Date.now().toString(36),name:'',min:25,auto:true,apps:[],strict:false,isNew:true};fill(true)}
- else if(f==='sedit'){l=sessions().filter(function(s){return s.id===v})[0];if(l){edit=JSON.parse(JSON.stringify(l));edit.isNew=false;fill(true)}}
+ if(f==='snew'){edit={id:'s'+Date.now().toString(36),name:'',min:25,auto:true,apps:[],strict:false,isNew:true,sch:{on:false,days:[1,2,3,4,5],time:'09:00'}};fill(true)}
+ else if(f==='sedit'){l=sessions().filter(function(s){return s.id===v})[0];if(l){edit=JSON.parse(JSON.stringify(l));edit.isNew=false;edit.sch=edit.sch||{on:false,days:[1,2,3,4,5],time:'09:00'};fill(true)}}
  else if(f==='sstart'){l=sessions().filter(function(s){return s.id===v})[0];if(l)startSess(l)}
- else if(f==='ssave'&&edit){edit.name=(edit.name||'').trim()||'Session';l=sessions();var k=-1;l.forEach(function(s,i){if(s.id===edit.id)k=i});var o={id:edit.id,name:edit.name,min:edit.min,auto:edit.auto,apps:edit.apps,strict:edit.strict};if(k>-1)l[k]=o;else l.push(o);sv(SS,l);edit=null;fill(true)}
+ else if(f==='ssave'&&edit){if(edit.sch&&edit.sch.on&&!edit.sch.days.length){alert('Pick at least one day for the schedule.');return}edit.name=(edit.name||'').trim()||'Session';l=sessions();var k=-1;l.forEach(function(s,i){if(s.id===edit.id)k=i});var o={id:edit.id,name:edit.name,min:edit.min,auto:edit.auto,apps:edit.apps,strict:edit.strict,sch:edit.sch};if(k>-1)l[k]=o;else l.push(o);sv(SS,l);edit=null;syncSchedules();fill(true)}
  else if(f==='scancel'){edit=null;fill(true)}
- else if(f==='sdel'&&edit){sv(SS,sessions().filter(function(s){return s.id!==edit.id}));edit=null;fill(true)}
+ else if(f==='sdel'&&edit){sv(SS,sessions().filter(function(s){return s.id!==edit.id}));edit=null;syncSchedules();fill(true)}
+ else if(f==='sday'&&edit){var di=+v,dx=edit.sch.days.indexOf(di);if(dx>-1)edit.sch.days.splice(dx,1);else edit.sch.days.push(di);t.classList.toggle('on')}
  else if((f==='sdm'||f==='sdp')&&edit){edit.min=Math.max(5,Math.min(240,edit.min+(f==='sdp'?5:-5)));var m=document.getElementById('fpSMin');if(m)m.textContent=edit.min}
 });
 document.addEventListener('change',function(e){var t=e.target;if(!edit||!t.dataset||!t.closest||!t.closest('.fp-page'))return;var f=t.dataset.f;
  if(f==='sstrict')edit.strict=t.checked;
  else if(f==='sauto'){edit.auto=t.checked;fill(false)}
+ else if(f==='sson'){edit.sch=edit.sch||{on:false,days:[1,2,3,4,5],time:'09:00'};edit.sch.on=t.checked;fill(false)}
+ else if(f==='sstime'&&edit.sch)edit.sch.time=t.value||'09:00';
  else if(f==='sapp'){var p=t.dataset.v,i=edit.apps.indexOf(p);if(t.checked&&i<0)edit.apps.push(p);else if(!t.checked&&i>-1)edit.apps.splice(i,1)}
 });
 document.addEventListener('input',function(e){var t=e.target;if(edit&&t.dataset&&t.dataset.f==='sname')edit.name=t.value});
+setInterval(function(){if(!F||!document.getElementById('fpRoot')||busy||edit)return;F.status().then(function(n){if(st&&(n.active!==st.active||n.start!==st.start)){anim=true;load()}}).catch(function(){})},10000);
 })();
 </script>
 <script>
