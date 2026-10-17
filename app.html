@@ -327,32 +327,43 @@ h2{font-size:11px;letter-spacing:.08em}
 @media (min-width:900px){.dock{overflow:visible}.dock .dscroll{overflow:visible;scroll-snap-type:none}.dock .dtrack{flex-direction:column;width:100%;gap:2px}.dock .dtrack button{flex:none}.dock .ind{display:none}}
 .fp-page{padding-bottom:120px}.fp-page .fp-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}.fp-page .fp-tile{background:var(--surf);border-radius:14px;padding:14px 8px;text-align:center}.fp-page .fp-tile .v{font-size:22px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.fp-page .fp-tile .l{font-size:12px;color:var(--mute);margin-top:2px}.fp-page .fp-step{display:flex;align-items:center;justify-content:center;gap:18px;margin:2px 0 10px}.fp-page .fp-round{width:46px;height:46px;border-radius:50%;border:0;background:var(--surf);color:var(--acc);font-size:26px;font-weight:500;line-height:1;cursor:pointer;transition:transform .15s,background .2s}.fp-page .fp-round:active{transform:scale(.9)}.fp-page .fp-hero .fg{stroke-dashoffset:0}.fp-page .fp-sh{padding:8px 16px 6px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);background:color-mix(in srgb,var(--text) 4%,transparent)}.fp-page .fp-r:active{background:color-mix(in srgb,var(--text) 5%,transparent)}.fp-page .fp-seg.two{grid-template-columns:1fr 1fr}.fp-page .fp-seg.two i{width:calc((100% - 4px)/2)}.fp-page .fp-seg.two.t2 i{transform:translateX(100%)}.fp-page .fp-acts{display:flex;justify-content:space-between;padding:0 6px 10px}.fp-page .fp-acts .fp-link{font-size:15px}
 .fp-page .fp-seg.four{grid-template-columns:repeat(4,1fr)}.fp-page .fp-seg.four i{width:calc((100% - 4px)/4)}.fp-page .fp-seg.four.t1 i{transform:none}.fp-page .fp-seg.four.t2 i{transform:translateX(100%)}.fp-page .fp-seg.four.t3 i{transform:translateX(200%)}.fp-page .fp-seg.four.t4 i{transform:translateX(300%)}.fp-page .fp-seg.four button{font-size:13px;padding:8px 2px}.fp-page .fp-pill{border:0;border-radius:999px;padding:8px 18px;background:var(--acc);color:#fff;font-weight:600;font-size:15px;cursor:pointer;transition:transform .15s}.fp-page .fp-pill:active{transform:scale(.94)}.fp-page .fp-in-t{width:100%;border:0;background:none;color:var(--text);font-size:17px;padding:6px 0;outline:none;font-family:inherit}
+/* ===== Glass dock navigation: icon-only floating tab bar with a sliding glass lens (phones and tablets under 900px; the desktop sidebar is unchanged) ===== */
+@property --gd-ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes gdsquish{0%{transform:scale(1.14,1.2)}35%{transform:scale(1.5,1.08)}70%{transform:scale(1.1,1.24)}100%{transform:scale(1.14,1.2)}}
+@keyframes gdripple{0%{opacity:.8;transform:scale(.92)}100%{opacity:0;transform:scale(1.4,1.25)}}
+@keyframes gdring{from{--gd-ang:0deg}to{--gd-ang:360deg}}
+#gdock{display:none}
 @media (max-width:899.98px){
-#dock{--dk-bg:rgba(255,255,255,.56);--dk-hair:rgba(0,0,0,.07);--dk-edge:rgba(255,255,255,.85);--dk-spec:rgba(255,255,255,.38);--dk-shadow:0 10px 30px rgba(20,24,40,.12),0 2px 6px rgba(20,24,40,.06);--dk-lens:rgba(255,255,255,.92);--dk-lens-sh:0 1px 5px rgba(20,24,40,.14),0 0 0 .5px rgba(20,24,40,.06)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #dock{--dk-bg:rgba(32,32,36,.52);--dk-hair:rgba(255,255,255,.08);--dk-edge:rgba(255,255,255,.14);--dk-spec:rgba(255,255,255,.05);--dk-shadow:0 12px 32px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.3);--dk-lens:rgba(255,255,255,.13);--dk-lens-sh:inset 0 .5px 0 rgba(255,255,255,.18),0 0 0 .5px rgba(255,255,255,.06)}}
-:root[data-theme="dark"] #dock{--dk-bg:rgba(32,32,36,.52);--dk-hair:rgba(255,255,255,.08);--dk-edge:rgba(255,255,255,.14);--dk-spec:rgba(255,255,255,.05);--dk-shadow:0 12px 32px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.3);--dk-lens:rgba(255,255,255,.13);--dk-lens-sh:inset 0 .5px 0 rgba(255,255,255,.18),0 0 0 .5px rgba(255,255,255,.06)}
-#dock{position:fixed;left:50%;right:auto;margin:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:calc(100% - 32px);max-width:392px;transform:translateX(-50%);display:block;padding:0;border:0;border-radius:27px;background:var(--dk-bg);-webkit-backdrop-filter:blur(26px) saturate(165%);backdrop-filter:blur(26px) saturate(165%);box-shadow:var(--dk-shadow),inset 0 .5px 0 var(--dk-edge),inset 0 0 0 .5px var(--dk-hair);z-index:5;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;transition:transform .38s cubic-bezier(.32,.72,0,1),opacity .25s}
-#dock::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,var(--dk-spec),transparent 46%)}
-#dock.kb{transform:translate(-50%,150%);opacity:0;pointer-events:none}
-#dock .dscroll{position:relative;overflow:hidden;padding:5px 5px 9px;touch-action:none;border-radius:0;-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,var(--fl,1)),#000 18px,#000 calc(100% - 18px),rgba(0,0,0,var(--fr,1)));mask-image:linear-gradient(90deg,rgba(0,0,0,var(--fl,1)),#000 18px,#000 calc(100% - 18px),rgba(0,0,0,var(--fr,1)))}
-#dock .dtrack{position:relative;display:flex;width:calc(var(--n,5)*20%);min-width:100%}
-#dock button{flex:0 0 calc(100%/var(--n,5));min-width:0;min-height:0;border:0;border-radius:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0 5px;font-size:10px;font-weight:600;letter-spacing:.01em;color:var(--mute);position:relative;z-index:1;transition:color .25s;-webkit-tap-highlight-color:transparent;outline:none}
-#dock button svg{width:22px;height:22px;stroke-width:1.8;transition:transform .35s cubic-bezier(.2,.9,.25,1.15),stroke-width .2s}
-#dock button:active svg{transform:scale(.88)}
-#dock button[aria-current="page"],#dock button.pv{background:none;color:var(--acc);transform:none}
-#dock button[aria-current="page"] svg{stroke-width:2.1;transform:translateY(-1px) scale(1.08)}
-#dock button:focus-visible{outline:2px solid color-mix(in srgb,var(--acc) 70%,transparent);outline-offset:-4px;border-radius:16px}
-#dock .ind{position:absolute;top:0;bottom:0;left:0;width:calc(100%/var(--n,5));z-index:0;pointer-events:none;will-change:transform;background:none;box-shadow:none;border-radius:0;animation:none;transition:transform .46s cubic-bezier(.32,.72,0,1)}
-#dock .ind::before{content:"";position:absolute;inset:0 2px;border-radius:20px;background:var(--dk-lens);box-shadow:var(--dk-lens-sh);transition:transform .3s cubic-bezier(.32,.72,0,1)}
-#dock .ind::after,#dock .lens{display:none}
-#dock .ind.st::before{animation:dkst .55s cubic-bezier(.32,.72,0,1)}
-@keyframes dkst{0%{transform:scale(1,1)}32%{transform:scale(var(--sx,1.1),.93)}100%{transform:scale(1,1)}}
-#dock.drag .ind{transition:none}
-#dock.hold .ind::before,#dock.drag .ind::before{transform:scale(1.06)}
-#dock .dpg{position:absolute;left:0;right:0;bottom:3px;display:flex;justify-content:center;gap:4px;pointer-events:none}
-#dock .dpg i{width:3px;height:3px;border-radius:50%;background:var(--mute);opacity:.3;transition:opacity .2s}
-#dock .dpg i.on{opacity:.8}
-@media (prefers-reduced-motion:reduce){#dock,#dock *{transition-duration:.01s!important;animation:none!important}}
+nav#dock{display:none!important}
+#gdock{--gd-glass:rgba(255,255,255,.64);--gd-line:rgba(255,255,255,.9);--gd-sh:0 8px 28px rgba(0,0,0,.12),0 1px 3px rgba(0,0,0,.06);--gd-g1:rgba(255,255,255,.5);--gd-g2:rgba(255,255,255,.12);--gd-lens:rgba(247,248,251,.88);--gd-rim:inset 0 0 0 .5px rgba(20,24,40,.1),inset 0 1px 0 #fff;--gd-drop:0 8px 22px rgba(20,24,40,.2),0 1px 3px rgba(20,24,40,.1);--gd-arc:rgba(14,15,30,.72);--gd-spring:cubic-bezier(.16,1,.3,1);--gd-pop:cubic-bezier(.2,.9,.25,1.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #gdock{--gd-glass:rgba(48,48,56,.52);--gd-line:rgba(255,255,255,.14);--gd-sh:0 12px 32px rgba(0,0,0,.6);--gd-g1:rgba(255,255,255,.14);--gd-g2:rgba(255,255,255,.03);--gd-lens:rgba(255,255,255,.14);--gd-rim:inset 0 0 0 1px rgba(255,255,255,.24),inset 0 1px 0 rgba(255,255,255,.32);--gd-drop:0 8px 22px rgba(0,0,0,.5);--gd-arc:rgba(255,255,255,.95)}}
+:root[data-theme="dark"] #gdock{--gd-glass:rgba(48,48,56,.52);--gd-line:rgba(255,255,255,.14);--gd-sh:0 12px 32px rgba(0,0,0,.6);--gd-g1:rgba(255,255,255,.14);--gd-g2:rgba(255,255,255,.03);--gd-lens:rgba(255,255,255,.14);--gd-rim:inset 0 0 0 1px rgba(255,255,255,.24),inset 0 1px 0 rgba(255,255,255,.32);--gd-drop:0 8px 22px rgba(0,0,0,.5);--gd-arc:rgba(255,255,255,.95)}
+#gdock{position:fixed;left:50%;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:calc(100% - 20px);max-width:460px;transform:translateX(-50%);display:block;padding:7px;border-radius:34px;border:1px solid var(--gd-line);background:linear-gradient(135deg,var(--gd-g1),var(--gd-g2)),color-mix(in srgb,var(--gd-glass) 28%,transparent);-webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);box-shadow:var(--gd-sh),inset 0 1px 0 var(--gd-line),inset 0 -1px 0 rgba(255,255,255,.1);z-index:5;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .3s var(--gd-spring),opacity .25s,background .3s,box-shadow .3s}
+#gdock.kb{transform:translate(-50%,150%);opacity:0;pointer-events:none}
+#gdock.hide{transform:translate(-50%,14px) scale(.96);opacity:0;pointer-events:none}
+#gdock .tabs{position:relative;z-index:1;display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
+#gdock button{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;height:48px;padding:0;border:0;border-radius:0;background:none;color:var(--mute);transform:none;transition:color .2s;outline:none;-webkit-tap-highlight-color:transparent}
+#gdock button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .24s var(--gd-pop),stroke-width .35s}
+#gdock button.on{color:var(--text)}
+#gdock button.on svg{stroke-width:2;transform:scale(1.2)}
+#gdock.hold button.on svg{transform:scale(1.36)}
+#gdock button:focus-visible{outline:2px solid color-mix(in srgb,var(--acc) 70%,transparent);outline-offset:-3px;border-radius:22px}
+#gdock .ind{position:absolute;top:7px;bottom:7px;left:7px;width:calc((100% - 14px)/var(--n,7));z-index:0;pointer-events:none;will-change:transform;transition:transform .5s cubic-bezier(.34,1.32,.5,1)}
+#gdock.hold .ind{transition:transform .2s var(--gd-spring)}
+#gdock.drag .ind{transition:transform .09s linear}
+#gdock .ind::before{content:"";position:absolute;inset:0;border-radius:26px;background:var(--gd-lens);box-shadow:var(--gd-rim),var(--gd-drop);transform:scale(1.14,1.2);transition:transform .25s var(--gd-spring),background .2s,box-shadow .25s}
+#gdock.hold .ind::before{transform:scale(1.24,1.3)}
+#gdock .ind::after{content:"";position:absolute;inset:0;border-radius:26px;pointer-events:none;opacity:0;border:1.5px solid color-mix(in srgb,var(--text) 22%,transparent)}
+#gdock .lens{position:absolute;inset:0;border-radius:26px;overflow:hidden;transform:scale(var(--st,1.14),var(--sy,1.2));transition:transform .3s var(--gd-spring);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gd-arc) 32%,transparent),inset 0 0 18px color-mix(in srgb,var(--gd-arc) 13%,transparent)}
+#gdock.hold .lens{transform:scale(var(--st,1.24),var(--sy,1.3))}
+#gdock .lens::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.6px;pointer-events:none;z-index:2;background:conic-gradient(from var(--gd-ang),transparent 0 50%,var(--gd-arc) 68%,transparent 86%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+#gdock.hold .lens::after{padding:2.4px}
+#gdock .ind.sq::before{animation:gdsquish .55s var(--gd-spring)}
+#gdock .ind.sq::after{animation:gdripple .65s var(--gd-spring)}
+#gdock .ind.sq .lens{animation:gdsquish .55s var(--gd-spring)}
+#gdock .ind.sq .lens::after{animation:gdring .9s var(--gd-spring)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){#gdock{background:color-mix(in srgb,var(--surf) 94%,transparent)}}
+@media (prefers-reduced-motion:reduce){#gdock,#gdock *{animation:none!important;transition-duration:.01s!important}}
 }
 </style><script>
 /* HabitFlow account guard + cloud sync (Supabase). Habits stay in localStorage and are mirrored to the user's account. */
@@ -1184,16 +1195,16 @@ buildDock();render();
 })();
 
 /* scroll-reactive nav: goes glassier while scrolling, tucks away on scroll down, returns on scroll up */
-(()=>{const dk=document.getElementById('dock'),fd=document.querySelector('.dockfade');let ly=SCR.scrollTop,tm,tk=false,lt=V.tab,ui=0;
+(()=>{const dk=document.getElementById('dock'),gk=document.getElementById('gdock'),fd=document.querySelector('.dockfade');let ly=SCR.scrollTop,tm,tk=false,lt=V.tab,ui=0;
  /* only a real finger/wheel/key scroll may tuck the nav away; tab switches and re-renders reset scroll in code and must never trigger it */
- ['touchstart','touchmove','wheel','keydown','pointerdown'].forEach(n=>addEventListener(n,e=>{if(e.target.closest&&e.target.closest('#dock'))return;ui=performance.now()},{passive:true,capture:true}));
- dk.addEventListener('pointerdown',()=>{ui=0});
+ ['touchstart','touchmove','wheel','keydown','pointerdown'].forEach(n=>addEventListener(n,e=>{if(e.target.closest&&e.target.closest('#dock,#gdock'))return;ui=performance.now()},{passive:true,capture:true}));
+ dk.addEventListener('pointerdown',()=>{ui=0});gk&&gk.addEventListener('pointerdown',()=>{ui=0});
  SCR.addEventListener('scroll',()=>{if(tk)return;tk=true;requestAnimationFrame(()=>{
   const y=Math.max(0,SCR.scrollTop),d=y-ly;
-  if(V.tab!==lt){lt=V.tab;ly=y;ui=0;clearTimeout(tm);dk.classList.remove('scrolling','hide');fd.classList.remove('hide');tk=false;return}
+  if(V.tab!==lt){lt=V.tab;ly=y;ui=0;clearTimeout(tm);dk.classList.remove('scrolling','hide');gk&&gk.classList.remove('hide');fd.classList.remove('hide');tk=false;return}
   const usr=performance.now()-ui<2500;
-  dk.classList.add('scrolling');clearTimeout(tm);tm=setTimeout(()=>{dk.classList.remove('scrolling');dk.classList.remove('hide');fd.classList.remove('hide')},700);
-  if(Math.abs(d)>6){const hide=usr&&d>0&&y>80;dk.classList.toggle('hide',hide);fd.classList.toggle('hide',hide);ly=y}
+  dk.classList.add('scrolling');clearTimeout(tm);tm=setTimeout(()=>{dk.classList.remove('scrolling');dk.classList.remove('hide');gk&&gk.classList.remove('hide');fd.classList.remove('hide')},700);
+  if(Math.abs(d)>6){const hide=usr&&d>0&&y>80;dk.classList.toggle('hide',hide);gk&&gk.classList.toggle('hide',hide);fd.classList.toggle('hide',hide);ly=y}
   tk=false})},{passive:true});
  dk.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')});
 })();
@@ -1898,6 +1909,41 @@ function init(){
 }
 if(!init())document.addEventListener('DOMContentLoaded',init);
 var _rg=render;render=function(){_rg();try{sync()}catch(e){}};
+})();
+</script>
+<script>
+/* Glass dock: icon-only floating tab bar with a sliding glass lens. Tap an icon, or press and drag across them. */
+(function(){
+var N=TABS.length,dk=document.createElement('nav'),ind,btns,ls=-1,cur=0,down=false,ht,px=0;
+dk.id='gdock';dk.setAttribute('aria-label','Main');dk.style.setProperty('--n',N);
+dk.innerHTML='<div class="tabs" role="tablist">'+TABS.map(function(t){return '<button type="button" role="tab" data-act="tab" data-id="'+t[0]+'" aria-label="'+t[2]+'">'+t[1]+'</button>'}).join('')+'</div><i class="ind"><b class="lens"></b></i>';
+document.body.appendChild(dk);
+ind=dk.querySelector('.ind');btns=dk.querySelectorAll('.tabs button');
+function idx(){for(var i=0;i<N;i++)if(TABS[i][0]===V.tab)return i;return 0}
+function buzz(){try{navigator.vibrate&&navigator.vibrate(6)}catch(e){}}
+function pulse(){ind.classList.remove('sq');void ind.offsetWidth;ind.classList.add('sq')}
+function mark(i){for(var k=0;k<N;k++){var on=k===i,b=btns[k];b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')}}
+function show(i,f){ind.style.transform='translateX('+((f==null?i:f)*100)+'%)';if(i!==ls){if(ls>-1)pulse();ls=i}mark(i)}
+function fracAt(x){var r=dk.getBoundingClientRect(),w=(r.width-16)/N;return Math.max(0,Math.min(N-1,(x-r.left-8)/w-.5))}
+function mv(x,first){
+ var f=fracAt(x),i=Math.round(f),dx=first?0:Math.abs(x-px);px=x;
+ dk.style.setProperty('--st',1.1+Math.min(.22,dx/50));dk.style.setProperty('--sy',1.16-Math.min(.1,dx/90));
+ if(first||i!==cur)buzz();cur=i;show(i,f)
+}
+function release(){down=false;dk.classList.remove('drag');dk.style.removeProperty('--st');dk.style.removeProperty('--sy');ht=setTimeout(function(){dk.classList.remove('hold')},240)}
+dk.addEventListener('pointerdown',function(e){if(e.button>0)return;clearTimeout(ht);down=true;try{dk.setPointerCapture(e.pointerId)}catch(_){}dk.classList.add('hold','drag');mv(e.clientX,true)});
+dk.addEventListener('pointermove',function(e){if(down)mv(e.clientX)});
+dk.addEventListener('pointerup',function(){if(!down)return;release();show(cur);if(TABS[cur][0]!==V.tab){V.tab=TABS[cur][0];SCR.scrollTop=0;render()}});
+dk.addEventListener('pointercancel',function(){if(!down)return;release();show(idx())});
+/* pointer taps are handled above; only keyboard / assistive-tech clicks (detail 0) fall through to the data-act handler */
+dk.addEventListener('click',function(e){if(e.detail!==0){e.stopPropagation();e.preventDefault()}},true);
+/* slide away while the on-screen keyboard is up */
+var inp=function(t){return t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)};
+document.addEventListener('focusin',function(e){if(inp(e.target))dk.classList.add('kb')});
+document.addEventListener('focusout',function(){setTimeout(function(){if(!inp(document.activeElement))dk.classList.remove('kb')},60)});
+/* follow V.tab whenever the app re-renders (shortcuts, links, deep links) */
+var _rg=render;render=function(){_rg();try{show(idx())}catch(e){}};
+ind.style.transition='none';show(idx());void ind.offsetWidth;ind.style.transition='';
 })();
 </script>
 </body></html>
