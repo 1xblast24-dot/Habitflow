@@ -327,38 +327,37 @@ h2{font-size:11px;letter-spacing:.08em}
 @media (min-width:900px){.dock{overflow:visible}.dock .dscroll{overflow:visible;scroll-snap-type:none}.dock .dtrack{flex-direction:column;width:100%;gap:2px}.dock .dtrack button{flex:none}.dock .ind{display:none}}
 .fp-page{padding-bottom:120px}.fp-page .fp-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}.fp-page .fp-tile{background:var(--surf);border-radius:14px;padding:14px 8px;text-align:center}.fp-page .fp-tile .v{font-size:22px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.fp-page .fp-tile .l{font-size:12px;color:var(--mute);margin-top:2px}.fp-page .fp-step{display:flex;align-items:center;justify-content:center;gap:18px;margin:2px 0 10px}.fp-page .fp-round{width:46px;height:46px;border-radius:50%;border:0;background:var(--surf);color:var(--acc);font-size:26px;font-weight:500;line-height:1;cursor:pointer;transition:transform .15s,background .2s}.fp-page .fp-round:active{transform:scale(.9)}.fp-page .fp-hero .fg{stroke-dashoffset:0}.fp-page .fp-sh{padding:8px 16px 6px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);background:color-mix(in srgb,var(--text) 4%,transparent)}.fp-page .fp-r:active{background:color-mix(in srgb,var(--text) 5%,transparent)}.fp-page .fp-seg.two{grid-template-columns:1fr 1fr}.fp-page .fp-seg.two i{width:calc((100% - 4px)/2)}.fp-page .fp-seg.two.t2 i{transform:translateX(100%)}.fp-page .fp-acts{display:flex;justify-content:space-between;padding:0 6px 10px}.fp-page .fp-acts .fp-link{font-size:15px}
 .fp-page .fp-seg.four{grid-template-columns:repeat(4,1fr)}.fp-page .fp-seg.four i{width:calc((100% - 4px)/4)}.fp-page .fp-seg.four.t1 i{transform:none}.fp-page .fp-seg.four.t2 i{transform:translateX(100%)}.fp-page .fp-seg.four.t3 i{transform:translateX(200%)}.fp-page .fp-seg.four.t4 i{transform:translateX(300%)}.fp-page .fp-seg.four button{font-size:13px;padding:8px 2px}.fp-page .fp-pill{border:0;border-radius:999px;padding:8px 18px;background:var(--acc);color:#fff;font-weight:600;font-size:15px;cursor:pointer;transition:transform .15s}.fp-page .fp-pill:active{transform:scale(.94)}.fp-page .fp-in-t{width:100%;border:0;background:none;color:var(--text);font-size:17px;padding:6px 0;outline:none;font-family:inherit}
-@property --lx{syntax:"<length>";inherits:true;initial-value:0px}
-@property --lw{syntax:"<length>";inherits:true;initial-value:60px}
-@property --zm{syntax:"<number>";inherits:true;initial-value:1}
-#dock .edge{display:none}
 @media (max-width:899.98px){
-#dock{--dk-bg:rgba(250,250,252,.62);--dk-hair:rgba(0,0,0,.08);--dk-edge:rgba(255,255,255,.7);--dk-shadow:0 10px 32px rgba(20,24,40,.14),0 2px 8px rgba(20,24,40,.06);--dk-lens:rgba(255,255,255,.86);--dk-lens-sh:0 3px 10px rgba(20,24,40,.16),inset 0 0 0 .5px rgba(20,24,40,.06),inset 0 1px 0 rgba(255,255,255,.9)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #dock{--dk-bg:rgba(30,30,34,.56);--dk-hair:rgba(255,255,255,.1);--dk-edge:rgba(255,255,255,.14);--dk-shadow:0 14px 36px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.3);--dk-lens:rgba(255,255,255,.15);--dk-lens-sh:0 4px 14px rgba(0,0,0,.35),inset 0 .5px 0 rgba(255,255,255,.22),inset 0 0 0 .5px rgba(255,255,255,.08)}}
-:root[data-theme="dark"] #dock{--dk-bg:rgba(30,30,34,.56);--dk-hair:rgba(255,255,255,.1);--dk-edge:rgba(255,255,255,.14);--dk-shadow:0 14px 36px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.3);--dk-lens:rgba(255,255,255,.15);--dk-lens-sh:0 4px 14px rgba(0,0,0,.35),inset 0 .5px 0 rgba(255,255,255,.22),inset 0 0 0 .5px rgba(255,255,255,.08)}
-#dock{position:fixed;left:50%;right:auto;margin:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:calc(100% - 32px);max-width:392px;transform:translateX(-50%);display:block;padding:0;border:0;border-radius:32px;background:var(--dk-bg);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);box-shadow:var(--dk-shadow),inset 0 .5px 0 var(--dk-edge),inset 0 0 0 .5px var(--dk-hair);z-index:5;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;transition:transform .38s cubic-bezier(.32,.72,0,1),opacity .25s,--lx .5s cubic-bezier(.32,1.18,.42,1),--zm .36s cubic-bezier(.2,.9,.25,1.12)}
-#dock.drag{transition:transform .38s cubic-bezier(.32,.72,0,1),opacity .25s,--zm .36s cubic-bezier(.2,.9,.25,1.12)}
-#dock.hold,#dock.drag{--zm:1.16}
+.dockfade{display:none!important}
+#dock{--g-bg:rgba(255,255,255,.42);--g-rim:rgba(255,255,255,.8);--g-hair:rgba(0,0,0,.08);--g-sh:0 8px 30px rgba(20,24,40,.12),0 1px 4px rgba(20,24,40,.06);--g-lens:rgba(110,110,122,.15);--g-lens-rim:rgba(255,255,255,.75);--g-lens-sh:0 2px 8px rgba(20,24,40,.12)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #dock{--g-bg:rgba(34,34,40,.40);--g-rim:rgba(255,255,255,.16);--g-hair:rgba(255,255,255,.07);--g-sh:0 10px 34px rgba(0,0,0,.45),0 1px 4px rgba(0,0,0,.3);--g-lens:rgba(255,255,255,.17);--g-lens-rim:rgba(255,255,255,.24);--g-lens-sh:0 3px 12px rgba(0,0,0,.35)}}
+:root[data-theme="dark"] #dock{--g-bg:rgba(34,34,40,.40);--g-rim:rgba(255,255,255,.16);--g-hair:rgba(255,255,255,.07);--g-sh:0 10px 34px rgba(0,0,0,.45),0 1px 4px rgba(0,0,0,.3);--g-lens:rgba(255,255,255,.17);--g-lens-rim:rgba(255,255,255,.24);--g-lens-sh:0 3px 12px rgba(0,0,0,.35)}
+#dock{position:fixed;left:50%;right:auto;margin:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:calc(100% - 40px);max-width:372px;transform:translateX(-50%);display:block;padding:0;border:0;border-radius:30px;background:var(--g-bg);-webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);box-shadow:var(--g-sh),inset 0 .5px 0 var(--g-rim),inset 0 0 0 .5px var(--g-hair);z-index:5;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;transition:transform .38s cubic-bezier(.32,.72,0,1),opacity .25s}
 #dock.kb{transform:translate(-50%,150%);opacity:0;pointer-events:none}
-#dock .dscroll{position:relative;overflow:hidden;padding:6px 8px;touch-action:none;border-radius:0}
-#dock .dtrack{position:relative;display:block;width:calc(var(--n,5)*20%);min-width:100%;transition:transform .45s cubic-bezier(.32,.72,0,1)}
-#dock .dbtns{display:flex;width:100%;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(var(--lx) + 4px),transparent calc(var(--lx) + 4px),transparent calc(var(--lx) + var(--lw) - 4px),#000 calc(var(--lx) + var(--lw) - 4px),#000 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(var(--lx) + 4px),transparent calc(var(--lx) + 4px),transparent calc(var(--lx) + var(--lw) - 4px),#000 calc(var(--lx) + var(--lw) - 4px),#000 100%)}
-#dock button,#dock .lb{flex:0 0 calc(100%/var(--n,5));min-width:0;min-height:0;border:0;border-radius:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 0 6px;font-size:10px;font-weight:600;letter-spacing:.01em;color:var(--mute);position:relative;-webkit-tap-highlight-color:transparent;outline:none;transform:none}
-#dock button{transition:color .25s}
-#dock button svg,#dock .lb svg{width:24px;height:24px;stroke-width:1.8}
+#dock .dscroll{position:relative;overflow:hidden;padding:5px 6px;touch-action:none;border-radius:0}
+#dock.sl .dscroll{-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px);mask-image:linear-gradient(90deg,transparent,#000 22px)}
+#dock.sr .dscroll{-webkit-mask-image:linear-gradient(270deg,transparent,#000 22px);mask-image:linear-gradient(270deg,transparent,#000 22px)}
+#dock.sl.sr .dscroll{-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent)}
+#dock .dtrack{position:relative;display:block;min-width:100%;transition:transform .45s cubic-bezier(.32,.72,0,1)}
+#dock .dbtns{display:flex;width:100%}
+#dock button,#dock .lb{flex:0 0 calc(100%/var(--n,5));min-width:0;min-height:0;border:0;border-radius:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0 5px;font-size:10px;font-weight:600;letter-spacing:.01em;color:var(--mute);position:relative;-webkit-tap-highlight-color:transparent;outline:none;transform:none}
+#dock .lb{flex:1 1 0}
+#dock button{transition:color .2s}
+#dock button svg,#dock .lb svg{width:22px;height:22px;stroke-width:1.8;transition:opacity .2s}
 #dock button[aria-current="page"],#dock button.pv{background:none;color:var(--mute)}
-#dock button:focus-visible{outline:2px solid color-mix(in srgb,var(--acc) 70%,transparent);outline-offset:-4px;border-radius:18px}
-#dock .ind{position:absolute;top:0;bottom:0;left:0;width:var(--lw);transform:translateX(var(--lx));z-index:2;pointer-events:none;will-change:transform;background:none;box-shadow:none;border-radius:0;animation:none;transition:none}
+#dock button.under,#dock button[aria-current="page"].under{color:transparent}
+#dock button.under svg{opacity:0}
+#dock button:focus-visible{outline:2px solid color-mix(in srgb,var(--acc) 70%,transparent);outline-offset:-4px;border-radius:16px}
+#dock .ind{position:absolute;top:0;bottom:0;left:0;z-index:2;pointer-events:none;will-change:transform;background:none;box-shadow:none;border-radius:0;animation:none;transition:transform .5s cubic-bezier(.32,1.18,.42,1)}
 #dock .ind::before,#dock .ind::after{display:none}
-#dock .lens{display:block;position:absolute;inset:0;border-radius:26px;overflow:hidden;background:var(--dk-lens);box-shadow:var(--dk-lens-sh);transform:scale(1);transition:transform .38s cubic-bezier(.2,.9,.25,1.12),box-shadow .3s}
-#dock.hold .lens,#dock.drag .lens{transform:scale(1.14)}
+#dock .lens{display:block;position:absolute;inset:0;border-radius:23px;overflow:hidden;background:var(--g-lens);box-shadow:inset 0 0 0 .5px var(--g-lens-rim),var(--g-lens-sh);transform:scale(1);transition:transform .38s cubic-bezier(.2,.9,.25,1.12)}
+#dock.hold .lens,#dock.drag .lens{transform:scale(1.1)}
 #dock .lens.pop{animation:dkpop .42s cubic-bezier(.2,.9,.25,1.12)}
-@keyframes dkpop{0%{transform:scale(1)}40%{transform:scale(1.1)}100%{transform:scale(1)}}
-#dock .lv{position:absolute;left:0;top:0;bottom:0;width:calc(var(--lw)*var(--n,5));display:flex;color:var(--acc);transform-origin:calc(var(--lx) + var(--lw)*.5) 50%;transform:translateX(calc(var(--lx)*-1)) scale(var(--zm,1))}
-#dock .lb{color:var(--acc)}
-#dock .edge{display:block;position:absolute;top:0;bottom:0;width:36px;z-index:3;pointer-events:none;opacity:0;transition:opacity .25s;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
-#dock .edge.l{left:0;background:linear-gradient(90deg,var(--dk-bg),transparent);-webkit-mask-image:linear-gradient(90deg,#000 25%,transparent);mask-image:linear-gradient(90deg,#000 25%,transparent)}
-#dock .edge.r{right:0;background:linear-gradient(270deg,var(--dk-bg),transparent);-webkit-mask-image:linear-gradient(270deg,#000 25%,transparent);mask-image:linear-gradient(270deg,#000 25%,transparent)}
-#dock.sl .edge.l,#dock.sr .edge.r{opacity:1}
+@keyframes dkpop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+#dock .zm{position:absolute;inset:0;transform:scale(1);transition:transform .38s cubic-bezier(.2,.9,.25,1.12)}
+#dock.hold .zm,#dock.drag .zm{transform:scale(1.12)}
+#dock .lv{position:absolute;left:0;top:0;bottom:0;display:flex;color:var(--acc);will-change:transform;transition:transform .5s cubic-bezier(.32,1.18,.42,1)}
+#dock.drag .ind,#dock.drag .lv{transition:none}
 @media (prefers-reduced-motion:reduce){#dock,#dock *{transition-duration:.01s!important;animation:none!important}}
 }
 </style><script>
@@ -1820,28 +1819,30 @@ window.hfTestNotif=async function(){
 };
 </script>
 <script>
-/* iOS-style tab bar: glass lens that zooms on hold, smooth momentum slide, blurred edges */
+/* Glass tab bar: zooming lens, smooth momentum slide, soft edge fade */
 (function(){
-var dock,sc,tr,bt,N=0,ls=-1,TW=0,ht,d=null,mom=0,lensEl;
+var dock,sc,tr,bt,ind,lens,lv,N=0,ls=-1,TW=0,ht,d=null,mom=0;
 function idx(){for(var i=0;i<TABS.length;i++)if(TABS[i][0]===V.tab)return i;return -1}
 function btns(){return bt.querySelectorAll('button')}
-function tw(){return (sc.clientWidth-16)/5}
-function setLens(px){dock.style.setProperty('--lx',px+'px')}
+function tw(){return (sc.clientWidth-12)/5}
+function setLens(px){ind.style.transform='translateX('+px+'px)';lv.style.transform='translateX('+(-px)+'px)'}
+function under(i){btns().forEach(function(b,k){b.classList.toggle('under',k===i)})}
+function pv(i){btns().forEach(function(b,k){b.classList.toggle('pv',k===i)})}
 function maxS(){return Math.max(0,sc.scrollWidth-sc.clientWidth)}
 function clampS(v){return Math.max(0,Math.min(maxS(),v))}
 function buzz(){try{navigator.vibrate&&navigator.vibrate(5)}catch(e){}}
 function edges(){var m=maxS(),x=sc.scrollLeft;dock.classList.toggle('sl',x>2);dock.classList.toggle('sr',x<m-2)}
-function fracAt(x){var r=sc.getBoundingClientRect();return Math.max(0,Math.min(N-1,(x-r.left-8+sc.scrollLeft)/TW-.5))}
-function pv(i){btns().forEach(function(b,k){b.classList.toggle('pv',k===i)})}
-function pop(){lensEl.classList.remove('pop');void lensEl.offsetWidth;lensEl.classList.add('pop')}
+function fracAt(x){var r=sc.getBoundingClientRect();return Math.max(0,Math.min(N-1,(x-r.left-6+sc.scrollLeft)/TW-.5))}
+function pop(){lens.classList.remove('pop');void lens.offsetWidth;lens.classList.add('pop')}
 function rubber(o){tr.style.transform=o?'translateX('+(-o*.35)+'px)':''}
+function size(){TW=tw();ind.style.width=TW+'px';lv.style.width=(TW*N)+'px';tr.style.width=(TW*N)+'px'}
 function sync(){
  var i=idx();if(i<0||!dock)return;
  if(ls>-1&&i!==ls)pop();
- setLens(i*TW);ls=i;
+ setLens(i*TW);under(i);pv(-1);ls=i;
  btns().forEach(function(b,k){b.setAttribute('aria-selected',k===i?'true':'false')});
- var x=i*TW,vis0=sc.scrollLeft,vis1=vis0+5*TW;
- if(x<vis0+2||x+TW>vis1-2)sc.scrollTo({left:clampS(x-2*TW),behavior:'smooth'});
+ var x=i*TW,v0=sc.scrollLeft,v1=v0+5*TW;
+ if(x<v0+2||x+TW>v1-2)sc.scrollTo({left:clampS(x-2*TW),behavior:'smooth'});
 }
 function stop(){window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);clearTimeout(ht);cancelAnimationFrame(mom)}
 function block(){var f=function(e){e.stopPropagation();e.preventDefault();dock.removeEventListener('click',f,true)};dock.addEventListener('click',f,true);setTimeout(function(){dock.removeEventListener('click',f,true)},400)}
@@ -1860,7 +1861,7 @@ function loop(){
  var r=sc.getBoundingClientRect(),x=d.x;
  if(x<r.left+34&&sc.scrollLeft>0)sc.scrollLeft=clampS(sc.scrollLeft-5);
  else if(x>r.right-34&&sc.scrollLeft<maxS())sc.scrollLeft=clampS(sc.scrollLeft+5);
- var f=fracAt(x);setLens(f*TW);var n=Math.round(f);if(n!==d.cur){d.cur=n;pv(n);buzz()}
+ var f=fracAt(x);setLens(f*TW);var n=Math.round(f);if(n!==d.cur){d.cur=n;under(n);pv(n);buzz()}
  d.raf=requestAnimationFrame(loop);
 }
 function down(e){
@@ -1868,7 +1869,7 @@ function down(e){
  var b=e.target.closest&&e.target.closest('.dbtns button');if(!b)return;
  cancelAnimationFrame(mom);
  d={x0:e.clientX,x:e.clientX,s0:sc.scrollLeft,mode:'p',hold:false,cur:idx(),lx:e.clientX,lt:e.timeStamp,v:0};
- ht=setTimeout(function(){if(d&&d.mode==='p'){d.hold=true;dock.classList.add('hold');var n=Math.round(fracAt(d.x));d.cur=n;setLens(n*TW)}},170);
+ ht=setTimeout(function(){if(d&&d.mode==='p'){d.hold=true;dock.classList.add('hold');var n=Math.round(fracAt(d.x));d.cur=n;setLens(n*TW);under(n)}},170);
  window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
 }
 function move(e){
@@ -1888,29 +1889,29 @@ function up(){
  var st=d;d=null;cancelAnimationFrame(st.raf);
  if(m==='scr'){block();rubber(0);glide(st.v)}
  else if(m==='sel'){
-  block();pv(-1);
+  pv(-1);
   var i=Math.max(0,Math.min(N-1,Math.round(fracAt(st.x))));
-  if(i!==idx()){setLens(i*TW);btns()[i].click()}else setLens(idx()*TW);
- }else if(st.hold){setLens(idx()*TW)}
+  if(i!==idx()){setLens(i*TW);under(i);btns()[i].click()}else{setLens(idx()*TW);under(idx())}
+  block();
+ }else if(st.hold){setTimeout(function(){setLens(idx()*TW);under(idx())},90)}
 }
 function init(){
  dock=document.getElementById('dock');if(!dock)return false;
  sc=document.getElementById('dscroll');if(!sc)return false;
- tr=sc.querySelector('.dtrack');var ind=tr.querySelector('.ind');lensEl=ind&&ind.querySelector('.lens');if(!lensEl)return false;
+ tr=sc.querySelector('.dtrack');ind=tr&&tr.querySelector('.ind');lens=ind&&ind.querySelector('.lens');if(!lens)return false;
  N=TABS.length;
  bt=document.createElement('div');bt.className='dbtns';bt.setAttribute('role','tablist');
  [].slice.call(tr.querySelectorAll('button')).forEach(function(b){b.setAttribute('role','tab');bt.appendChild(b)});
  tr.appendChild(bt);
- var lv=document.createElement('div');lv.className='lv';lv.setAttribute('aria-hidden','true');
+ var zm=document.createElement('div');zm.className='zm';
+ lv=document.createElement('div');lv.className='lv';lv.setAttribute('aria-hidden','true');
  lv.innerHTML=[].map.call(bt.children,function(b){return '<span class="lb">'+b.innerHTML+'</span>'}).join('');
- lensEl.appendChild(lv);
- ['l','r'].forEach(function(s){var e=document.createElement('div');e.className='edge '+s;dock.appendChild(e)});
- TW=tw();dock.style.setProperty('--lw',TW+'px');
- dock.classList.add('drag');setLens(Math.max(0,idx())*TW);ls=idx();
+ zm.appendChild(lv);lens.appendChild(zm);
+ dock.classList.add('drag');size();setLens(Math.max(0,idx())*TW);under(idx());ls=idx();
  requestAnimationFrame(function(){requestAnimationFrame(function(){dock.classList.remove('drag')})});
  sc.addEventListener('scroll',edges,{passive:true});edges();
  dock.addEventListener('pointerdown',down);
- window.addEventListener('resize',function(){TW=tw();dock.style.setProperty('--lw',TW+'px');dock.classList.add('drag');setLens(Math.max(0,idx())*TW);setTimeout(function(){dock.classList.remove('drag')},60);edges()});
+ window.addEventListener('resize',function(){dock.classList.add('drag');size();setLens(Math.max(0,idx())*TW);setTimeout(function(){dock.classList.remove('drag')},60);edges()});
  var inp=function(t){return t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)};
  document.addEventListener('focusin',function(e){if(inp(e.target))dock.classList.add('kb')});
  document.addEventListener('focusout',function(){setTimeout(function(){if(!inp(document.activeElement))dock.classList.remove('kb')},60)});
